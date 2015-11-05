@@ -3,11 +3,12 @@
     'name': "RNC/Cedula Validation RD",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+            Automatically creates customers and suppliers using the valid tax ID and the DGII.
+        """,
 
     'description': """
-        Long description of module's purpose
+        Pressing the create button in all for new partner will validate de fiscal identification, this module is connected directly to the form of validation of RNC / Cedula
+        DGII valid if correct and automatically creates the associated name.
     """,
 
     'author': "Marcos Organizador de negocios SRL",
@@ -16,8 +17,8 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
     # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Tools',
+    'version': '1.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account'],
@@ -31,4 +32,6 @@
     'demo': [
         'demo.xml',
     ],
+    "price": 200,
+    'currency': 'EUR'
 }
