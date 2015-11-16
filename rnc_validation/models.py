@@ -30,16 +30,16 @@ class res_partner(osv.Model):
     _name = "res.partner"
     _inherit = "res.partner"
 
-    def _check_unique_ref(self, cr, uid, ids, context=None):
+    def _check_unique_vat(self, cr, uid, ids, context=None):
         partner = self.browse(cr, uid, ids, context=context)[0]
         if partner.customer or partner.supplier:
-            if not self.search(cr, uid, [("ref", "=", partner.ref), ("multiple_company_rnc", "=", False)]):
+            if not self.search(cr, uid, [("vat", "=", partner.vat), ("multiple_company_rnc", "=", False)]):
                 return True
         return False
 
     _constraints = [
         (osv.osv._check_recursion, 'You cannot create recursive Partner hierarchies.', ['parent_id']),
-        (_check_unique_ref,
+        (_check_unique_vat,
          u"Esta identificacion ya ha sido registrado! Si quiere utilizar varios relacionados con mismo RNC/Cedula debe indicarlo en el campo --RNC para varias compañias--",
          [u"Rnc/Cédula"]),
     ]
@@ -71,7 +71,7 @@ class res_partner(osv.Model):
             query = ('''SELECT res_partner.id FROM res_partner
                                   LEFT JOIN res_partner company
                                        ON res_partner.parent_id = company.id'''
-                     + where_str + ''' (res_partner.email ''' + operator + ''' %s OR  res_partner.ref ''' + operator + ''' %s OR
+                     + where_str + ''' (res_partner.email ''' + operator + ''' %s OR  res_partner.vat ''' + operator + ''' %s OR
                       CASE
                            WHEN company.id IS NULL OR res_partner.is_company
                                THEN res_partner.name
@@ -100,15 +100,15 @@ class res_partner(osv.Model):
         return super(res_partner, self).name_search(cr, uid, name, args, operator=operator, context=context,
                                                     limit=limit)
 
-    def get_rnc(self, ref):
-        res = requests.get('http://api.marcos.do/rnc/%s' % ref)
+    def get_rnc(self, vat):
+        res = requests.get('http://api.marcos.do/rnc/%s' % vat)
         if res.status_code == 200:
             return res.json()
         else:
             return False
 
     def is_fiscal_id(self, vals):
-        value = vals.get("ref", False) or vals.get("name", False)
+        value = vals.get("vat", False) or vals.get("name", False)
 
         if value and (len(value) == 9 or len(value) == 11):
             if value.isdigit():
@@ -121,7 +121,7 @@ class res_partner(osv.Model):
         if vals.get("fiscal_position", False):
             fiscal_id = self.pool.get("account.fiscal.position").search(cr, uid, [("fiscal_type", "=", vals["fiscal_position"])])
             if fiscal_id:
-                vals.update({"property_account_position": fiscal_id[0]})
+                vals.update({"property_account_position_id": fiscal_id[0]})
 
         validation = {}
 
@@ -130,8 +130,8 @@ class res_partner(osv.Model):
             validation = self.validate_fiscal_id(fiscal_id, context=context)
 
         if validation:
-            if vals.get("property_account_position", False):
-                validation.update({"property_account_position": vals["property_account_position"]})
+            if vals.get("property_account_position_id", False) and vals.get("customer", False):
+                validation.update({"property_account_position_id": vals["property_account_position_id"]})
             vals.update(validation)
 
 
@@ -151,20 +151,20 @@ class res_partner(osv.Model):
         if vals.get("fiscal_position", False):
             fiscal_id = self.pool.get("account.fiscal.position").search(cr, uid, [("fiscal_type", "=", vals["fiscal_position"])])
             if fiscal_id:
-                vals.update({"property_account_position": fiscal_id[0]})
+                vals.update({"property_account_position_id": fiscal_id[0]})
 
         validation = {}
         fiscal_id = self.is_fiscal_id(vals)
 
         if fiscal_id:
-            if vals.get("ref", False):
-                validation = self.validate_fiscal_id(u"{}".format(vals["ref"]), context=context)
+            if vals.get("vat", False):
+                validation = self.validate_fiscal_id(u"{}".format(vals["vat"]), context=context)
             elif vals.get("name", False):
                 validation = self.validate_fiscal_id(u"{}".format(vals["name"]), context=context)
 
         if validation:
-            if vals.get("property_account_position", False):
-                validation.update({"property_account_position": vals["property_account_position"]})
+            if vals.get("property_account_position_id", False):
+                validation.update({"property_account_position_id": vals["property_account_position_id"]})
             vals.update(validation)
 
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
@@ -185,18 +185,18 @@ class res_partner(osv.Model):
             if _internet_on():
                 data = self.get_rnc(name)
                 if data:
-                    vals['ref'] = data['rnc'].strip()
+                    vals['vat'] = data['rnc'].strip()
                     vals['name'] = data['name'].strip()
                     vals["comment"] = u"Nombre Comercial: %s, regimen de pago: %s,  estatus: %s, categoria: %s" % (
                         data['comercial_name'], data['payment_regimen'], data['status'], data['category'])
                     vals['is_company'] = True
 
                     if customer:
-                        vals['property_account_position'] = 1
+                        vals['property_account_position_id'] = 1
                     elif supplier:
-                        vals["property_account_position"] = 13
+                        vals["property_account_position_id"] = 13
             else:
-                vals['ref'] = name.strip()
+                vals['vat'] = name.strip()
                 vals['is_company'] = True
 
         return vals
