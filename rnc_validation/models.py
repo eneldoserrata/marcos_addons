@@ -22,7 +22,10 @@
 from tools import is_identification, _internet_on
 import requests
 from openerp import models, api, exceptions
-from openerp.osv import expression
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class res_partner(models.Model):
@@ -48,7 +51,7 @@ class res_partner(models.Model):
 
     @api.model
     def vat_is_unique(self, fiscal_id):
-        partner = self.search([('vat','=', fiscal_id)])
+        partner = self.search([('vat', '=', fiscal_id)])
         if partner:
             raise exceptions.UserError(u"Ya fue registrada una empresa con este numero de RNC/Cédula")
         return False
@@ -64,7 +67,7 @@ class res_partner(models.Model):
         vals = {}
 
         if not len(fiscal_id) in [9, 11]:
-            raise exceptions.UserError(u"Debe colocar un numero de RNC/Cedula valido!")
+            raise exceptions.ValidationError(u"Debe colocar un numero de RNC/Cedula valido!")
         else:
             if _internet_on():
                 data = self.get_rnc(fiscal_id)
@@ -104,7 +107,7 @@ class res_partner(models.Model):
         if vals.get("vat", False) or vals.get("name", False):
             for rec in self:
                 if vals.get("vat", False):
-                    if self.env["account.invoice"].search_count([('partner_id','=','self.id')]):
+                    if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
                         raise exceptions.UserError("No puede cambiar el RNC/Cédula al que le ha creado facturas")
                 validation = self.check_vals(vals)
                 if validation:
@@ -114,12 +117,13 @@ class res_partner(models.Model):
 
     @api.model
     def name_create(self, name):
-        vals = self.validate_fiscal_id(name)
         if self._rec_name:
-            if vals:
-                record = self.create(vals)
-                return record.name_get()[0]
-            else:
-                raise exceptions.ValidationError("A session's instructor can't be an attendee")
+            if name.isdigit():
+                partner = self.search([('vat', '=', name)])
+                if partner or not len(name) in [9, 11] or not self.get_rnc(name):
+                    return (0,"")
+            record = self.create({self._rec_name: name})
+            return record.name_get()[0]
         else:
-            return super(res_partner, self).name_create(name)
+            _logger.warning("Cannot execute name_create, no _rec_name defined on %s", self._name)
+            return False
