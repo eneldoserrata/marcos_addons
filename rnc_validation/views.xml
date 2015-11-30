@@ -2,22 +2,6 @@
 <openerp>
     <data>
 
-        <record id="marcos_ncf_view_partner_property_form" model="ir.ui.view">
-            <field name="name">marcos_ncf.res.partner.property.form.inherit</field>
-            <field name="model">res.partner</field>
-            <field name="priority">2</field>
-            <field name="inherit_id" ref="base.view_partner_form"/>
-            <field name="arch" type="xml">
-                <field name="supplier" position="attributes">
-                    <attribute name="readonly">True</attribute>
-                </field>
-
-                <field name="customer" position="attributes">
-                    <attribute name="readonly">True</attribute>
-                </field>
-            </field>
-        </record>
-
         <!--modifica el modulo de partner para validar rnc y posicion fiscal-->
         <record model="ir.ui.view" id="marcos_view_partner_form">
             <field name="name">marcos_view_partner_form</field>
@@ -29,7 +13,6 @@
                     <attribute name="placeholder">Nombre, RNC o Cédula</attribute>
                 </field>
 
-                <!--<field name="property_account_position" position="replace"/>-->
                 <field name="ref" position="replace"/>
 
 

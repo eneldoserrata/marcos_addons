@@ -30,7 +30,7 @@
     ],
     # only loaded in demonstration mode
     'demo': [
-        'demo.xml',
+        # 'demo.xml',
     ],
     "price": 200,
     'currency': 'EUR'

@@ -19,191 +19,102 @@
 #
 ##############################################################################
 
-from openerp.osv.orm import browse_null
 from tools import is_identification, _internet_on
-from openerp.osv import osv, fields
 import requests
-from openerp import api, exceptions
+from openerp import models, api, exceptions
+from openerp.osv import expression
 
 
-class res_partner(osv.Model):
-    _name = "res.partner"
+class res_partner(models.Model):
     _inherit = "res.partner"
 
-    def _check_unique_vat(self, cr, uid, ids, context=None):
-        partner = self.browse(cr, uid, ids, context=context)[0]
-        if partner.customer or partner.supplier:
-            if not self.search(cr, uid, [("vat", "=", partner.vat), ("multiple_company_rnc", "=", False)]):
-                return True
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', context=None, limit=100):
+        args = args or []
+
+        recs = self.search([], limit=limit)
+
+        if name:
+            recs = self.search([('name', operator, name)] + args, limit=limit)
+
+        if not recs:
+            recs = self.search([('vat', operator, name)] + args, limit=limit)
+        elif not recs:
+            recs = self.search([('phone', operator, name)] + args, limit=limit)
+        elif not recs:
+            recs = self.search([('mobile', operator, name)] + args, limit=limit)
+
+        return recs.name_get()
+
+    @api.model
+    def vat_is_unique(self, fiscal_id):
+        partner = self.search([('vat','=', fiscal_id)])
+        if partner:
+            raise exceptions.UserError(u"Ya fue registrada una empresa con este numero de RNC/Cédula")
         return False
 
-    _constraints = [
-        (osv.osv._check_recursion, 'You cannot create recursive Partner hierarchies.', ['parent_id']),
-        (_check_unique_vat,
-         u"Esta identificacion ya ha sido registrado! Si quiere utilizar varios relacionados con mismo RNC/Cedula debe indicarlo en el campo --RNC para varias compañias--",
-         [u"Rnc/Cédula"]),
-    ]
-
-    def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
-        if not args:
-            args = []
-        if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
-
-            self.check_access_rights(cr, uid, 'read')
-            where_query = self._where_calc(cr, uid, args, context=context)
-            self._apply_ir_rules(cr, uid, where_query, 'read', context=context)
-            from_clause, where_clause, where_clause_params = where_query.get_sql()
-            where_str = where_clause and (" WHERE %s AND " % where_clause) or ' WHERE '
-
-            # search on the name of the contacts and of its company
-            search_name = name
-            if operator in ('ilike', 'like'):
-                search_name = '%%%s%%' % name
-            if operator in ('=ilike', '=like'):
-                operator = operator[1:]
-
-            # TODO: simplify this in trunk with `display_name`, once it is stored
-            # Perf note: a CTE expression (WITH ...) seems to have an even higher cost
-            #            than this query with duplicated CASE expressions. The bulk of
-            #            the cost is the ORDER BY, and it is inevitable if we want
-            #            relevant results for the next step, otherwise we'd return
-            #            a random selection of `limit` results.
-            query = ('''SELECT res_partner.id FROM res_partner
-                                  LEFT JOIN res_partner company
-                                       ON res_partner.parent_id = company.id'''
-                     + where_str + ''' (res_partner.email ''' + operator + ''' %s OR  res_partner.vat ''' + operator + ''' %s OR
-                      CASE
-                           WHEN company.id IS NULL OR res_partner.is_company
-                               THEN res_partner.name
-                           ELSE company.name || ', ' || res_partner.name
-                      END ''' + operator + ''' %s)
-                ORDER BY
-                      CASE
-                           WHEN company.id IS NULL OR res_partner.is_company
-                               THEN res_partner.name
-                           ELSE company.name || ', ' || res_partner.name
-                      END''')
-
-            where_clause_params += [search_name, search_name]
-            where_clause_params.append(search_name)
-            if limit:
-                query += ' limit %s'
-                where_clause_params.append(limit)
-
-            cr.execute(query, where_clause_params)
-            ids = map(lambda x: x[0], cr.fetchall())
-
-            if ids:
-                return self.name_get(cr, uid, ids, context)
-            else:
-                return []
-        return super(res_partner, self).name_search(cr, uid, name, args, operator=operator, context=context,
-                                                    limit=limit)
-
-    def get_rnc(self, vat):
-        res = requests.get('http://api.marcos.do/rnc/%s' % vat)
+    def get_rnc(self, fiscal_id):
+        res = requests.get('http://api.marcos.do/rnc/%s' % fiscal_id)
         if res.status_code == 200:
             return res.json()
         else:
             return False
 
-    def is_fiscal_id(self, vals):
-        value = vals.get("vat", False) or vals.get("name", False)
-
-        if value and (len(value) == 9 or len(value) == 11):
-            if value.isdigit():
-                return value
-
-        return False
-
-    def create(self, cr, uid, vals, context=None):
-
-        if vals.get("fiscal_position", False):
-            fiscal_id = self.pool.get("account.fiscal.position").search(cr, uid, [("fiscal_type", "=", vals["fiscal_position"])])
-            if fiscal_id:
-                vals.update({"property_account_position_id": fiscal_id[0]})
-
-        validation = {}
-
-        fiscal_id = self.is_fiscal_id(vals)
-        if fiscal_id:
-            validation = self.validate_fiscal_id(fiscal_id, context=context)
-
-        if validation:
-            if vals.get("property_account_position_id", False) and vals.get("customer", False):
-                validation.update({"property_account_position_id": vals["property_account_position_id"]})
-            vals.update(validation)
-
-
-        try:
-            name_is_numeric = vals["name"].isnumeric()
-        except:
-            name_is_numeric = unicode(vals["name"], 'utf-8').isnumeric()
-
-
-        if name_is_numeric:
-            raise exceptions.ValidationError(u"El número de cédula o rnc no es valido!")
-        return super(res_partner, self).create(cr, uid, vals, context=context)
-
-    def write(self, cr, uid, ids, vals, context=None):
-        partner = self.browse(cr, uid, ids)
-
-        if vals.get("fiscal_position", False):
-            fiscal_id = self.pool.get("account.fiscal.position").search(cr, uid, [("fiscal_type", "=", vals["fiscal_position"])])
-            if fiscal_id:
-                vals.update({"property_account_position_id": fiscal_id[0]})
-
-        validation = {}
-        fiscal_id = self.is_fiscal_id(vals)
-
-        if fiscal_id:
-            if vals.get("vat", False):
-                validation = self.validate_fiscal_id(u"{}".format(vals["vat"]), context=context)
-            elif vals.get("name", False):
-                validation = self.validate_fiscal_id(u"{}".format(vals["name"]), context=context)
-
-        if validation:
-            if vals.get("property_account_position_id", False):
-                validation.update({"property_account_position_id": vals["property_account_position_id"]})
-            vals.update(validation)
-
-        return super(res_partner, self).write(cr, uid, ids, vals, context=context)
-
-    def validate_fiscal_id(self, name, context=None):
+    def validate_fiscal_id(self, fiscal_id):
         vals = {}
-        context = context or {}
-        supplier = customer = False
 
-        if context.get('search_default_supplier', False):
-            supplier = True
+        if not len(fiscal_id) in [9, 11]:
+            raise exceptions.UserError(u"Debe colocar un numero de RNC/Cedula valido!")
         else:
-            customer = True
-        if name and not len(name) in [9, 11] and name.isnumeric():
-            raise osv.except_osv(u"Debe colocar un numero de RNC/Cedula valido!", u"RNC/Cedula")
-
-        if name.isdigit() and len(name) in [9, 11]:
             if _internet_on():
-                data = self.get_rnc(name)
+                data = self.get_rnc(fiscal_id)
                 if data:
                     vals['vat'] = data['rnc'].strip()
                     vals['name'] = data['name'].strip()
-                    vals["comment"] = u"Nombre Comercial: %s, regimen de pago: %s,  estatus: %s, categoria: %s" % (
+                    vals["comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
                         data['comercial_name'], data['payment_regimen'], data['status'], data['category'])
-                    vals['is_company'] = True
-
-                    if customer:
-                        vals['property_account_position_id'] = 1
-                    elif supplier:
-                        vals["property_account_position_id"] = 13
-            else:
-                vals['vat'] = name.strip()
-                vals['is_company'] = True
-
+                    vals.update({"company_type": "company"})
+                    if len(fiscal_id) == 9:
+                        vals.update({"company_type": "company"})
+                    else:
+                        vals.update({"company_type": "person"})
         return vals
 
     @api.model
+    def check_vals(self, vals):
+        validation = {}
+
+        vat_or_name = vals.get("vat", False) or vals.get("name", False)
+        if vat_or_name.isdigit():
+            fiscal_id = vat_or_name.strip()
+            self.vat_is_unique(fiscal_id)
+            validation = self.validate_fiscal_id(fiscal_id)
+
+        return validation
+
+    @api.model
+    def create(self, vals):
+        validation = self.check_vals(vals)
+        if validation:
+            vals.update(validation)
+        return super(res_partner, self).create(vals)
+
+    @api.multi
+    def write(self, vals):
+        if vals.get("vat", False) or vals.get("name", False):
+            for rec in self:
+                if vals.get("vat", False):
+                    if self.env["account.invoice"].search_count([('partner_id','=','self.id')]):
+                        raise exceptions.UserError("No puede cambiar el RNC/Cédula al que le ha creado facturas")
+                validation = self.check_vals(vals)
+                if validation:
+                    vals.update(validation)
+
+        return super(res_partner, self).write(vals)
+
+    @api.model
     def name_create(self, name):
-        vals = self.validate_fiscal_id(name, context=self._context)
+        vals = self.validate_fiscal_id(name)
         if self._rec_name:
             if vals:
                 record = self.create(vals)
