@@ -90,7 +90,6 @@ class res_partner(models.Model):
         vat_or_name = vals.get("vat", False) or vals.get("name", False)
         if vat_or_name.isdigit():
             fiscal_id = vat_or_name.strip()
-            self.vat_is_unique(fiscal_id)
             validation = self.validate_fiscal_id(fiscal_id)
 
         return validation
@@ -106,6 +105,7 @@ class res_partner(models.Model):
     def write(self, vals):
         if vals.get("vat", False) or vals.get("name", False):
             for rec in self:
+                self.vat_is_unique(vals)
                 if vals.get("vat", False):
                     if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
                         raise exceptions.UserError("No puede cambiar el RNC/Cédula al que le ha creado facturas")
