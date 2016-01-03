@@ -14,7 +14,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
         res = super(SaleAdvancePaymentInv)._create_invoice(order, so_line, amount)
         res._onchange_partner_id()
         res.onchange_fiscal_position_id()
-        import pdb;pdb.set_trace()
         return res
 
 

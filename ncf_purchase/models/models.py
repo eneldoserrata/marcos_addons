@@ -45,13 +45,22 @@ class PurchaseOrder(models.Model):
 
         return {'domain': {"picking_type_id": [('code','=','none')]}}
 
+    @api.onchange("fiscal_position_id")
+    def onchange_fiscal_position_id(self):
+        if self.fiscal_position_id:
+            self.partner_id.property_account_position_supplier_id = self.fiscal_position_id.id;
+
+    @api.onchange("date_planed")
+    def onchange_date_planed(self):
+        for line in self.order_line:
+            line.date_planned = self.date_planned
+
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     # Load all unsold PO lines
     @api.onchange('purchase_id')
     def purchase_order_change(self):
-        res = super(AccountInvoice, self).purchase_order_change()
+        super(AccountInvoice, self).purchase_order_change()
         self._onchange_partner_id()
         self.onchange_fiscal_position_id()
-        return res

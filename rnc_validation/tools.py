@@ -550,9 +550,11 @@ def is_ncf(value, type):
     return False
 
 def _internet_on():
-        try:
-            response = urllib2.urlopen('http://api.marcos.do/', timeout=1)
-            return True
-        except urllib2.URLError as err:
-            pass
-        return False
+    """TODO: fix this check"""
+    return True
+    try:
+        response = urllib2.urlopen('http://api.marcos.do/', timeout=1)
+        return True
+    except urllib2.URLError as err:
+        pass
+    return False

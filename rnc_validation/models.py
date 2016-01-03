@@ -28,26 +28,17 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class res_partner(models.Model):
+class ResPartner(models.Model):
     _inherit = "res.partner"
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', context=None, limit=100):
-        args = args or []
-
-        recs = self.search([], limit=limit)
-
-        if name:
-            recs = self.search([('name', operator, name)] + args, limit=limit)
-
-        if not recs:
-            recs = self.search([('vat', operator, name)] + args, limit=limit)
-        elif not recs:
-            recs = self.search([('phone', operator, name)] + args, limit=limit)
-        elif not recs:
-            recs = self.search([('mobile', operator, name)] + args, limit=limit)
-
-        return recs.name_get()
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        res = super(ResPartner, self).name_search(name, args=args, operator=operator, limit=100)
+        if not res and name:
+            partners = self.search(['|','|',('vat','ilike',name),('phone','ilike',name),('mobile','ilike',name)])
+            if partners:
+                res = partners.name_get()
+        return res
 
     @api.model
     def vat_is_unique(self, fiscal_id):
@@ -99,21 +90,13 @@ class res_partner(models.Model):
         validation = self.check_vals(vals)
         if validation:
             vals.update(validation)
-        return super(res_partner, self).create(vals)
+        return super(ResPartner, self).create(vals)
 
-    @api.multi
-    def write(self, vals):
-        if vals.get("vat", False) or vals.get("name", False):
-            for rec in self:
-                self.vat_is_unique(vals)
-                if vals.get("vat", False):
-                    if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
-                        raise exceptions.UserError("No puede cambiar el RNC/Cédula al que le ha creado facturas")
-                validation = self.check_vals(vals)
-                if validation:
-                    vals.update(validation)
-
-        return super(res_partner, self).write(vals)
+    @api.onchange("vat")
+    def onchange_vat(self):
+        if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
+            raise exceptions.UserError("No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
+        self.check_vals(self.vat)
 
     @api.model
     def name_create(self, name):
