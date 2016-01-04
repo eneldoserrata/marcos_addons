@@ -9,9 +9,9 @@
             <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
             <field name="arch" type="xml">
 
-
                 <field name="warehouse_id" position="replace"/>
                 <field name="payment_term_id" position="after">
+                    <field name="journal_id" options="{'no_create': True}"/>
                     <field name="warehouse_id" options="{'no_create': True}"/>
                 </field>
 
@@ -24,16 +24,16 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
 
+                <field name="validity_date" position="before">
+                    <field name="shop_id" options="{'no_create': True}"/>
+                </field>
+
                 <field name="fiscal_position_id" position="replace"/>
 
                 <field name="partner_id" position="after">
                     <field name="fiscal_position_id" options="{'no_create': True}"/>
                 </field>
 
-                <field name="payment_term_id" position="after">
-                    <field name="shop_id" options="{'no_create': True}"/>
-                    <field name="journal_id" options="{'no_create': True}"/>
-                </field>
 
             </field>
         </record>

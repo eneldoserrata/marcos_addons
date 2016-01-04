@@ -12,12 +12,12 @@
 
                 <field name="date_order" position="after">
                     <field name="date_planned"/>
-                    <field name="picking_type_id"/>
+                    <field name="picking_type_id" options="{'no_create': True}"/>
                 </field>
 
                 <field name="fiscal_position_id" position="replace"/>
                 <field name="partner_id" position="after">
-                    <field name="fiscal_position_id"/>
+                    <field name="fiscal_position_id" options="{'no_create': True}"/>
                 </field>
             </field>
         </record>
