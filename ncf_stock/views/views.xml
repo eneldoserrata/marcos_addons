@@ -8,9 +8,9 @@
             <field name="model">shop.ncf.config</field>
             <field name="inherit_id" ref="ncf_manager.invoice_journal_config_form"/>
             <field name="arch" type="xml">
-              <field name="sale_journal_ids" position="after">
-                <field name="warehouse_ids" widget="many2many_tags"/>
-              </field>
+                <field name="sale_journal_ids" position="after">
+                    <field name="warehouse_ids" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
 

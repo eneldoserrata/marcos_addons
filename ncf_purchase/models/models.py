@@ -24,7 +24,8 @@ class PurchaseOrder(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Hello', states=READONLY_STATES, required=True, default=_default_picking_type,\
     help="This will determine picking type of incoming shipment")
 
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', oldname='fiscal_position')
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', oldname='fiscal_position',
+                                         domain=[('supplier','=',True)])
 
     def get_user_picking(self):
 

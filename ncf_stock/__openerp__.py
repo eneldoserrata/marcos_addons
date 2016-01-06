@@ -20,13 +20,14 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'sale', 'ncf_manager'],
+    'depends': ['base', 'product', 'sale', 'stock','ncf_manager', 'stock_account'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'wizard/stock_return_picking_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

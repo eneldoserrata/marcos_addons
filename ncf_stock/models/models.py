@@ -19,3 +19,10 @@ class ShopNcfConfig(models.Model):
 
         res.update({"warehouse_ids": warehouse_ids})
         return res
+
+
+class StockPicking(models.Model):
+    _inherit = "stock.picking"
+
+    invoice_action = fields.Selection([("nc", u'Solicitar Factura'), ('inv', u"Solicitar Nota de Crédito"), ("int", "Interno")])
+
