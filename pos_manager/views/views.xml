@@ -10,13 +10,16 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="allow_refund"/>
+                            <field name="allow_payments"/>
+                            <field name="allow_delete_order"/>
                         </group>
                         <group>
-                            <field name="refund"/>
-                            <field name="cash_refund"/>
-                            <field name="max_disc"/>
-                            <field name="change_price"/>
-                            <field name="can_cancel"/>
+                            <field name="allow_discount"/>
+                            <field name="allow_edit_price"/>
+                            <field name="allow_delete_order_line"/>
+                            <field name="allow_cancel"/>
+                            <field name="allow_cash_refund"/>
                         </group>
                     </group>
                     <group>
@@ -32,9 +35,6 @@
             <field name="arch" type="xml">
                 <tree string="Supervisores" version="7.0">
                     <field name="name"/>
-                    <field name="max_disc"/>
-                    <field name="change_price"/>
-                    <field name="refund"/>
                 </tree>
             </field>
         </record>

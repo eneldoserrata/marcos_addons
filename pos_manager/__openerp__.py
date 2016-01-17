@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "ncf_pos",
+    'name': "pos_manager",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,18 +20,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale', 'ncf_manager', 'sale'],
+    'depends': ['base', 'point_of_sale'],
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
-        'wizard/pos_order_cancel_view.xml',
-        'wizard/pos_order_refund_view.xml',
-        'wizard/pos_payment.xml',
-        'views.xml',
-        'templates.xml'
+        # 'security/ir.model.access.csv',
+        'views/views.xml',
+        'views/templates.xml',
     ],
     # only loaded in demonstration mode
-    'demo': [],
-    'qweb': ['static/src/xml/pos.xml']
+    'demo': [
+        'demo/demo.xml',
+    ],
 }

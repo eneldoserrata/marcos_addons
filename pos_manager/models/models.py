@@ -27,11 +27,14 @@ class pos_manager(models.Model):
     _name = "pos.manager"
 
     name = fields.Char('Name', size=124)
-    max_disc = fields.Float('Maximo descuento en (%)', default=0)
-    change_price = fields.Boolean("Puede cambiar el precio", default=False)
-    refund = fields.Boolean("Puede hacer devoluciones", default=False)
-    cash_refund = fields.Boolean("Puede devolver dinero de la caja", default=False)
-    can_cancel = fields.Boolean("Pueden cancelar ordenes nuevas")
+    allow_refund = fields.Boolean("Permitir hacer devoluciones", default=False)
+    allow_payments = fields.Boolean('Permitir cobrar', default=True)
+    allow_delete_order = fields.Boolean('Permitir eliminar orde no vacías en el POS', default=True)
+    allow_discount = fields.Float('Maximo descuento permitido en (%)', default=0)
+    allow_edit_price = fields.Boolean('Permitir cambiar el precio', default=True)
+    allow_delete_order_line = fields.Boolean('Permitir eliminar línea de la orden', default=True)
+    allow_cancel = fields.Boolean("Pueden cancelar ordenes nuevas")
+    allow_cash_refund = fields.Boolean("Permitir devolver dinero de la caja", default=False)
     users = fields.Many2many('res.users', 'pos_discount_users', 'discount_id', 'user_id', string='Add Users')
 
 
