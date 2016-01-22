@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "pos_manager",
+    'name': "sale_control",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
