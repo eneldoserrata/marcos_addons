@@ -77,20 +77,21 @@ class ResPartner(models.Model):
     @api.model
     def check_vals(self, vals):
         validation = {}
-
-        vat_or_name = vals.get("vat", False) or vals.get("name", False)
-        if vat_or_name.isdigit():
-            fiscal_id = vat_or_name.strip()
-            validation = self.validate_fiscal_id(fiscal_id)
+        if vals:
+            vat_or_name = vals.get("vat", False) or vals.get("name", False)
+            if vat_or_name.isdigit():
+                fiscal_id = vat_or_name.strip()
+                validation = self.validate_fiscal_id(fiscal_id)
 
         return validation
 
     @api.model
     def create(self, vals):
-        validation = self.check_vals(vals)
-        if validation:
-            vals.update(validation)
-        return super(ResPartner, self).create(vals)
+        if vals:
+            validation = self.check_vals(vals)
+            if validation:
+                vals.update(validation)
+            return super(ResPartner, self).create(vals)
 
     @api.onchange("vat")
     def onchange_vat(self):
