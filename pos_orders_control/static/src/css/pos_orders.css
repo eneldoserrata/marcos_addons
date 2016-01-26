@@ -1,0 +1,34 @@
+.wk_main_body{
+   
+
+}
+.wk_header_body{
+    height:100px;
+    position:fixed !important;
+    background:#eeeeee;
+    width: 100%;
+}
+.wk_cancel_button{
+    float:left;
+}
+
+.wk_table_body{
+    padding-top:100px;
+    overflow: scroll;
+    height: 83%;
+}
+
+.wk_order_button {
+    position: fixed; 
+    top: 1px; 
+    right: 10%;
+}
+
+.wk_cancel_button:active,.wk_print_content:active {
+    background: #7F82AC !important;
+    border: solid 1px #7F82AC !important;
+    color: white !important;
+}
+.wk_table_back{
+    background-color: white !important;
+}
