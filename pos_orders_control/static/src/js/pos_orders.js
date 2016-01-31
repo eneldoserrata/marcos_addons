@@ -29,6 +29,7 @@ odoo.define('pos_orders.pos_orders', function (require) {
                 })
                 .then(function () {
                     var contents = self.$el[0].querySelector('.wk-order-list-contents');
+                    var cashier = self.pos.get_cashier();
                     contents.innerHTML = "";
 
                     if (self.wk_orders.length > 0) {
@@ -47,9 +48,14 @@ odoo.define('pos_orders.pos_orders', function (require) {
                                 self.reprint(this)
                             });
 
-                            $(orderline).find(".wk_refund_content").click(function () {
-                                self.refund(this)
-                            });
+                            if (!cashier.allow_refund) {
+                                $(orderline).find(".wk_refund_content").css('visibility', 'hidden');
+                            } else {
+                                $(orderline).find(".wk_refund_content").css('visibility', 'visible');
+                                $(orderline).find(".wk_refund_content").click(function () {
+                                    self.refund(this)
+                                });
+                            }
 
                             contents.appendChild(orderline);
 
@@ -78,6 +84,9 @@ odoo.define('pos_orders.pos_orders', function (require) {
         close: function () {
             this._super();
             this.$('.wk-order-list-contents').undelegate();
+            this.$('.order_search').val("");
+            this.$('.wk-order-list-contents').empty()
+
         },
         get_wk_order: function (button, type) {
             var self = this;
@@ -161,16 +170,18 @@ odoo.define('pos_orders.pos_orders', function (require) {
                     product.refund_price = line.price_unit;
                     product.refund_discount = line.discount;
                     product.refund_note = line.note;
+                    product.refund_line_ref = line.id;
                     products.push(product);
                 }
             });
 
             self.pos.add_new_order();
             var order = self.pos.get_order();
-            var partner = self.pos.db.get_partner_by_id(wk_order.partner_id);
+            var partner = self.pos.db.get_partner_by_id(wk_order.partner_id[0].id);
             order.set_order_type("refund");
             order.set_origin(button.id);
             order.set_client(partner);
+            order.set_origin_ncf(wk_order.origin_ncf);
             self.pos.set_order(order);
             self.pos.gui.screen_instances.products.product_list_widget.set_product_list(products);
             order.save_to_db();

@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-import wk_orders
+import point_of_sale

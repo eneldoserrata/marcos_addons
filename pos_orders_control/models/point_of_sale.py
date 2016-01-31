@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from openerp import models, api
 import logging
 
@@ -11,13 +12,13 @@ class PosOrder(models.Model):
     def wk_order_list(self, name):
         orders_dict = []
         if name:
-            orders = self.env['pos.order'].search([('reserve_ncf_seq', 'ilike', name)], limit=10)
+            orders = self.env['pos.order'].search([('reserve_ncf_seq', 'ilike', name),('state','=','invoiced')], limit=15)
 
             if not orders:
-                orders = self.env['pos.order'].search([('date_order', 'ilike', name)], limit=10)
+                orders = self.env['pos.order'].search([('date_order', 'ilike', name),('state','=','invoiced')], limit=15)
 
             if not orders:
-                orders = self.env['pos.order'].search([('partner_id', 'ilike', name)], limit=10)
+                orders = self.env['pos.order'].search([('partner_id', 'ilike', name),('state','=','invoiced')], limit=15)
 
             if orders:
                 for rec in orders:
@@ -27,13 +28,14 @@ class PosOrder(models.Model):
                     order = {"id": rec.id,
                              "date_order": rec.date_order,
                              "lines": [],
-                             "partner_id": rec.partner_id.id,
+                             "partner_id": rec.partner_id.read(["name"]),
                              "reserve_ncf_seq": rec.reserve_ncf_seq,
                              "statement_ids": [],
                              "credit": rec.credit,
                              "cashier": rec.user_id.id,
                              "uid": pos_reference,
                              "session_id": rec.session_id.id,
+                             "origin_ncf": rec.invoice_id.number
                              }
                     for line in rec.lines:
                         product_on_list = False
