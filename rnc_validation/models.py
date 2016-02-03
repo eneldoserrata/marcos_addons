@@ -79,9 +79,10 @@ class ResPartner(models.Model):
         validation = {}
         if vals:
             vat_or_name = vals.get("vat", False) or vals.get("name", False)
-            if vat_or_name.isdigit():
-                fiscal_id = vat_or_name.strip()
-                validation = self.validate_fiscal_id(fiscal_id)
+            if vat_or_name:
+                if vat_or_name.isdigit():
+                    fiscal_id = vat_or_name.strip()
+                    validation = self.validate_fiscal_id(fiscal_id)
 
         return validation
 

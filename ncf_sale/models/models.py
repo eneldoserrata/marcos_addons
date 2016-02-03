@@ -18,7 +18,15 @@ class SaleOrder(models.Model):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config["warehouse_ids"][0]
 
+    @api.one
+    def _get_total_dicount(self):
+        total_discount = 0.0
+        for line in self.order_line:
+            total_discount += line.price_unit * ((line.discount or 0.0) / 100.0)
+        self.total_discount = total_discount
 
+
+    total_discount = fields.Monetary(string='Descuento', currency_field="currency_id", compute=_get_total_dicount)
     fiscal_position_id = fields.Many2one('account.fiscal.position', oldname='fiscal_position', string='Fiscal Position',
                                          domain=[('supplier', '=', False)])
     payment_term_id = fields.Many2one('account.payment.term', string='Payment Term', oldname='payment_term')
@@ -55,3 +63,9 @@ class SaleOrder(models.Model):
         values.update({"payment_term_id": self.partner_id.property_payment_term_id.id,
                        "fiscal_position_id": self.partner_id.property_account_position_id.id})
         super(SaleOrder, self).update(values)
+
+
+# class Sale(models.Mode):
+#     _inherit = "sale.order"
+#
+#     price_tax = fields.Monetary(compute='_compute_amount', string='Taxes', readonly=True, store=True)

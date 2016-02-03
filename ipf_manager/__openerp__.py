@@ -20,16 +20,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'hw_proxy', 'point_of_sale'],
+    'depends': ['base'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views.xml',
-        'templates.xml',
+        'views/views.xml',
+        'views/templates.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
-        'demo.xml',
-    ]
+        'demo/demo.xml',
+    ],
 }
