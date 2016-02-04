@@ -206,7 +206,7 @@ class ipf_printer_config(models.Model):
         invoice_dict["rnc"] = invoice.partner_id.ref
 
         invoice_items_list = []
-        for line in invoice.invoice_line:
+        for line in invoice.invoice_line_ids:
             invoice_items_dict = {}
             # variant_name = self.pool.get("product.product").name_get(self.env.cr, self.env.uid, [line.product_id.id],
             #                                                          context=self.env.context)[0][1]
@@ -228,15 +228,15 @@ class ipf_printer_config(models.Model):
                 invoice_items_dict["extra_description"] = extra_description[0:9]
             invoice_items_dict["quantity"] = line.quantity
 
-            tax_id = line.invoice_line_tax_id
+            tax_id = line.invoice_line_tax_ids
 
             if not len(tax_id) == 1:
                 raise exceptions.Warning(u'Error en el impuestos de productos',
                 u"Los productos de ventas deben de tener un impuesto asignado y nunca mas de uno revise el '%s'!" % (line.name))
 
-            tax_rate = int(tax_id.amount*100)
+            tax_rate = int(tax_id.amount)
             tax_include = tax_id.price_include
-            tax_except = tax_id.exempt
+            tax_except = tax_id.tax_except
 
             if not tax_rate in [18, 13, 11, 8, 5, 0]:
                 raise exceptions.Warning(u'Impuesto inválido',

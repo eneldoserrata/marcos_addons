@@ -133,24 +133,24 @@
             </field>
         </record>
 
-        <!--<record id="marcos_invoice_ipf_form" model="ir.ui.view">-->
-        <!--<field name="name">invoice.ipf.form</field>-->
-        <!--<field name="model">account.invoice</field>-->
-        <!--<field name="inherit_id" ref="account.invoice_form"/>-->
-        <!--<field name="arch" type="xml">-->
-        <!--<xpath expr="//button[@name='invoice_print']" position="attributes">-->
-        <!--<attribute name="string">Imprimir PDF</attribute>-->
-        <!--</xpath>-->
-        <!--<field name="number" position="after">-->
-        <!--<div class="oe_button_box oe_right">-->
-        <!--<widget type="ipf_manager"/>-->
-        <!--</div>-->
-        <!--</field>-->
-        <!--<field name="account_id" position="after">-->
-        <!--<field name="nif" attrs="{'invisible': [('nif','=','false')]}"/>-->
-        <!--</field>-->
-        <!--</field>-->
-        <!--</record>-->
+        <record id="marcos_invoice_ipf_form" model="ir.ui.view">
+            <field name="name">marcos.invoice.ipf.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='invoice_print']" position="attributes">
+                    <attribute name="string">Imprimir PDF</attribute>
+                </xpath>
+                <field name="number" position="after">
+                    <div class="oe_button_box oe_right">
+                        <widget type="ipf_button_post_invoice"/>
+                    </div>
+                </field>
+                <!--<field name="account_id" position="after">-->
+                    <!--<field name="nif" attrs="{'invisible': [('nif','=','false')]}"/>-->
+                <!--</field>-->
+            </field>
+        </record>
 
 
         <record id="marcos_ipf_daily_book_tree" model="ir.ui.view">
