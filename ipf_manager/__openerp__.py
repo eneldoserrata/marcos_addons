@@ -20,15 +20,17 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base', 'web', 'account', 'ncf_manager'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
+        'views/ipf_view.xml',
         'views/views.xml',
         'views/templates.xml',
     ],
     # only loaded in demonstration mode
+    'qweb': ['static/src/xml/ipf_manager.xml'],
     'demo': [
         'demo/demo.xml',
     ],

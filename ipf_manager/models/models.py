@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from openerp import models, fields, api
 
-# class ipf_manager(models.Model):
-#     _name = 'ipf_manager.ipf_manager'
 
-#     name = fields.Char()
-#     value = fields.Integer()
-#     value2 = fields.Float(compute="_value_pc", store=True)
-#     description = fields.Text()
-#
-#     @api.depends('value')
-#     def _value_pc(self):
-#         self.value2 = float(self.value) / 100
+class AccountInvoice(models.Model):
+    _inherit = "account.invoice"
+
+    nif = fields.Char("NIF")

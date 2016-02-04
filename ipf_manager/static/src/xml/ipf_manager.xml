@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+
+    <t t-name="ipf_manager_button">
+        <button class="btn ipf-button"><i class="fa fa-print"/> Impresion fiscal</button>
+    </t>
+
+
+
+</template>
