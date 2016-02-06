@@ -23,9 +23,6 @@ odoo.define('ipf_manager.service', function (require) {
 
     var ipfAPI = core.Class.extend({
         init: function () {
-            console.log("================")
-            console.log(this)
-            console.log("================")
             this.host;
             this.response;
             this.showDialogOnget_printer_information = true;
@@ -156,7 +153,9 @@ odoo.define('ipf_manager.service', function (require) {
                     var url = self.host + "/daily_book/" + serial + "/" + aplitBookDay[2] + "/" + aplitBookDay[1] + "/" + aplitBookDay[0];
                     self.get_book(url, serial, bookday, context);
                 }).fail(function (response) {
+                    console.log("=======get_host=========");
                     console.log(response);
+                    console.log("=======get_host=========");
                     var res = false;
 
                     if (response.responseText) {
@@ -184,7 +183,6 @@ odoo.define('ipf_manager.service', function (require) {
             } else {
                 var params = {"type": type, "url": url}
             }
-
             return $.ajax(params)
                 .done(function (response) {
                     console.log(JSON.parse(response));
@@ -192,7 +190,10 @@ odoo.define('ipf_manager.service', function (require) {
 
                 })
                 .fail(function (response) {
+                    console.log("========get_report========");
                     console.log(response);
+                    console.log("========get_report========");
+
                     var res = false;
 
                     if (response.responseText) {
@@ -471,13 +472,13 @@ odoo.define('ipf_manager.service', function (require) {
                 self.save_book(response, serial, bookday, context);
 
             }).fail(function (response) {
-                openerp.web.unblockUI()
+                openerp.web.unblockUI();
                 console.log(response);
                 var res = false;
 
                 if (response.responseText) {
                     console.log(JSON.parse(response.responseText));
-                    var res = JSON.parse(response.responseText);
+                    res = JSON.parse(response.responseText);
                 }
 
                 if (res) {
@@ -531,16 +532,13 @@ odoo.define('ipf_manager.service', function (require) {
 
                 })
                 .fail(function (response) {
+                    console.log("=======print_receipt fail=========");
                     console.log(response);
-                    var res = false;
+                    console.log("=======print_receipt fail=========");
 
                     if (response.responseText) {
-                        console.log(JSON.parse(response.responseText));
-                        res = JSON.parse(response.responseText) || false;
-                    }
-
-                    if (res) {
-                        self.showDialog(res.message)
+                        var message = JSON.parse(response.responseText);
+                        self.showDialog(message.status, message.message);
                     } else if (response.statusText === "error") {
                         self.showDialog("Error de conexion", "El sistema no pudo conectarse a la impresora verifique las conexiones.")
                     }
@@ -984,7 +982,7 @@ odoo.define('ipf_manager.service', function (require) {
             "click #post_invoice": "post_invoice"
         },
         start: function () {
-            this.$el.append("<button id='post_invoice' class='btn btn-default btn-block'><div class='stat_button_icon fa fa-print'></div><div>Impresora fiscal</div></button>");
+            this.$el.append("<button id='post_invoice' class='btn btn-default'><div class='stat_button_icon fa fa-print'></div><div>Enviar a la impresora fiscal</div></button>");
         },
         post_invoice: function () {
             var self = this;

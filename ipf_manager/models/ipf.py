@@ -130,7 +130,7 @@ class ipf_printer_config(models.Model):
         id = values[0]
         nif = values[1]
         if not nif == None:
-            self.pool.get("account.invoice").write(self.env.cr, self.env.uid, id, {"nif": nif})
+            self.pool.get("account.invoice").write(self.env.cr, self.env.uid, id, {"fiscal_nif": nif})
         return True
 
     @api.model
@@ -155,12 +155,13 @@ class ipf_printer_config(models.Model):
         print_copy = printer.print_copy
         subsidiary = printer.subsidiary
 
+
         ncf_type = False
 
         invoice_dict["type"] = "nofiscal"
-        if invoice.state in ['open', 'paid'] and invoice.nif == "false":
+        if invoice.state in ['open', 'paid'] and invoice.fiscal_nif == "false":
             invoice_dict["ncf"] = invoice.number
-            ncf_type = invoice.fiscal_position.fiscal_type
+            ncf_type = invoice.fiscal_position_id.client_fiscal_type
 
             if invoice.type == "out_invoice":
                 if ncf_type == "gov":
@@ -171,8 +172,8 @@ class ipf_printer_config(models.Model):
                         invoice_dict["type"] = "final"
 
             elif invoice.type == "out_refund":
-                ncf_type = invoice.fiscal_position.fiscal_type or "final"
-                invoice_dict["reference_ncf"] = invoice.parent_id.number
+                ncf_type = invoice.fiscal_position_id.client_fiscal_type or "final"
+                invoice_dict["reference_ncf"] = invoice.origin
                 if ncf_type == "final":
                     invoice_dict["type"] = "final_note"
                 elif ncf_type in ["fiscal", "gov"]:
@@ -257,11 +258,11 @@ class ipf_printer_config(models.Model):
 
         payment_ids_list = []
 
-        if not len(invoice.payment_ids) == 0:
-            for payment in invoice.payment_ids:
+        if not len(invoice.payment_move_line_ids) == 0:
+            for payment in invoice.payment_move_line_ids:
                 if payment.credit:
                     payment_ids_dict = {}
-                    payment_ids_dict["type"] = payment.journal_id.ipf_payment_type or "other"
+                    payment_ids_dict["type"] = payment.journal_id.ipf_payment_type or "Nota de credito {}".format(payment.name)
                     payment_ids_dict["amount"] = payment.credit
                     payment_ids_list.append(payment_ids_dict)
                 else:
@@ -272,12 +273,12 @@ class ipf_printer_config(models.Model):
         else:
             payment_ids_list.append(dict(type="other", amount=invoice.amount_total))
 
+
         if invoice_dict["type"] == "nofiscal":
             invoice_dict.update(dict(host=printer.host, payments=payment_ids_list, invoice_id=invoice.id))
         else:
             invoice_dict.update(dict(host=printer.host, payments=payment_ids_list, invoice_id=invoice.id))
-        # from pprint import pprint as pp
-        # pp(invoice_dict)
+
         return invoice_dict
 
 

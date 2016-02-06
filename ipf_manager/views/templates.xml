@@ -4,10 +4,19 @@
 
         <template id="ipf_manager.assets_backend" name="ipf_manager assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/ipf_manager/static/src/js/ipf_manager.js"></script>
                 <script type="text/javascript" src="/ipf_manager/static/src/js/bootbox.min.js"></script>
+                <script type="text/javascript" src="/ipf_manager/static/src/js/ipf_manager.js"></script>
             </xpath>
         </template>
+
+        <template id="assets_backend" name="pos_multi_session assets" inherit_id="point_of_sale.assets">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/ipf_manager/static/src/js/models.js"></script>
+                <script type="text/javascript" src="/ipf_manager/static/src/js/devices.js"></script>
+                <script type="text/javascript" src="/ipf_manager/static/src/js/screen.js"></script>
+            </xpath>
+        </template>
+
 
     </data>
 </openerp>

@@ -20,13 +20,14 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'web', 'account', 'ncf_manager'],
+    'depends': ['base', 'web', 'account', 'ncf_manager', "ncf_pos", "point_of_sale"],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'views/ipf_view.xml',
-        'views/views.xml',
+        'views/account_view.xml',
+        'views/point_of_sale_view.xml',
         'views/templates.xml',
     ],
     # only loaded in demonstration mode
