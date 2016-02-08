@@ -2,26 +2,6 @@
 <openerp>
     <data>
 
-        <record id="ncf_manager_account_invoice_inherit_form" model="ir.ui.view">
-            <field name="name">ncf_manager_account_invoice_inherit_form</field>
-            <field name="model">account.invoice</field>
-            <field name="inherit_id" ref="account.invoice_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//button[@name='invoice_print']" position="attributes">
-                    <attribute name="string">Imprimir PDF</attribute>
-                </xpath>
-                <field name="number" position="after">
-                    <div class="oe_button_box oe_right">
-                        <widget type="ipf_button_post_invoice"/>
-                    </div>
-                </field>
-                <field name="move_id" position="after">
-                    <field name="fiscal_nif" attrs="{'invisible': [('fiscal_nif','=','false')]}"/>
-                </field>
-            </field>
-        </record>
-
-
         <!-- Inherit Form View to Modify it -->
         <record id="ncf_manager_inherit_journal_from" model="ir.ui.view">
             <field name="name">ncf_manager_inherit_journal_from</field>

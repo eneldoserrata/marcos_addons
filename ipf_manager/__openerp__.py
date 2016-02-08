@@ -25,10 +25,12 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/templates.xml',
         'views/ipf_view.xml',
         'views/account_view.xml',
-        'views/point_of_sale_view.xml',
-        'views/templates.xml',
+        'views/account_invoice_view.xml',
+        'views/point_of_sale_view.xml'
+
     ],
     # only loaded in demonstration mode
     'qweb': ['static/src/xml/ipf_manager.xml'],

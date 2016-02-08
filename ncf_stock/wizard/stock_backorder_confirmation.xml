@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="ncf_stock_inherit_view_backorder_confirmation" model="ir.ui.view">
+            <field name="name">ncf_stock_inherit_view_backorder_confirmation</field>
+            <field name="model">stock.backorder.confirmation</field>
+            <field name="inherit_id" ref="stock.view_backorder_confirmation"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//form" position="replace">
+                    <form string="Backorder creation">
+
+                        <thml>
+                            <div class="row" style="font-size:20px">
+                                <p class="alert alert-danger">
+                                    <strong>
+                                        <i class="fa fa-warning"/>
+                                        Usted ha procesado menos productos que la demanda inicial.
+                                    </strong>
+                                </p>
+                            </div>
+
+                            <div class="row alert alert-info" style="font-size:12px">
+                                <div class="col-md-8">
+                                    <strong>
+                                        <i class="fa fa-info"/>
+                                        Entrega parcial:
+                                    </strong>
+                                    El conduce sera procesado parcialmente y se genera otro
+                                    conduce por las cantidades restantes para ser procesado posteriormente.
+                                </div>
+                                <div class="col-md-4">
+                                    <button name="process" string="Entrega parcial" type="object"
+                                            class="btn btn-primary btn-block pull-right"/>
+                                </div>
+                            </div>
+
+
+                            <div class="row alert alert-warning" style="font-size:12px">
+                                <div class="col-md-8">
+                                    <strong>
+                                        <i class="fa fa-info"/>
+                                        No hay pedidos pendientes:
+                                    </strong>
+                                    El conduce sera procesado parcialmente y se generara otro
+                                    conduce por las cantidades restantes cancelado.
+                                </div>
+                                <div class="col-md-4">
+                                    <button name="process_cancel_backorder" string="No hay pedidos pendientes" type="object"
+                                    class="btn btn-primary btn-block pull-right"/>
+                                </div>
+                            </div>
+                        </thml>
+
+                        <footer>
+                            <button string="_Cancel" class="btn-default" special="cancel"/>
+                        </footer>
+                    </form>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>

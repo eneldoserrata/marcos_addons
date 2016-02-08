@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="ncf_stock_inherit_view_picking_form" model="ir.ui.view">
+            <field name="name">ncf_stock_inherit_view_picking_form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                <field name="picking_type_id" position="after">
+                    <field name="purchase_id" attrs="{'invisible': [('purchase_id','=',False)]}"></field>
+                    <field name="sale_id" attrs="{'invisible': [('sale_id','=',False)]}"></field>
+                    <field name="refund_action" attrs="{'refund_action': [('sale_id','=',False)]}"></field>
+                </field>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>

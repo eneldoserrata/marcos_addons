@@ -507,7 +507,6 @@ odoo.define('ipf_manager.service', function (require) {
         },
         create_invoice: function (context) {
             var self = this;
-            console.log("create_invoice");
             return new openerp.web.Model("ipf.printer.config").call("ipf_print", [], {context: context})
                 .then(function (data) {
                     return self.print_receipt(data, context)
@@ -516,9 +515,7 @@ odoo.define('ipf_manager.service', function (require) {
         },
         print_receipt: function (data, context) {
             console.log("print_receipt");
-            console.log(data);
             var self = this;
-
             $.ajax({
                     type: 'POST',
                     url: data.host + "/invoice",

@@ -25,9 +25,12 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/views.xml',
+        'views/shop_view.xml',
+        'views/stock_view.xml',
         'views/templates.xml',
-        'wizard/stock_return_picking_view.xml'
+        'views/res_partner_view.xml',
+        'wizard/stock_return_picking_view.xml',
+        'wizard/stock_backorder_confirmation.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

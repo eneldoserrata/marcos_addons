@@ -16,8 +16,3 @@ class AccountJournal(models.Model):
                                              string=u'Formas de pago impresora fiscal', required=False, default="other",
                                              help=u"Esta configuracion se encuantra internamente en la impresora fiscal y debe de especificar esta opecion. " \
                                                   u"Esta es la forma en que la impresora fiscal registra el pago en los libros.")
-
-class AccountInvoice(models.Model):
-    _inherit = "account.invoice"
-
-    fiscal_nif = fields.Char("NIF", default="false", copy=False)
