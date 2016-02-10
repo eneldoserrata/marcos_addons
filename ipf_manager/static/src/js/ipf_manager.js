@@ -516,7 +516,7 @@ odoo.define('ipf_manager.service', function (require) {
         print_receipt: function (data, context) {
             console.log("print_receipt");
             var self = this;
-            $.ajax({
+            return $.ajax({
                     type: 'POST',
                     url: data.host + "/invoice",
                     data: JSON.stringify(data)

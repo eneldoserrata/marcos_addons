@@ -12,7 +12,7 @@
                 <field name="picking_type_id" position="after">
                     <field name="purchase_id" attrs="{'invisible': [('purchase_id','=',False)]}"></field>
                     <field name="sale_id" attrs="{'invisible': [('sale_id','=',False)]}"></field>
-                    <field name="refund_action" attrs="{'refund_action': [('sale_id','=',False)]}"></field>
+                    <field name="refund_action" attrs="{'invisible': [('refund_action','=',False)]}"></field>
                 </field>
 
             </field>

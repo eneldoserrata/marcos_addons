@@ -108,7 +108,7 @@ class AccountInvoice(models.Model):
             if tax_include or tax_except:
                 invoice_items_dict["price"] = line.price_unit
             else:
-                invoice_items_dict["price"] = line.price_unit*(tax_id.amount+1)
+                invoice_items_dict["price"] = line.price_unit+(line.price_unit*(tax_id.amount/100))
 
             if line.discount > 0:
                 invoice_items_dict["discount"] = line.discount

@@ -1,6 +1,7 @@
 odoo.define('ipf_manager.devices', function (require) {
 
     var devices = require('point_of_sale.devices');
+    var IpfApi = require('ipf_manager.service');
 
     devices.ProxyDevice.include({
         try_hard_to_connect: function (url, options) {
@@ -93,37 +94,31 @@ odoo.define('ipf_manager.devices', function (require) {
             }
 
         },
-        //print_receipt: function (receipt) {
-        //    var self = this;
-        //    if (this.pos.config.iface_fiscal_printer) {
-        //        console.log("=======iface_fiscal_printer=========")
-        //        console.log(receipt)
-        //        console.log("================")
-        //    } else {
-        //        return this._super(receipt);
-        //    }
+        print_receipt: function (receipt) {
+            var self = this;
+            if (!Array.isArray(receipt)) {
+                return this._super();
+            } else {
+                if (receipt) {
+                    self.receipt_queue.push(receipt);
+                }
+                function send_printing_job() {
+                    if (self.receipt_queue.length > 0) {
+                        var r = self.receipt_queue.shift();
+                        new IpfApi().print_receipt(r[0], r[1]).then(function () {
 
-        //    function send_printing_job() {
-        //        if (self.receipt_queue.length > 0) {
-        //            var r = self.receipt_queue.shift();
-        //            self.message('print_xml_receipt', {receipt: r}, {timeout: 5000})
-        //                .then(function () {
-        //                    send_printing_job();
-        //                }, function (error) {
-        //                    if (error) {
-        //                        self.pos.chrome.screen_selector.show_popup('error-traceback', {
-        //                            'title': _t('Printing Error: ') + error.data.message,
-        //                            'body': error.data.debug,
-        //                        });
-        //                        return;
-        //                    }
-        //                    self.receipt_queue.unshift(r);
-        //                });
-        //        }
-        //    }
-        //
-        //    send_printing_job();
-        //}
+                            })
+                            .fail(function () {
+                                self.receipt_queue.unshift(r);
+                            });
+                    }
+                }
+
+                send_printing_job();
+
+
+            }
+        }
     });
 
 });
