@@ -32,38 +32,16 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Control en ventas",
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
+from openerp import models, api, _
 
-    'description': """
-        Restricciones de funcionalidades en las ventas.
-    """,
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
+class account_payment(models.Model):
+    _inherit = "account.payment"
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
-
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
-    'license': "Other proprietary"
-}
+    @api.multi
+    def do_print_checks(self):
+        check_layout = self[0].journal_id.check_layout
+        if check_layout:
+            return self.env['report'].get_action(self, "l10n_do_check_printing.check_print_report")
+        return super(account_payment, self).do_print_checks()

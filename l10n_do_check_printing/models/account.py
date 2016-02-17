@@ -32,38 +32,14 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Control en ventas",
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
+from openerp import models, fields
 
-    'description': """
-        Restricciones de funcionalidades en las ventas.
-    """,
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
+class InheritedAccountJournal(models.Model):
+    _inherit = "account.journal"
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
+    check_layout = fields.Many2one("check.report.config", string="Plantilla de cheque", required=False,
+        help=u"Seleccione el formato que corresponde al papel de verificación va a imprimir sus cheques en.\n"
+             u"Para desactivar la función de impresión, seleccione 'Ninguno'.")
 
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
-
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
-    'license': "Other proprietary"
-}

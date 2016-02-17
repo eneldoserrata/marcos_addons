@@ -32,38 +32,31 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Control en ventas",
+from openerp import models, fields, api
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
 
-    'description': """
-        Restricciones de funcionalidades en las ventas.
-    """,
+class CheckReportConfig(models.Model):
+    _name = "check.report.config"
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
+    name = fields.Char("Nombre", required=True)
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
+    font_zise = fields.Float(string=u"Tamaño del las letras", default=10)
+    body_top = fields.Float(string="Margen superior del cuerpo del cheque", default=0)
 
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
+    name_top = fields.Float(string="Margen superior del nombre", default=15)
+    name_left = fields.Float(string="Margen izquierdo del nombre", default=10)
 
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
-    'license': "Other proprietary"
-}
+    date_top = fields.Float(string="Margen superior de la fecha", default=15)
+    date_left = fields.Float(string="Margen izquierdo de la fecha" , default=175)
+
+    amount_top = fields.Float(string="Margen superior del monto", default=23)
+    amount_left = fields.Float(string="Margen izquierdo del monto", default=175)
+
+    amount_letter_top = fields.Float(string="Margen superior monto en letras", default=26)
+    amount_letter_left = fields.Float(string="Margen izquierdo monto en letras", default=10)
+
+    check_header_top = fields.Float("Margen superior de la Cabecera")
+    check_header = fields.Many2one("ir.ui.view", string="Plantilla Cabecera del cheque")
+
+    check_footer_top = fields.Float("Margen superior del pie")
+    check_footer = fields.Many2one("ir.ui.view", string="Plantilla Pie del cheque")

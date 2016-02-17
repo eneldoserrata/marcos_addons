@@ -32,38 +32,36 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Control en ventas",
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
+from openerp import models, api
 
-    'description': """
-        Restricciones de funcionalidades en las ventas.
-    """,
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
+class PrintCheck(models.AbstractModel):
+    _name = 'report.l10n_do_check_printing.check_print_report'
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
+    @api.multi
+    def render_html(self, data=None):
+        report_obj = self.env['report']
+        report = report_obj._get_report_from_name('l10n_do_check_printing.check_print_report')
 
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
+        payment_ids = self.env[report.model].browse(self._ids)
 
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
-    'license': "Other proprietary"
-}
+        payments = []
+        for payment in payment_ids:
+            payment.payment_date
+            year, month, day = payment.payment_date.split("-")
+            payment.report_date = "{} {} {} {} {} {} {} {}".format(day[0],day[1],month[0],month[1],year[0],year[1],
+                                                                   year[2], year[3])
+            payments.append(payment)
+
+
+
+
+        docargs = {
+            "doc_ids": self._ids,
+            "doc_model": report.model,
+            "docs": payments
+        }
+        return report_obj.render('l10n_do_check_printing.check_print_report', docargs)
+
+

@@ -33,37 +33,29 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 {
-    'name': "Control en ventas",
+    'name': 'Impresion de cheques bancos Domnicanos',
+    'version': '1.0',
+    'author': 'Eneldo Serrata - Marcos Organizador de Negocios, SRL.',
+    'website': "http://marcos.do",
+    'category': 'Localization',
 
     'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
-
+    Localizacion Para Republica Dominicana
+    Permite configurar desde los diarios las plantillas para impresion de chques.""",
     'description': """
-        Restricciones de funcionalidades en las ventas.
+        Este módulo permite configurar sus cheques de pagos en el papel de verificación pre-impreso.
+        Puede configurar la salida (distribución, información trozos, etc.) en los entornos de la empresa, y gestionar el
+        cheques de numeración (si utiliza cheques preimpresos sin números) en la configuración de diario.
     """,
-
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
-
-    # always loaded
+    'depends' : ['account_check_printing','ncf_manager'],
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+        'report/paper_data.xml',
+        'report/report_data.xml',
+        'report/report_template.xml',
+        'views/account_view.xml',
+        'views/check_report_config_view.xml'
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
+    'installable': True,
+    'auto_install': False,
     'license': "Other proprietary"
 }
