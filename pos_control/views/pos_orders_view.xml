@@ -4,7 +4,7 @@
     <data>
         <template id="assets_backend" name="pos_multi_session assets" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
-               <script type="text/javascript" src="/pos_orders_control/static/src/js/pos_orders.js"></script>
+               <script type="text/javascript" src="/pos_control/static/src/js/pos_orders.js"></script>
             </xpath>
         </template>
     </data>

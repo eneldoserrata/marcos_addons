@@ -1,4 +1,4 @@
-odoo.define('pos_orders.pos_orders', function (require) {
+odoo.define('pos_control.pos_orders', function (require) {
     "use strict";
     var Model = require('web.DataModel');
     var screens = require('point_of_sale.screens');

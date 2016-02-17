@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ########################################################################################################################
 #  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
@@ -33,37 +32,27 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 {
-    'name': "Restricciones de funcionalidades en las ventas",
-
-    'summary': """
+    "name": "Control de usuarios en el POS",
+    "category": 'point_of_sale',
+    "summary": """
         Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
-
-    'description': """
-        Long description of module's purpose
-    """,
-
+        Agrega control de funcionalidades para los usarios del POS
+       """,
+    "sequence": 1,
     'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
     'website': "http://marcos.do",
+    'version': '0.1',
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
-
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+    "depends": ['base', 'point_of_sale', 'ncf_pos'],
+    "data": [
+        'views/pos_orders_view.xml',
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
+
+    'qweb': [
+        'static/src/xml/*.xml',
     ],
+    "installable": True,
+    "application": True,
+    "auto_install": False,
     'license': "Other proprietary"
 }
