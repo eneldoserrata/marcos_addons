@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pos_orders_control_pos_orders_control,pos_orders_control.pos_orders_control,model_pos_orders_control_pos_orders_control,,1,0,0,0
