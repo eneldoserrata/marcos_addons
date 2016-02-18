@@ -53,15 +53,7 @@ class SaleOrder(models.Model):
             raise exceptions.UserError(u"Su usuario ningun almacen asignado para continuar comuníquese con su administrador.")
         return shop_user_config["warehouse_ids"][0]
 
-    @api.one
-    def _get_total_discount(self):
-        total_discount = 0.0
-        for line in self.order_line:
-            total_discount += line.price_unit * ((line.discount or 0.0) / 100.0)
-        self.total_discount = total_discount
 
-
-    total_discount = fields.Monetary(string='Descuento', currency_field="currency_id", compute=_get_total_discount)
     fiscal_position_id = fields.Many2one('account.fiscal.position', oldname='fiscal_position', string='Fiscal Position',
                                          domain=[('supplier', '=', False)])
     payment_term_id = fields.Many2one('account.payment.term', string='Payment Term', oldname='payment_term')
