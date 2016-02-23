@@ -41,19 +41,28 @@ class SaleOrder(models.Model):
 
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
-        return shop_user_config["shop_ids"][0]
+        return self.env["shop.ncf.config"].browse(shop_user_config["shop_ids"][0])
 
     def _default_user_journal(self):
+
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
-        return shop_user_config["sale_journal_ids"][0]
+        return self.env["account.journal"].browse(shop_user_config["sale_journal_ids"][0])
 
     def _default_user_wh(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         if not shop_user_config.get("warehouse_ids", False):
             raise exceptions.UserError(u"Su usuario ningun almacen asignado para continuar comuníquese con su administrador.")
-        return shop_user_config["warehouse_ids"][0]
+        return self.env["stock.warehouse"].browse(shop_user_config["warehouse_ids"][0])
 
 
+    @api.one
+    def _get_total_discount(self):
+        total_discount = 0.0
+        for line in self.order_line:
+            total_discount += line.price_unit * ((line.discount or 0.0) / 100.0)
+        self.total_discount = total_discount
+
+    total_discount = fields.Monetary(string='Descuento', currency_field="currency_id", compute=_get_total_discount)
     fiscal_position_id = fields.Many2one('account.fiscal.position', oldname='fiscal_position', string='Fiscal Position',
                                          domain=[('supplier', '=', False)])
     payment_term_id = fields.Many2one('account.payment.term', string='Payment Term', oldname='payment_term')
@@ -89,7 +98,7 @@ class SaleOrder(models.Model):
                        "fiscal_position_id": self.partner_id.property_account_position_id.id})
         super(SaleOrder, self).update(values)
 
-    @api.multi
-    @api.onchange('partner_shipping_id')
-    def onchange_partner_shipping_id(self):
-        pass
+    # @api.multi
+    # @api.onchange('partner_shipping_id')
+    # def onchange_partner_shipping_id(self):
+    #     pass

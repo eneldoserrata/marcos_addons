@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="architect_edit_project" model="ir.ui.view">
+            <field name="name">architect_edit_project</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <div name="button_box">
+                    <button class="oe_stat_button" type="action" name="99" icon="fa-usd" string="Cost/Revenue"
+                            widget="statinfo"/>
+                </div>
+
+                <xpath expr="//notebook">
+                    <page string="Compras">
+                        <field name="purchase_ids"/>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="architect_view_project_kanban" model="ir.ui.view">
+            <field name="name">architect_view_project_kanban</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="arch" type="xml">
+
+                <field name="doc_count" position="after">
+                    <field name="purchase_count"/>
+                </field>
+
+                <div class="o_project_kanban_boxes">
+                    <!--<a t-if="record.purchase_count.value > 0" class="o_project_kanban_box" name="purchase_tree_view"-->
+                    <a class="o_project_kanban_box" name="purchase_tree_view"
+                       type="object">
+                        <span class="o_value">
+                            50
+                            <!--<t t-esc="record.purchase_count.value"/>-->
+                        </span>
+                        <span class="o_label">Compras</span>
+                    </a>
+                </div>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>
