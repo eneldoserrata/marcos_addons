@@ -54,7 +54,7 @@
     'version': '9.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'product', 'sale', 'stock','ncf_manager', 'stock_account'],
+    'depends': ['base', 'product', 'sale', 'stock','ncf_manager', 'stock_account','purchase'],
 
     # always loaded
     'data': [
