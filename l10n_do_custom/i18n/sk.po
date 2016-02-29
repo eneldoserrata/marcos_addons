@@ -3,6 +3,8 @@
 # * l10n_do
 # 
 # Translators:
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2016
+# Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
@@ -20,7 +22,7 @@ msgstr ""
 #. module: l10n_do
 #: model:ir.ui.menu,name:l10n_do.account_reports_do_statements_menu
 msgid "Dominican Statements"
-msgstr ""
+msgstr "Dominican Statements"
 
 #. module: l10n_do
 #: model:ir.actions.client,name:l10n_do.action_client_l10n_do_menu
