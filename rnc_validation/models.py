@@ -96,7 +96,8 @@ class ResPartner(models.Model):
 
     @api.model
     def check_vals(self, vals):
-        validation = {}
+        if isinstance(vals, unicode):
+            vals = {"vat": vals}
         if vals:
             vat_or_name = vals.get("vat", False) or vals.get("name", False)
             if vat_or_name:
@@ -112,6 +113,8 @@ class ResPartner(models.Model):
             validation = self.check_vals(vals)
             if validation:
                 vals.update(validation)
+            else:
+                raise exceptions.UserError(u"El número de RNC/Cédula no es vEalido en la DGII.")
             return super(ResPartner, self).create(vals)
 
     @api.onchange("vat")
