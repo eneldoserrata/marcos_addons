@@ -93,3 +93,14 @@ class StockPicking(models.Model):
             refund_wizard._create_returns()
 
         return res
+
+
+class StockMove(models.Model):
+    _inherit = "stock.move"
+
+    @api.multi
+    def product_price_update_after_done(self):
+        super(StockMove, self).product_price_update_after_done()
+        for move in self:
+            if move.product_id.cost_method == 'real' and move.location_dest_id.usage == 'internal' and move.product_id.standard_price == 0:
+                self._store_average_cost_price(move)
