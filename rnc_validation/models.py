@@ -103,9 +103,8 @@ class ResPartner(models.Model):
             if vat_or_name:
                 if vat_or_name.isdigit():
                     fiscal_id = vat_or_name.strip()
-                    validation = self.validate_fiscal_id(fiscal_id)
-
-        return validation
+                    vals = self.validate_fiscal_id(fiscal_id)
+        return vals
 
     @api.model
     def create(self, vals):
