@@ -96,6 +96,8 @@ class ResPartner(models.Model):
 
     @api.model
     def check_vals(self, vals):
+        if self._context.get("install_mode", False):
+            return super(ResPartner, self).check_vals(vals)
         if isinstance(vals, unicode):
             vals = {"vat": vals}
         if vals:
@@ -108,7 +110,9 @@ class ResPartner(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals:
+        if self._context.get("install_mode", False):
+            return super(ResPartner, self).create(vals)
+        elif vals:
             validation = self.check_vals(vals)
             if validation:
                 vals.update(validation)
@@ -125,6 +129,8 @@ class ResPartner(models.Model):
 
     @api.model
     def name_create(self, name):
+        if self._context.get("install_mode", False):
+            return super(ResPartner, self).name_create(name)
         if self._rec_name:
             if name.isdigit():
                 partner = self.search([('vat', '=', name)])
