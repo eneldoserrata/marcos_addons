@@ -3,16 +3,17 @@
     <data>
 
 
-        <record id="ncf_sale.view_order_form_inherit_sale_stock" model="ir.ui.view">
+        <record id="ncf_sale_view_order_form_inherit_sale_stock" model="ir.ui.view">
             <field name="name">ncf_sale_view_order_form_inherit_sale_stock</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
             <field name="arch" type="xml">
 
-                <field name="warehouse_id" position="replace"/>
+                <field name="warehouse_id" position="attributes">
+                    <attribute name="options">{'no_create': True}</attribute>
+                </field>
                 <field name="payment_term_id" position="after">
                     <field name="journal_id" options="{'no_create': True}"/>
-                    <field name="warehouse_id" options="{'no_create': True}"/>
                 </field>
 
             </field>
