@@ -64,7 +64,8 @@
         'views/templates.xml',
         'views/res_partner_view.xml',
         'wizard/stock_return_picking_view.xml',
-        'wizard/stock_backorder_confirmation.xml'
+        'wizard/stock_backorder_confirmation.xml',
+        'wizard/inventory_import_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

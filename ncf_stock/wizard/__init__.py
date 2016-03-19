@@ -33,3 +33,4 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 import stock_return_picking
+import inventory_import
