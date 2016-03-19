@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "construction",
+    'name': "Builder",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'purchase','account_analytic_default'],
+    'depends': ['base', 'project', 'purchase', 'account', 'account_analytic_default','hr_expense'],
 
     # always loaded
     'data': [
@@ -28,6 +28,7 @@
         'views/project_view.xml',
         'views/purchase_view.xml',
         'views/templates.xml',
+        'views/cash_box.xml'
 
     ],
     # only loaded in demonstration mode
