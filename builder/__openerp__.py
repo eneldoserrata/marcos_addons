@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'purchase', 'account', 'account_analytic_default','hr_expense'],
+    'depends': ['base', 'project', 'purchase', 'account', 'account_analytic_default','hr_expense', 'sale'],
 
     # always loaded
     'data': [
@@ -28,6 +28,7 @@
         'views/project_view.xml',
         'views/purchase_view.xml',
         'views/templates.xml',
+        'views/account_view.xml',
         'views/cash_box.xml'
 
     ],

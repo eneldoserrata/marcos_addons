@@ -77,8 +77,9 @@ class PurchaseOrder(models.Model):
 
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
-        if self.fiscal_position_id:
-            self.partner_id.property_account_position_supplier_id = self.fiscal_position_id.id;
+        if self.partner_id:
+            if self.fiscal_position_id:
+                self.partner_id.property_account_position_supplier_id = self.fiscal_position_id.id;
 
     @api.onchange("date_planed")
     def onchange_date_planed(self):

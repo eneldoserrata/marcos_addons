@@ -13,15 +13,75 @@
                             widget="statinfo"/>
                 </div>
 
+                <field name="privacy_visibility" position="before">
+                    <field name="fiscal_position_id"/>
+                </field>
+
                 <xpath expr="//notebook">
                     <page string="Compras">
                         <field name="purchase_ids"/>
+                    </page>
+                    <page string="Ventas">
+                        <field name="sale_ids"/>
                     </page>
                 </xpath>
 
             </field>
         </record>
 
+
+        <record id="act_project_project_2_project_purchase_all" model="ir.actions.act_window">
+            <field name="name">act_project_project_2_project_purchase_all</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph,calendar</field>
+            <field name="context">{
+                'search_default_project_id': [active_id],
+                'default_project_id': active_id
+                }
+            </field>
+            <!--<field name="search_view_id" ref="view_task_search_form"/>-->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Clica para crear una solicitud de cotización.
+                </p>
+                <p>
+                    La cita contiene la historia de la discusión / negotiation
+                    que tuvo con su proveedor. Una vez confirmado, un for petición
+                    la cita se convierte en una orden de compra.
+                </p>
+                <p>
+                    La mayoría de las proposiciones de las órdenes de compra se crean automatically
+                    por Odoo basado en las necesidades de inventario.
+                </p>
+                <p></p>
+            </field>
+        </record>
+
+        <record id="act_project_project_2_project_sale_all" model="ir.actions.act_window">
+            <field name="name">act_project_project_2_project_sale_all</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="context">{
+                'search_default_project_id': [active_id],
+                'default_project_id': active_id
+                }
+            </field>
+            <!--<field name="search_view_id" ref="view_task_search_form"/>-->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crea un Presupuesto, el primer paso de una nueva venta.
+                </p>
+                <p>
+                    Sus próximas acciones deben fluir eficientemente: confirmar la cita a una orden de venta, y luego
+                    crear la factura y cobrar el pago.
+                </p>
+                <p>
+                    Tenga en cuenta que una vez que una cotización se convierte en una orden de venta, se moverán desde
+                    la lista de cotizaciones a la lista de orden de ventas.
+                </p>
+                <p></p>
+            </field>
+        </record>
 
         <!-- Inherit Form View to Modify it -->
         <record id="architect_view_project_kanban" model="ir.ui.view">
@@ -32,20 +92,33 @@
 
                 <field name="doc_count" position="after">
                     <field name="purchase_count"/>
+                    <field name="sale_count"/>
                 </field>
 
                 <div class="o_project_kanban_boxes">
-                    <!--<a t-if="record.purchase_count.value > 0" class="o_project_kanban_box" name="purchase_tree_view"-->
-                    <a class="o_project_kanban_box" name="purchase_tree_view"
-                       type="object">
-                        <span class="o_value">
-                            50
-                            <!--<t t-esc="record.purchase_count.value"/>-->
-                        </span>
-                        <span class="o_label">Compras</span>
-                    </a>
-                </div>
+                    <div t-if="record.purchase_count.raw_value" class="o_project_kanban_box">
+                        <a name="%(act_project_project_2_project_purchase_all)d" type="action">
+                            <span class="o_value">
+                                <t t-esc="record.purchase_count.value"/>
+                            </span>
+                            <span class="o_label">
+                                Compras
+                            </span>
+                        </a>
+                    </div>
 
+                    <div t-if="record.sale_count.value" class="o_project_kanban_box">
+                        <a name="%(act_project_project_2_project_sale_all)d" type="action">
+                            <span class="o_value">
+                                <t t-esc="record.sale_count.value"/>
+                            </span>
+                            <span class="o_label">
+                                Ventas
+                            </span>
+                        </a>
+                    </div>
+
+                </div>
             </field>
         </record>
 

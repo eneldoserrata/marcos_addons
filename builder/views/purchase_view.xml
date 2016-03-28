@@ -12,16 +12,6 @@
                     <field name="project_id"/>
                 </field>
 
-            </field>
-        </record>
-
-        <!-- Inherit Form View to Modify it -->
-        <record id="builder_purchase_order_form" model="ir.ui.view">
-            <field name="name">builder_purchase_order_form</field>
-            <field name="model">purchase.order</field>
-            <field name="inherit_id" ref="purchase.purchase_order_form"/>
-            <field name="arch" type="xml">
-
                 <xpath expr="//tree//field[@name='product_id']" position="replace">
                      <field name="product_id" context="{'partner_id': parent.partner_id}" options="{'no_create_edit': True}"/>
                 </xpath>
