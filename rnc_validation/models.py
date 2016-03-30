@@ -122,7 +122,7 @@ class ResPartner(models.Model):
 
     @api.onchange("vat")
     def onchange_vat(self):
-        if self.vat:
+        if self.vat and not self._context.get("install_mode", False):
             if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
                 raise exceptions.UserError("No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
             self.check_vals(self.vat)

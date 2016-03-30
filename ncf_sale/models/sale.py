@@ -98,7 +98,12 @@ class SaleOrder(models.Model):
                        "fiscal_position_id": self.partner_id.property_account_position_id.id})
         super(SaleOrder, self).update(values)
 
-    # @api.multi
-    # @api.onchange('partner_shipping_id')
-    # def onchange_partner_shipping_id(self):
-    #     pass
+    @api.multi
+    def action_invoice_create(self, grouped=False, final=False):
+        res = super(SaleOrder, self).action_invoice_create(grouped=grouped, final=final)
+        order_ids = self._context.get("active_ids", False)
+        if order_ids:
+            orders = self.browse(order_ids)
+            for order in orders:
+                order.invoice_ids.write({"journal_id": order.journal_id.id})
+        return res

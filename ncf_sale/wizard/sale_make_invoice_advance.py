@@ -33,3 +33,23 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
+
+import time
+
+from openerp import api, fields, models, _
+import openerp.addons.decimal_precision as dp
+from openerp.exceptions import UserError
+
+
+# class SaleAdvancePaymentInv(models.TransientModel):
+#     _inherit = "sale.advance.payment.inv"
+#
+#
+#     @api.multi
+#     def create_invoices(self):
+#         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
+#         res = super(SaleAdvancePaymentInv, self).create_invoices()
+#         from pprint import pprint as pp
+#         print "========================="
+#         pp(res)
+#         print "========================="
