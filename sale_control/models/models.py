@@ -32,7 +32,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-from openerp import api, models, fields, SUPERUSER_ID
+from openerp import api, models, fields, SUPERUSER_ID, exceptions
 
 
 class pos_config(models.Model):
@@ -50,7 +50,37 @@ class pos_config(models.Model):
     allow_credit = fields.Boolean(u"Permitir facturar a credito", default=False)
 
 
+class AccountInvoiceLine(models.Model):
+    _inherit = "account.invoice.line"
+
+    @api.onchange("discount")
+    def onchange_dicount(self):
+        if self.discount:
+            if self._context.get("type", False) in ('out_invoice', 'out_refund'):
+                if self.discount > self.env.user.allow_discount:
+                    self.discount = 0
+                    return {
+                        'value': {'discount': 0},
+                        'warning': {'title': "Cuidado", 'message': "Usted no tiene permitido aplicar este descuento"},
+                    }
+            elif self._context.get("type", False) in ('in_invoice', 'in_refund'):
+                if self.discount > 100:
+                    self.discount = 0
+                    return {
+                        'value': {'discount': 0},
+                        'warning': {'title': "Cuidado", 'message': "El descuento no debe superar el 100%"},
+                    }
 
 
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
 
-
+    @api.onchange("discount")
+    def onchange_dicount(self):
+        if self.discount:
+            if self.discount > self.env.user.allow_discount:
+                self.discount = 0
+                return {
+                    'value': {'discount': 0},
+                    'warning': {'title': "Cuidado", 'message': "Usted no tiene permitido aplicar este descuento"}
+                }

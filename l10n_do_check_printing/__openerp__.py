@@ -49,6 +49,7 @@
     """,
     'depends' : ['account_check_printing','ncf_manager'],
     'data': [
+        'security/ir.model.access.csv',
         'report/paper_data.xml',
         'report/report_data.xml',
         'report/report_template.xml',

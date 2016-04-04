@@ -53,7 +53,7 @@
     'version': '9.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale'],
+    'depends': ['base', 'account', 'sale', 'purchase'],
 
     # always loaded
     'data': [
