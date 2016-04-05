@@ -39,7 +39,7 @@
         Localizacion Para Republica Dominicana
         Integra NCF con el modulo de inventario""",
 
-    'description': """
+    'description': u"""
         Este modulo integra la habilidad de crear comprobates fiscales tipo notas de crédito a partir de devoluciones
         de conduces a proveedores.
     """,

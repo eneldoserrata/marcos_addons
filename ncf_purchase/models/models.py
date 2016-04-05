@@ -81,7 +81,7 @@ class PurchaseOrder(models.Model):
             if self.fiscal_position_id:
                 self.partner_id.property_account_position_supplier_id = self.fiscal_position_id.id;
 
-    @api.onchange("date_planed")
+    @api.onchange("date_planned")
     def onchange_date_planed(self):
         for line in self.order_line:
             line.date_planned = self.date_planned
