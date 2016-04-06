@@ -26,7 +26,7 @@
             <field name="arch" type="xml">
 
                 <field name="validity_date" position="before">
-                    <field name="shop_id" options="{'no_create': True}"/>
+                    <field name="shop_id" options="{'no_create': True}" attrs="{'readonly': [('state','!=','draft')]}"/>
                 </field>
 
                 <field name="fiscal_position_id" position="replace"/>
