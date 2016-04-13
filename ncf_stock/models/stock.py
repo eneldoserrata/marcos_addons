@@ -36,6 +36,7 @@ from openerp import models, fields, api, exceptions
 from openerp.tools.translate import _
 
 
+
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
