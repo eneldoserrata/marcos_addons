@@ -96,10 +96,11 @@
                 </field>
 
                 <div class="o_project_kanban_boxes">
-                    <div t-if="record.purchase_count.raw_value" class="o_project_kanban_box">
+                    <!--<div t-if="record.purchase_count.raw_value" class="o_project_kanban_box">-->
+                    <div class="o_project_kanban_box">
                         <a name="%(act_project_project_2_project_purchase_all)d" type="action">
                             <span class="o_value">
-                                <t t-esc="record.purchase_count.value"/>
+                                <t t-esc="record.purchase_count.value || 0"/>
                             </span>
                             <span class="o_label">
                                 Compras
@@ -107,10 +108,11 @@
                         </a>
                     </div>
 
-                    <div t-if="record.sale_count.value" class="o_project_kanban_box">
+                    <!--<div t-if="record.sale_count.value" class="o_project_kanban_box">-->
+                    <div class="o_project_kanban_box">
                         <a name="%(act_project_project_2_project_sale_all)d" type="action">
                             <span class="o_value">
-                                <t t-esc="record.sale_count.value"/>
+                                <t t-esc="record.sale_count.value || 0"/>
                             </span>
                             <span class="o_label">
                                 Ventas

@@ -1,0 +1,11 @@
+<openerp>
+    <data>
+
+        <template id="assets_backend" name="account assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/dgii_reports/static/src/js/dgii.js"></script>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>
