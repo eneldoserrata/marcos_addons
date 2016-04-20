@@ -52,10 +52,11 @@ class StockReturnPicking(models.TransientModel):
                                            venta y al recibir o al entregar la mercancia esta solicito la emision de una
                                            nota de crédito para el rembolso del pago.""")
 
-            if not self._context.get("refund_action", False):
-                if res.get("product_return_moves"):
-                    if sum([l[2]["quantity"] for l in res["product_return_moves"]]) == 0:
-                        raise exceptions.ValidationError(u"Este conduce ya fue totalmente devuelto")
+            # TODO test this constraing prevent refund
+            # if not self._context.get("refund_action", False):
+            #     if res.get("product_return_moves"):
+            #         if sum([l[2]["quantity"] for l in res["product_return_moves"]]) == 0:
+            #             raise exceptions.ValidationError(u"Este conduce ya fue totalmente devuelto")
 
             if picking.purchase_id:
                 refund_action = "in_refund"
