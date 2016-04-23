@@ -13,9 +13,9 @@
                             widget="statinfo"/>
                 </div>
 
-                <!--<field name="privacy_visibility" position="before">-->
-                    <!--<field name="fiscal_position_id"/>-->
-                <!--</field>-->
+                <field name="privacy_visibility" position="before">
+                    <field name="fiscal_position_id"/>
+                </field>
 
                 <xpath expr="//notebook">
                     <page string="Compras">

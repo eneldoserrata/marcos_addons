@@ -24,5 +24,5 @@ class Project(models.Model):
     sale_ids = fields.One2many("sale.order", "project_id", string="Ventas")
     sale_count = fields.Integer(compute=_count_sale_and_purchase)
 
-    # fiscal_position_id = fields.Many2one("account.fiscal.position", string=u"Posición fiscal de compras", required=False,
-    #                                      domain=[('supplier','=',True)])
+    fiscal_position_id = fields.Many2one("account.fiscal.position", string=u"Posición fiscal de compras", required=False,
+                                         domain=[('supplier','=',True)])
