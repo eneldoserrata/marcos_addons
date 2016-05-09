@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Builder",
+    'name': "ncf_cjc",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,15 +20,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'purchase', 'account', 'account_analytic_default','hr_expense', 'sale', 'ncf_purchase'],
+    'depends': ['base', 'account', 'hr', 'hr_expense', 'ncf_manager'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/project_view.xml',
-        'views/purchase_view.xml',
-        'views/templates.xml',
+        'security/ncf_cjc_security.xml',
+        'security/ir.model.access.csv',
+        'data/data.xml',
         'views/account_view.xml',
+        'views/hr_view.xml',
+        'views/templates.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

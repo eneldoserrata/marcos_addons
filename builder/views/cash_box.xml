@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-        <!-- This Menu Item must have a parent and an action -->
-        <menuitem id="builder_cash_box" name="Caja chica" parent="hr_expense.menu_hr_expense_root" action="account.action_view_bank_statement_tree" sequence="0"/>
-    </data>
-</openerp>

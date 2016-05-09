@@ -13,5 +13,20 @@
 
             </field>
         </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="inherit_view_account_supplier_payment_tree" model="ir.ui.view">
+            <field name="name">inherit_view_account_supplier_payment_tree</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+            <field name="arch" type="xml">
+
+                <field name="payment_method_id" position="after">
+                    <field name="check_number"/>
+                </field>
+
+            </field>
+        </record>
     </data>
 </openerp>

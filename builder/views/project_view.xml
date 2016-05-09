@@ -14,7 +14,7 @@
                 </div>
 
                 <field name="privacy_visibility" position="before">
-                    <field name="fiscal_position_id"/>
+                    <field name="fiscal_position_ids" widget="many2many_tags"/>
                 </field>
 
                 <xpath expr="//notebook">
@@ -30,8 +30,20 @@
         </record>
 
 
+        <!-- Inherit Form View to Modify it -->
+        <record id="inherit_view_purchase_order_filter" model="ir.ui.view">
+            <field name="name">inherit_view_purchase_order_filter</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="project_id"/>
+                </field>
+            </field>
+        </record>
+
         <record id="act_project_project_2_project_purchase_all" model="ir.actions.act_window">
-            <field name="name">act_project_project_2_project_purchase_all</field>
+            <field name="name">Ordenes de compras</field>
             <field name="res_model">purchase.order</field>
             <field name="view_mode">tree,kanban,form,pivot,graph,calendar</field>
             <field name="context">{
@@ -42,23 +54,13 @@
             <!--<field name="search_view_id" ref="view_task_search_form"/>-->
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                    Clica para crear una solicitud de cotización.
+                    Clica para crear una ordern de compra.
                 </p>
-                <p>
-                    La cita contiene la historia de la discusión / negotiation
-                    que tuvo con su proveedor. Una vez confirmado, un for petición
-                    la cita se convierte en una orden de compra.
-                </p>
-                <p>
-                    La mayoría de las proposiciones de las órdenes de compra se crean automatically
-                    por Odoo basado en las necesidades de inventario.
-                </p>
-                <p></p>
             </field>
         </record>
 
         <record id="act_project_project_2_project_sale_all" model="ir.actions.act_window">
-            <field name="name">act_project_project_2_project_sale_all</field>
+            <field name="name">Ventas</field>
             <field name="res_model">sale.order</field>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
             <field name="context">{
@@ -96,7 +98,7 @@
                 </field>
 
                 <div class="o_project_kanban_boxes">
-                    <div class="o_project_kanban_box">
+
                         <div class="o_project_kanban_box">
                             <a name="%(act_project_project_2_project_purchase_all)d" type="action">
                                 <span class="o_value">
@@ -106,11 +108,11 @@
                                     Compras
                                 </span>
                             </a>
-                        </div>
+
                     </div>
 
                     <div class="o_project_kanban_box">
-                        <div class="o_project_kanban_box">
+
                             <a name="%(act_project_project_2_project_sale_all)d" type="action">
                                 <span class="o_value">
                                     <t t-esc="record.sale_count.value || 0"/>
@@ -119,7 +121,7 @@
                                     Ventas
                                 </span>
                             </a>
-                        </div>
+
                     </div>
 
                 </div>

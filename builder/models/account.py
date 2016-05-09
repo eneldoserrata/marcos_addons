@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from openerp import models, fields
+from openerp import models, fields, api
+from lxml import etree
 
 class account_analytic_line(models.Model):
     _inherit = 'account.analytic.line'

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+
+        <record model="res.groups" id="cjc_group_user">
+            <field name="name">Custodio de caja chica</field>
+        </record>
+
+    </data>
+</openerp>

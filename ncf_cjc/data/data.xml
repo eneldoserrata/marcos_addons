@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="seq_hr_caja_chica" model="ir.sequence">
+            <field name="name">sequencia para caja chica</field>
+            <field name="code">cjc</field>
+            <field name="prefix">GCJC/</field>
+            <field name="padding">4</field>
+        </record>
+
+    </data>
+</openerp>

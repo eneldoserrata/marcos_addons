@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="cjc_invoice_wizard_form" model="ir.ui.view">
+            <field name="name">cjc_invoice_wizard_form</field>
+            <field name="model">cjc.invoice.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Registro de facturas de caja chica">
+                    <field name="purchase_type" invisible="1"/>
+                    <group col="4">
+                        <field name="journal_id"/>
+                        <field name="date_invoice"/>
+                        <field name="partner_id" attrs="{'invisible':[('purchase_type','=','minor')], 'required': [('purchase_type','!=','minor')]}"/>
+                        <field name="fiscal_posistion_id"/>
+                        <field name="ncf" attrs="{'invisible':[('purchase_type','=','minor')], 'required': [('purchase_type','!=','minor')]}"/>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Detalle">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price"/>
+                                    <field name="amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}"
+                               class="oe_subtotal_footer_separator"/>
+                    </group>
+                    <footer>
+                        <button name="confirm_invoice" string="Guardar" type="object" class="oe_highlight"/>
+                        o
+                        <button special="cancel" string="Salir" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</openerp>

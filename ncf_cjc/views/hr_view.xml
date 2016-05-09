@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="ncf_cjc_view_employee_form" model="ir.ui.view">
+            <field name="name">ncf_cjc_view_employee_form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+
+                <field name="user_id" position="after">
+                    <field name="cjc_journal_ids" widget="many2many_tags"/>
+                    <field name="multi_petty_cash"/>
+                </field>
+
+            </field>
+        </record>
+
+        <record id="hr_cjc_form_view" model="ir.ui.view">
+            <field name="name">Caja chica de empleados</field>
+            <field name="model">hr.cjc</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group col="4">
+                            <field name="statement_id"/>
+                            <field name="journal_id"/>
+                            <field name="employee_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        <notebook>
+                            <page string="Facturas">
+                                <field name="expense_ids">
+                                    <tree>
+                                        <field name="journal_id"/>
+                                        <field name="date"/>
+                                        <field name="partner_id"/>
+                                        <field name="fiscal_posistion_id"/>
+                                        <field name="name"/>
+                                        <field name="total_amount"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="hr_cjc_action_view" model="ir.actions.act_window">
+            <field name="name">Caja chica</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hr.cjc</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    <!-- Add Text Here -->
+                </p>
+                <p>
+                    <!-- More details about what a user can do with this object will be OK -->
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="hr_cjc_menu" name="Caja chica" parent="hr_expense.menu_hr_expense_root"
+                  action="hr_cjc_action_view" sequence="0"
+                  groups="ncf_cjc.cjc_group_user"/>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="hr_cjc_hr_expense_form_view" model="ir.ui.view">
+            <field name="name">hr_cjc_hr_expense_form_view</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_form_view"/>
+            <field name="arch" type="xml">
+
+                <form position="replace">
+                    <form string="Expenses">
+                        <header>
+                            <button name="submit_expenses" states="draft" string="Submit to Manager" type="object"
+                                    class="oe_highlight"/>
+                            <button name="approve_expenses" states="submit" string="Approve" type="object"
+                                    groups="base.group_hr_user" class="oe_highlight"/>
+                            <button name="%(hr_expense.hr_expense_refuse_wizard_action)d" states="submit"
+                                    string="Refuse" type="action" groups="base.group_hr_user"/>
+                            <button name="%(hr_expense.hr_expense_refuse_wizard_action)d" states="approve"
+                                    string="Refuse" type="action" groups="account.group_account_user"/>
+                            <button name="reset_expenses" states="cancel" string="Set to Draft" type="object"/>
+                            <button name="action_move_create" states="approve" string="Post Journal Entries"
+                                    type="object" groups="account.group_account_user" class="oe_highlight"/>
+                            <field name="state" widget="statusbar" statusbar_visible="draft,submit,approve,post,done"
+                                   statusbar_colors='{"submit":"blue","cancel":"red"}'/>
+                        </header>
+                        <sheet>
+                            <div class="oe_button_box">
+                                <button name="action_get_attachment_view"
+                                        class="oe_stat_button"
+                                        icon="fa-book"
+                                        type="object">
+                                    <field name="attachment_number" widget="statinfo" string="Documents"/>
+                                </button>
+                            </div>
+                            <group>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                            </group>
+                            <group col="4">
+                                <field name="journal_id" domain="[('type', '=', 'purchase')]"
+                                       groups="account.group_account_user"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                                <field name="date"/>
+                                <field name="partner_id"/>
+                                <field name="fiscal_posistion_id"/>
+                                <field name="name" placeholder="e.g. Business lunch with X"/>
+                                <field name="ncf"/>
+                                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+                                <field name="employee_id"/>
+                                <field name="currency_id" groups="base.group_multi_currency"/>
+                                <field name="account_move_id" domain="[('type', '=', 'purchase'])]" readonly="1"/>
+                                <field name="department_id" invisible="1"/>
+                            </group>
+                            <notebook>
+                                <page string="Detalle">
+                                    <field name="line_ids">
+                                        <tree editable="botton">
+                                            <field name="product_id"/>
+                                            <field name="name"/>
+                                            <field name="quantity"/>
+                                            <field name="price"/>
+                                            <field name="amount"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                            </notebook>
+
+
+                                <!--<group>-->
+                                <!--<field name="product_id" context="{'default_can_be_expensed': 1}"/>-->
+                                <!--<field name="unit_amount" required="1" widget="monetary"-->
+                                <!--options="{'currency_field': 'currency_id'}"/>-->
+                                <!--<label for="quantity"/>-->
+                                <!--<div>-->
+                                <!--<field name="quantity" class="oe_inline"/>-->
+                                <!--<field name="product_uom_id" widget="selection" class="oe_inline"-->
+                                <!--groups="product.group_uom"/>-->
+                                <!--</div>-->
+                                <!--<field name="tax_ids" widget="many2many_tags" groups="account.group_account_user"/>-->
+                                <!--</group>-->
+
+
+                                <group class="oe_subtotal_footer oe_right">
+                                    <field name="total_amount" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"
+                                           class="oe_subtotal_footer_separator"/>
+                                </group>
+                            <group>
+                                <field name="payment_mode" widget="radio"/>
+                                <field name="bank_journal_id"
+                                       attrs="{'invisible': [('payment_mode', '=', 'own_account')], 'required': [('payment_mode', '=', 'company_account')]}"
+                                       domain="[('type', 'in', ['cash', 'bank'])]"
+                                       widget="selection"/>
+                            </group>
+
+                            <div>
+                                <field name="description" placeholder="Notes..."/>
+                            </div>
+                        </sheet>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                        </div>
+                    </form>
+                </form>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>
