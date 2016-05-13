@@ -14,7 +14,7 @@ class HrCjc(models.Model):
 
     @api.model
     def _get_employee(self):
-        employee_id = self.env.user.employee_ids
+        employee_id = self.env.user.employee_ids #TODO fix
         if employee_id:
             return self.env.user.employee_ids.id
         else:

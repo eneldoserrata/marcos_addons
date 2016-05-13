@@ -99,7 +99,7 @@
 
                 <div class="o_project_kanban_boxes">
 
-                        <div class="o_project_kanban_box">
+                        <div class="o_project_kanban_box" groups="purchase.group_purchase_user">
                             <a name="%(act_project_project_2_project_purchase_all)d" type="action">
                                 <span class="o_value">
                                     <t t-esc="record.purchase_count.value || 0"/>
@@ -111,7 +111,7 @@
 
                     </div>
 
-                    <div class="o_project_kanban_box">
+                    <div class="o_project_kanban_box" groups="base.group_sale_salesman_all_leads">
 
                             <a name="%(act_project_project_2_project_sale_all)d" type="action">
                                 <span class="o_value">

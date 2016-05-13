@@ -40,22 +40,22 @@ class CheckReportConfig(models.Model):
 
     name = fields.Char("Nombre", required=True)
 
-    font_zise = fields.Float(string=u"Tamaño del las letras", default=10)
-    body_top = fields.Float(string="Margen superior del cuerpo del cheque", default=0)
+    font_zise = fields.Float(string=u"Tamaño del las letras", default=15)
+    body_top = fields.Float(string="Margen superior del cuerpo del cheque", default=23)
 
-    name_top = fields.Float(string="Margen superior del nombre", default=15)
-    name_left = fields.Float(string="Margen izquierdo del nombre", default=10)
+    name_top = fields.Float(string="Margen superior del nombre", default=22)
+    name_left = fields.Float(string="Margen izquierdo del nombre", default=60)
 
-    date_top = fields.Float(string="Margen superior de la fecha", default=15)
-    date_left = fields.Float(string="Margen izquierdo de la fecha" , default=175)
+    date_top = fields.Float(string="Margen superior de la fecha", default=4.5)
+    date_left = fields.Float(string="Margen izquierdo de la fecha" , default=215)
 
-    amount_top = fields.Float(string="Margen superior del monto", default=23)
-    amount_left = fields.Float(string="Margen izquierdo del monto", default=175)
+    amount_top = fields.Float(string="Margen superior del monto", default=22)
+    amount_left = fields.Float(string="Margen izquierdo del monto", default=200)
 
-    amount_letter_top = fields.Float(string="Margen superior monto en letras", default=26)
-    amount_letter_left = fields.Float(string="Margen izquierdo monto en letras", default=10)
+    amount_letter_top = fields.Float(string="Margen superior monto en letras", default=32)
+    amount_letter_left = fields.Float(string="Margen izquierdo monto en letras", default=20)
 
-    check_header_top = fields.Float("Margen superior de la Cabecera")
+    check_header_top = fields.Float("Margen superior de la Cabecera", default=0)
     check_header = fields.Many2one("ir.ui.view", string="Plantilla Cabecera del cheque")
 
     check_footer_top = fields.Float("Margen superior del pie")
