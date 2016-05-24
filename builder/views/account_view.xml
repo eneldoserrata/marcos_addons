@@ -16,5 +16,19 @@
             </field>
         </record>
 
+
+            <record id="builder_view_account_move_line_filter" model="ir.ui.view">
+            <field name="name">builder_view_account_move_line_filter</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_account_move_line_filter"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//group">
+                    <filter string="Categoria de producto" context="{'group_by':'categ_id'}" name="categ_id"/>
+                </xpath>
+
+            </field>
+        </record>
+
     </data>
 </openerp>
