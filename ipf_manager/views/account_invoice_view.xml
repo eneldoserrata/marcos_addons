@@ -10,14 +10,14 @@
                 <xpath expr="//button[@name='invoice_print']" position="attributes">
                     <attribute name="string">Imprimir PDF</attribute>
                 </xpath>
-                <field name="number" position="after">
-                    <div class="oe_button_box oe_right">
-                        <widget type="ipf_button_post_invoice"/>
-                    </div>
-                </field>
                 <field name="move_id" position="after">
                     <field name="fiscal_nif" attrs="{'invisible': [('fiscal_nif','=','false')]}"/>
                 </field>
+
+                <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <widget type="ipf_button_post_invoice"/>
+                </xpath>
+
             </field>
         </record>
 
