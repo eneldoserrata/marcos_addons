@@ -28,5 +28,37 @@
 
             </field>
         </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="do_view_account_payment_form_inherited" model="ir.ui.view">
+            <field name="name">do_view_account_payment_form_inherited</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account_check_printing.view_account_payment_form_inherited"/>
+            <field name="arch" type="xml">
+
+                <field name="check_number" position="replace">
+                    <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],
+                                                        'readonly': [('check_manual_sequencing','!=',False)]}"/>
+                </field>
+
+            </field>
+        </record>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="do_view_account_payment_invoice_form" model="ir.ui.view">
+            <field name="name">do_view_account_payment_invoice_form</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+            <field name="arch" type="xml">
+
+                <field name="check_number" position="replace">
+                    <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],
+                                                        'readonly': [('check_manual_sequencing','!=',False)]}"/>
+                </field>
+
+            </field>
+        </record>
+
     </data>
 </openerp>

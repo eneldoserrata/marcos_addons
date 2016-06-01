@@ -33,11 +33,20 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, api, _
+from openerp import models, api, fields
+import number_to_word
+
+class account_register_payments(models.TransientModel):
+    _inherit = "account.register.payments"
+
+    @api.onchange('amount')
+    def _onchange_amount(self):
+        self.check_amount_in_words = number_to_word.to_word(self.amount)
 
 
 class account_payment(models.Model):
     _inherit = "account.payment"
+
 
     @api.multi
     def do_print_checks(self):
@@ -45,3 +54,16 @@ class account_payment(models.Model):
         if check_layout:
             return self.env['report'].get_action(self, "l10n_do_check_printing.check_print_report")
         return super(account_payment, self).do_print_checks()
+
+    @api.onchange('amount')
+    def _onchange_amount(self):
+        self.check_amount_in_words = self.amont_in_word
+
+
+    @api.multi
+    def print_checks(self):
+        res = super(account_payment, self).print_checks()
+        if not self[0].journal_id.check_manual_sequencing:
+            if self.check_number > 0:
+                res["context"].update({"default_next_check_number": self.check_number})
+        return res
