@@ -6,5 +6,17 @@
             <field name="name">Custodio de caja chica</field>
         </record>
 
+
+        <record id="hr_account_bank_statement" model="ir.rule">
+            <field name="name">CJC account_bank_statement rules</field>
+            <field name="model_id" ref="model_account_bank_statement"/>
+            <field name="domain_force">[('employee_id', '=', user.employee_ids.id)]</field>
+            <field name="groups" eval="[(4, ref('ncf_cjc.cjc_group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
     </data>
 </openerp>

@@ -29,7 +29,9 @@
         'data/data.xml',
         'views/account_view.xml',
         'views/hr_view.xml',
-        'views/templates.xml'
+        'views/templates.xml',
+        'views/cjc_concept.xml',
+        'wizard/cjc_wizard_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

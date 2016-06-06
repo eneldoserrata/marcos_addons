@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="cjc_view_form" model="ir.ui.view">
+            <field name="name">Caja Chica Conceptos Form</field>
+            <field name="model">cjc.concept</field>
+            <field name="arch" type="xml">
+                <form string="Conceptos Para NCF Especiales" version="7.0">
+                    <group col="2">
+                        <field name="name"/>
+                        <field name="product_id"/>
+
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="cjc_view_tree" model="ir.ui.view">
+            <field name="name">Caja Chica Conceptos Tree</field>
+            <field name="model">cjc.concept</field>
+            <field name="arch" type="xml">
+                <tree string="Conceptos Para NCF Especiales" version="7.0">
+                    <field name="name"/>
+                    <field name="product_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="cjc_view_action">
+            <field name="name">Conceptos de Caja Chica</field>
+            <field name="res_model">cjc.concept</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name='Conceptos de Caja Chica'
+                  id='cjc_menu'
+                  parent='account.account_account_menu'
+                  sequence='13'
+                  action="cjc_view_action"/>
+
+    </data>
+</openerp>
