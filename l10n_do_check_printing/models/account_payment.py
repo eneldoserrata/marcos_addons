@@ -52,8 +52,8 @@ class account_payment(models.Model):
     @api.onchange("check_number")
     def onchange_check_number(self):
         if self.payment_method_code == "check_printing":
-            if self.search([('journal_id', '=', self.journal_id.id), ('check_number', '=', self.check_number),
-                            ('payment_method_code', '=', "check_printing")]):
+            check_duplicate = self.search([('journal_id', '=', self.journal_id.id), ('check_number', '=', self.check_number),('payment_method_code', '=', "check_printing")])
+            if len(check_duplicate) > 1:
                 raise exceptions.ValidationError(u"El número del cheque debe de ser único.")
 
     @api.multi
