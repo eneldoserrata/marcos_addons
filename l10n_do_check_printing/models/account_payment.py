@@ -33,8 +33,9 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, api, fields
+from openerp import models, api, exceptions
 import number_to_word
+
 
 class account_register_payments(models.TransientModel):
     _inherit = "account.register.payments"
@@ -47,6 +48,18 @@ class account_register_payments(models.TransientModel):
 class account_payment(models.Model):
     _inherit = "account.payment"
 
+    @api.one
+    @api.onchange("check_number")
+    def onchange_check_number(self):
+        if self.payment_method_code == "check_printing":
+            if self.search([('journal_id', '=', self.journal_id.id), ('check_number', '=', self.check_number),
+                            ('payment_method_code', '=', "check_printing")]):
+                raise exceptions.ValidationError(u"El número del cheque debe de ser único.")
+
+    @api.multi
+    def post(self):
+        self.onchange_check_number()
+        return super(account_payment, self).post()
 
     @api.multi
     def do_print_checks(self):
@@ -58,7 +71,6 @@ class account_payment(models.Model):
     @api.onchange('amount')
     def _onchange_amount(self):
         self.check_amount_in_words = self.amont_in_word
-
 
     @api.multi
     def print_checks(self):
