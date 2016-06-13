@@ -1,0 +1,310 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* advanced_payment
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 9.0c\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-13 22:34+0000\n"
+"PO-Revision-Date: 2016-06-13 18:50-0400\n"
+"Last-Translator: Eneldo Serrata <eneldoserrata@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_DO\n"
+"X-Generator: Poedit 1.8.8\n"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_account_id
+msgid "Account"
+msgstr "Cuenta"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_net
+msgid "Amount"
+msgstr "Importe"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_amount_currency
+msgid "Amount in Currency"
+msgstr "Importe en moneda"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_analytic_account_id
+msgid "Analytic Account"
+msgstr "Cuenta analítica"
+
+#. module: advanced_payment
+#: selection:account.payment,move_type:0
+msgid "Automatic"
+msgstr "Automatic"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_balance
+msgid "Balance"
+msgstr "Saldo pendiente"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Balance por pagar:"
+msgstr "Balance por pagar:"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_create_uid
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_create_date
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_credit
+msgid "Credit"
+msgstr "Haber"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Crédito"
+msgstr "Crédito"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Cuenta"
+msgstr "Cuenta"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_company_currency_id
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_currency_id
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_company_currency_id
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_date
+msgid "Date"
+msgstr "Fecha"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_debit
+msgid "Debit"
+msgstr "Debe"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Descripción"
+msgstr "Descripción"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_display_name
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_display_name
+msgid "Display Name"
+msgstr "Nome a Mostrar"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_date_maturity
+msgid "Due date"
+msgstr "Vencimiento"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Débito"
+msgstr "Débito"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Etiqueta"
+msgstr "Etiqueta"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Fecha:"
+msgstr "Fecha:"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_id
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_id
+msgid "ID"
+msgstr "ID"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.advanced_view_account_payment_form
+msgid "Journal Items"
+msgstr "Apuntes contables"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line___last_update
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_write_uid
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_write_date
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: advanced_payment
+#: selection:account.payment,move_type:0
+msgid "Manual"
+msgstr "Manual"
+
+#. module: advanced_payment
+#: model:ir.actions.report.xml,name:advanced_payment.account_invoices_move
+msgid "Mayor de facturas"
+msgstr "Mayor de facturas"
+
+#. module: advanced_payment
+#: model:ir.actions.report.xml,name:advanced_payment.account_payment_invoices_move
+msgid "Mayor de facturas pagadas"
+msgstr "Mayor de facturas pagadas"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_account_payment_move_type
+msgid "Method of accounting entries"
+msgstr "Method of accounting entries"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Monto:"
+msgstr "Monto:"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_move_line_id
+msgid "Move line id"
+msgstr "Move line id"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Número:"
+msgstr "Número:"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_balance_cash_basis
+msgid "Paid"
+msgstr "Pagado"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_partner_id
+msgid "Partner"
+msgstr "Empresa"
+
+#. module: advanced_payment
+#: selection:account.payment,move_type:0
+msgid "Pay bills"
+msgstr "Pagar las facturas"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_payment_id
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_move_line_payment_id
+msgid "Payment id"
+msgstr "Payment id"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_account_payment_payment_invoice_ids
+msgid "Payment invoice ids"
+msgstr "Payment invoice ids"
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_account_payment_payment_move_ids
+msgid "Payment move ids"
+msgstr "Payment move ids"
+
+#. module: advanced_payment
+#: model:ir.model,name:advanced_payment.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Proyecto"
+msgstr "Proyecto"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Ref:"
+msgstr "Ref:"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
+#: model:ir.ui.view,arch_db:advanced_payment.report_payment_invoice_move
+msgid "Relacionado:"
+msgstr "Relacionado:"
+
+#. module: advanced_payment
+#: model:ir.model.fields,help:advanced_payment.field_payment_invoice_line_currency_id
+#: model:ir.model.fields,help:advanced_payment.field_payment_move_line_currency_id
+msgid "The optional other currency if it is a multi-currency entry."
+msgstr "La divisa alternativa si se trata de un apunte multi-divisa."
+
+#. module: advanced_payment
+#: model:ir.model.fields,help:advanced_payment.field_payment_invoice_line_date_maturity
+msgid "This field is used for payable and receivable journal entries. You can put the limit date for the payment of this line."
+msgstr "Este campo se utiliza en asientos pendientes de pago y de cobro. Puede establecer la fecha límite para el pago de esta entrada."
+
+#. module: advanced_payment
+#: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_amount
+msgid "To pay"
+msgstr "A pagar"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.advanced_view_account_payment_form
+msgid "Total Credit"
+msgstr "Crédito total"
+
+#. module: advanced_payment
+#: model:ir.ui.view,arch_db:advanced_payment.advanced_view_account_payment_form
+msgid "Total Debit"
+msgstr "Débito total"
+
+#. module: advanced_payment
+#: model:ir.model.fields,help:advanced_payment.field_payment_invoice_line_company_currency_id
+#: model:ir.model.fields,help:advanced_payment.field_payment_move_line_company_currency_id
+msgid "Utility field to express amount currency"
+msgstr "Campo útil para expresar importe en divisa."
+
+#. module: advanced_payment
+#: code:addons/advanced_payment/models/models.py:53
+#, python-format
+msgid "You can not create journal entry that is not square."
+msgstr "No se puede crear entrada de diario que no este cuadrada."
+
+#. module: advanced_payment
+#: code:addons/advanced_payment/models/models.py:206
+#, python-format
+msgid "You must first select a partner."
+msgstr "Primero debe seleccionar un relacionado."
+
+#. module: advanced_payment
+#: model:ir.model,name:advanced_payment.model_payment_invoice_line
+msgid "payment.invoice.line"
+msgstr "payment.invoice.line"
+
+#. module: advanced_payment
+#: model:ir.model,name:advanced_payment.model_payment_move_line
+msgid "payment.move.line"
+msgstr "payment.move.line"

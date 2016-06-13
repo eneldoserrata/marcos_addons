@@ -1,0 +1,52 @@
+<openerp>
+    <data>
+
+
+        <record id="advanced_view_account_payment_form" model="ir.ui.view">
+            <field name="name">advanced_view_account_payment_form</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <sheet>
+
+                    <group attrs="{'invisible': [('payment_type','=','transfer')]}">
+                        <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}" widget="radio"/>
+                    </group>
+
+                    <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
+                            'readonly': [('state','!=','draft')]}" create="false">
+                        <tree delete="false" create="false" editable="bottom">
+                            <field name="move_line_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                            <field name="date_maturity" readonly="1"/>
+                            <field name="net" readonly="1"/>
+                            <field name="balance_cash_basis" readonly="1"/>
+                            <field name="balance" readonly="1"/>
+                            <field name="amount"/>
+                        </tree>
+                    </field>
+
+                    <field name="payment_move_ids" attrs="{'invisible': [('move_type','!=','manual')],
+                            'readonly': [('state','!=','draft')]}">
+                        <tree editable="bottom" string="Journal Items">
+                            <field name="partner_id" invisible="1"
+                                   domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>
+                            <field name="account_id"
+                                   domain="[('deprecated', '=', False)]"/>
+                            <field name="analytic_account_id" groups="analytic.group_analytic_accounting"
+                                   domain="[('account_type', '=', 'normal')]"/>
+                            <field name="amount_currency" groups="base.group_multi_currency" invisible="1"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="currency_id" options="{'no_create': True}"
+                                   groups="base.group_multi_currency" invisible="1"/>
+                            <field name="debit" sum="Total Debit"/>
+                            <field name="credit" sum="Total Credit"/>
+                        </tree>
+                    </field>
+
+                </sheet>
+            </field>
+        </record>
+
+    </data>
+</openerp>
