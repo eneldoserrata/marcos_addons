@@ -65,8 +65,8 @@
     'demo': [
         'demo/demo.xml',
     ],
-    'images': 'static/description/main.png',
-    "price": 150,
+    'images': ['static/description/main.png'],
+    "price": 49,
     'currency': 'EUR',
     'license': "Other proprietary"
 }
