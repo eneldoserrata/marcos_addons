@@ -41,9 +41,9 @@ class AccountPayment(models.Model):
 
     move_type = fields.Selection([('auto', 'Automatic'), ('manual', 'Manual'), ('invoice', 'Pay bills')],
                                  string=u"Method of accounting entries",
-                                 default="auto", required=True)
-    payment_move_ids = fields.One2many("payment.move.line", "payment_id")
-    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id")
+                                 default="auto", required=True, copy=False)
+    payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
+    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False)
 
     def _create_payment_entry_manual(self, amount):
 
@@ -75,7 +75,7 @@ class AccountPayment(models.Model):
         if counterpart_aml_dict.get("amount_currency", False):
             rate = counterpart_aml_dict["debit"] / counterpart_aml_dict["amount_currency"] if counterpart_aml_dict[
                                                                                                   "debit"] > 0 else \
-            counterpart_aml_dict["credit"] / counterpart_aml_dict["amount_currency"]
+                counterpart_aml_dict["credit"] / counterpart_aml_dict["amount_currency"]
         for line in manual_lines:
 
             line_amount_currency = False
@@ -94,7 +94,7 @@ class AccountPayment(models.Model):
                          'invoice_id': counterpart_aml_dict["invoice_id"],
                          'journal_id': counterpart_aml_dict["journal_id"],
                          'move_id': counterpart_aml_dict["move_id"],
-                         'name': counterpart_aml_dict["name"],
+                         'name': line.name or counterpart_aml_dict["name"],
                          'partner_id': counterpart_aml_dict["partner_id"],
                          'payment_id': counterpart_aml_dict["payment_id"]}
             aml_obj.create(line_dict)
@@ -146,16 +146,54 @@ class AccountPayment(models.Model):
         move.post()
         return move
 
+    def set_payment_name(self):
+        if self.state != 'draft':
+            raise Exception.UserError(
+                _("Only a draft payment can be posted. Trying to post a payment in state %s.") % self.state)
+
+        if any(inv.state != 'open' for inv in self.invoice_ids):
+            raise Exception.ValidationError(_("The payment cannot be processed because the invoice is not open!"))
+
+        if not self.name or self.name == "Draft Payment":
+            if self.payment_type == 'transfer':
+                sequence_code = 'account.payment.transfer'
+            else:
+                if self.partner_type == 'customer':
+                    if self.payment_type == 'inbound':
+                        sequence_code = 'account.payment.customer.invoice'
+                    if self.payment_type == 'outbound':
+                        sequence_code = 'account.payment.customer.refund'
+                if self.partner_type == 'supplier':
+                    if self.payment_type == 'inbound':
+                        sequence_code = 'account.payment.supplier.refund'
+                    if self.payment_type == 'outbound':
+                        sequence_code = 'account.payment.supplier.invoice'
+            self.name = self.env['ir.sequence'].with_context(ir_sequence_date=self.payment_date).next_by_code(
+                sequence_code)
+
     @api.multi
     def post(self):
         for rec in self:
             if rec.move_type == "auto":
-                super(AccountPayment, self).post()
+                # Create the journal entry
+                amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
+                move = rec._create_payment_entry(amount)
+
+                # In case of a transfer, the first journal entry created debited the source liquidity account and credited
+                # the transfer account. Now we debit the transfer account and credit the destination liquidity account.
+                if rec.payment_type == 'transfer':
+                    transfer_credit_aml = move.line_ids.filtered(
+                        lambda r: r.account_id == rec.company_id.transfer_account_id)
+                    transfer_debit_aml = rec._create_transfer_entry(amount)
+                    (transfer_credit_aml + transfer_debit_aml).reconcile()
+                rec.state = 'posted'
             elif rec.move_type == "manual":
+                self.set_payment_name()
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 rec._create_payment_entry_manual(amount)
                 rec.state = 'posted'
             elif rec.move_type == "invoice":
+                self.set_payment_name()
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 rec._create_payment_entry_invoice(amount)
                 rec.state = 'posted'
@@ -280,13 +318,14 @@ class PaymentMoveLine(models.Model):
 
     payment_id = fields.Many2one("account.payment")
     account_id = fields.Many2one("account.account", string="Account")
+    name = fields.Char("Etiqueta")
     partner_id = fields.Many2one('res.partner', string='Partner', index=True, ondelete='restrict')
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
-    amount_currency = fields.Monetary(string="Amount in Currency")
-    currency_id = fields.Many2one('res.currency', string='Currency', related="payment_id.currency_id",
-                                  help="The optional other currency if it is a multi-currency entry.")
+    company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True,
+                                          help='Utility field to express amount currency', store=True)
     company_currency_id = fields.Many2one('res.currency', related='payment_id.currency_id', readonly=True,
                                           help='Utility field to express amount currency', store=True)
+    company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True)
 
     debit = fields.Monetary(string="Debit", default=0.0, currency_field='company_currency_id')
     credit = fields.Monetary(string="Credit", default=0.0, currency_field='company_currency_id')
