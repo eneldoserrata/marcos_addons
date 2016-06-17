@@ -60,5 +60,20 @@
             </field>
         </record>
 
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="view_account_payment_search_check" model="ir.ui.view">
+            <field name="name">view_account_payment_search_check</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_search"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="check_number"/>
+                </xpath>
+
+            </field>
+        </record>
+
     </data>
 </openerp>
