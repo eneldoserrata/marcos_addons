@@ -47,8 +47,8 @@ class AccountPayment(models.Model):
 
     def _create_payment_entry_manual(self, amount):
 
-        manual_debit = sum([line.debit for line in self.payment_move_ids])
-        manual_credit = sum([line.credit for line in self.payment_move_ids])
+        manual_debit = round(sum([line.debit for line in self.payment_move_ids]),2)
+        manual_credit = round(sum([line.credit for line in self.payment_move_ids]),2)
         if manual_credit != manual_debit:
             raise exceptions.UserError(_("You can not create journal entry that is not square."))
 
@@ -334,5 +334,5 @@ class PaymentMoveLine(models.Model):
                                           help='Utility field to express amount currency', store=True)
     company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True)
 
-    debit = fields.Monetary(string="Debit", default=0.0, currency_field='company_currency_id')
-    credit = fields.Monetary(string="Credit", default=0.0, currency_field='company_currency_id')
+    debit = fields.Monetary(string="Debit", default=0.0, currency_field='company_currency_id', digits=(16, 2))
+    credit = fields.Monetary(string="Credit", default=0.0, currency_field='company_currency_id', digits=(16, 2))
