@@ -235,6 +235,7 @@ class AccountPayment(models.Model):
             AND ( "public"."account_journal"."type" = '{}' )
             AND ( "public"."account_account"."reconcile" = TRUE )
             AND ( "public"."account_move_line"."partner_id" = {})
+            ORDER BY "public"."account_move_line"."date"
             """.format(journal_type, self.partner_id.id)
 
             if not self.partner_id:
@@ -276,9 +277,7 @@ class AccountPayment(models.Model):
 
     @api.onchange("payment_invoice_ids")
     def onchange_payment_invoice_ids(self):
-        self.amount = 0
-        for rec in self.payment_invoice_ids:
-            self.amount += rec.amount
+        self.amount = sum(rec.amount for rec in self.payment_invoice_ids)
 
 
 class PaymentInvoiceLine(models.Model):
@@ -287,7 +286,7 @@ class PaymentInvoiceLine(models.Model):
     @api.multi
     def _calc_amount(self):
         for rec in self:
-            rec.net = rec.move_line_id.net * -1 if rec.move_line_id.net < 0 else rec.move_line_id.net
+            rec.net = rec.move_line_id.balance * -1 if rec.move_line_id.balance < 0 else rec.move_line_id.balance
             rec.balance_cash_basis = rec.move_line_id.balance_cash_basis * -1 if rec.move_line_id.balance_cash_basis < 0 else rec.move_line_id.balance_cash_basis
             rec.balance = rec.net - rec.balance_cash_basis
 
@@ -312,6 +311,14 @@ class PaymentInvoiceLine(models.Model):
         elif self.amount < 0:
             self.amount = 0
 
+
+    @api.multi
+    def full_pay(self):
+        if self.amount == self.balance:
+            self.amount = 0
+        else:
+            self.amount = self.balance
+        self.payment_id.amount = sum(rec.amount for rec in self.payment_id.payment_invoice_ids)
 
 class PaymentMoveLine(models.Model):
     _name = "payment.move.line"

@@ -23,6 +23,7 @@
                             <field name="balance_cash_basis" readonly="1"/>
                             <field name="balance" readonly="1"/>
                             <field name="amount"/>
+                            <button name="full_pay" type="object" icon="kanban-apply"/>
                         </tree>
                     </field>
 
