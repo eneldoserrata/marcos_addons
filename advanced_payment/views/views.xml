@@ -10,20 +10,26 @@
                 <sheet>
 
                     <group attrs="{'invisible': [('payment_type','=','transfer')]}">
-                        <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}" widget="radio"/>
+                        <group>
+                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}" widget="radio"/>
+                        </group>
+                        <group>
+                            <button name="calc_invoice_check" type="object" string="Calcular facturas pagadas"
+                                    attrs="{'invisible': [('move_type','!=','invoice')]}"/>
+                        </group>
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
                             'readonly': [('state','!=','draft')]}" create="false">
-                        <tree delete="false" create="false" editable="bottom">
+                        <tree delete="false" create="false" editable="bottom" limit="1000">
                             <field name="move_line_id" readonly="1"/>
-                            <field name="date" readonly="1"/>
+                            <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
                             <field name="net" readonly="1"/>
                             <field name="balance_cash_basis" readonly="1"/>
                             <field name="balance" readonly="1"/>
                             <field name="amount"/>
-                            <button name="full_pay" type="object" icon="kanban-apply"/>
+                            <button name="full_pay" type="object" string="Pagar"/>
                         </tree>
                     </field>
 
