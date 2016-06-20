@@ -38,6 +38,7 @@ from openerp import models, api, exceptions
 
 import logging
 
+
 _logger = logging.getLogger(__name__)
 
 
@@ -48,13 +49,18 @@ class ResPartner(models.Model):
     def name_search(self, name, args=None, operator='ilike', limit=100):
         res = super(ResPartner, self).name_search(name, args=args, operator=operator, limit=100)
         if not res and name:
-            partners = self.search([('vat','ilike',name)])
+            partners = False
+            if len(name) in (9,11):
+                partners = self.search([('vat','=',name)])
+            else:
+                partners = self.search([('vat','ilike',name)])
 
-            if not partners:
-                if self._context.get("search_default_customer", False):
-                    partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('customer','=',True)])
-                elif self._context.get("search_default_supplier", False):
-                    partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('supplier','=',True)])
+
+            # if not partners:
+            #     if self._context.get("search_default_customer", False):
+            #         partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('customer','=',True)])
+            #     elif self._context.get("search_default_supplier", False):
+            #         partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('supplier','=',True)])
 
 
 
