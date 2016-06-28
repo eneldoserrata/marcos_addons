@@ -11,30 +11,49 @@
 
                     <group attrs="{'invisible': [('payment_type','=','transfer')]}">
                         <group>
-                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}" widget="radio"/>
+                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
                         </group>
                         <group>
-                            <button name="calc_invoice_check" type="object" string="Calcular facturas pagadas"
-                                    attrs="{'invisible': [('move_type','!=','invoice')]}"/>
+                            <table class="table">
+                                <tr>
+                                    <th class="tg-yw4l">
+                                        <button name="update_invoice" type="object" string="Actulizar facturas pendientes"
+                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
+                                                class="btn btn-sm btn-primary"/>
+                                    </th>
+                                    <th class="tg-yw4l">
+                                        <button name="calc_invoice_check" type="object" string="Calcular pago"
+                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
+                                                class="btn btn-sm btn-primary"/>
+                                    </th>
+                                    <th class="tg-yw4l">
+                                        <button name="pay_all" type="object" string="Pagar todas"
+                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
+                                                class="btn btn-sm btn-primary"/>
+                                    </th>
+                                </tr>
+                            </table>
                         </group>
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
                             'readonly': [('state','!=','draft')]}" create="false">
                         <tree delete="false" create="false" editable="bottom" limit="1000">
-                            <field name="move_line_id" readonly="1"/>
+                            <button name="full_pay" type="object" string="Pagar" icon="kanban-apply"/>
+                            <button name="unfull_pay" type="object" string="Pagar" icon="kanban-stop"/>
+                            <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
                             <field name="net" readonly="1"/>
                             <field name="balance_cash_basis" readonly="1"/>
                             <field name="balance" readonly="1"/>
                             <field name="amount"/>
-                            <button name="full_pay" type="object" string="Pagar"/>
                         </tree>
                     </field>
 
                     <field name="payment_move_ids" attrs="{'invisible': [('move_type','!=','manual')],
                             'readonly': [('state','!=','draft')]}">
+
                         <tree editable="bottom" string="Journal Items">
                             <field name="partner_id" invisible="1"
                                    domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>

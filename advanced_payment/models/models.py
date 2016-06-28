@@ -219,51 +219,6 @@ class AccountPayment(models.Model):
                 self.payment_move_ids = first_move
 
 
-    @api.onchange("move_type")
-    def onchange_move_type(self):
-        if self.move_type == "manual":
-            self.payment_invoice_ids = False
-            self.set_default_account_move()
-        elif self.move_type == "invoice":
-            self.payment_move_ids = False
-
-            journal_type = 'purchase' if self.payment_type == "outbound" else 'sale'
-            query = """
-                SELECT   "public"."account_move_line"."id",
-                 "public"."account_move_line"."reconciled",
-                 "public"."account_journal"."type",
-                 "public"."account_account"."reconcile",
-                 "public"."account_move_line"."partner_id"
-                FROM     "account_move_line"
-                INNER JOIN "account_account"  ON "account_move_line"."account_id" = "account_account"."id"
-                INNER JOIN "account_journal"  ON "account_move_line"."journal_id" = "account_journal"."id"
-                WHERE    ( "public"."account_move_line"."reconciled" = FALSE )
-                AND ( "public"."account_journal"."type" = '{}' )
-                AND ( "public"."account_account"."reconcile" = TRUE )
-                AND ( "public"."account_move_line"."partner_id" = {})
-                ORDER BY "public"."account_move_line"."date"
-                """.format(journal_type, self.partner_id.id)
-
-            if not self.partner_id:
-                self.move_type = "auto"
-                return {
-                    'value': {"move_type": "auto"},
-                    'warning': {'title': "Warning", 'message': _("You must first select a partner.")},
-                }
-
-            self.env.cr.execute(query)
-
-            to_reconciled_move_lines = []
-            for row in self.env.cr.dictfetchall():
-                to_reconciled_move_lines.append(self.payment_invoice_ids.create({'move_line_id': row["id"]}))
-
-            to_reconciled_move_lines = self.payment_invoice_ids.browse([move.id for move in to_reconciled_move_lines])
-            self.payment_invoice_ids = to_reconciled_move_lines
-        else:
-            self.payment_invoice_ids = False
-            self.payment_move_ids = False
-
-
     def reset_move_type(self):
         self.move_type = "auto"
 
@@ -296,7 +251,6 @@ class AccountPayment(models.Model):
             communication += "PAGO FAC: {} ".format(",".join(full_payment))
         if partinal_payment:
             communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
-
         self.communication = communication
 
     @api.one
@@ -310,10 +264,72 @@ class AccountPayment(models.Model):
         self.onchange_payment_invoice_ids()
 
 
+    @api.onchange("move_type")
+    def onchange_move_type(self):
+        if self.move_type == "manual":
+            self.payment_invoice_ids = False
+            self.set_default_account_move()
+        elif self.move_type == "invoice":
+            self.update_invoice()
+            self.payment_move_ids = False
+        else:
+            self.payment_invoice_ids = False
+            self.payment_move_ids = False
+
+    @api.multi
+    def update_invoice(self):
+        for rec in self:
+            journal_type = 'purchase' if rec.payment_type == "outbound" else 'sale'
+
+            if not rec.partner_id:
+                rec.move_type = "auto"
+                return {
+                    'value': {"move_type": "auto"},
+                    'warning': {'title': "Warning", 'message': _("You must first select a partner.")},
+                }
+
+            to_reconciled_move_lines = []
+
+            open_invoice = self.env["account.invoice"].search([('state','=','open'),
+                                                               ('partner_id','=',rec.partner_id.id),
+                                                               ('journal_id.type','=',journal_type)])
+
+            inv_ids = [inv.id for inv in open_invoice]
+
+            rows = self.env['account.move.line'].search([('invoice_id','in',inv_ids),
+                                                         ('account_id.reconcile','=',True),
+                                                         ('reconciled','=',False)
+                                                         ])
+
+
+            lines_on_payment = [line.move_line_id.id for line in rec.payment_invoice_ids]
+
+            for row in rows:
+                if not row.id in lines_on_payment:
+                    to_reconciled_move_lines.append(rec.payment_invoice_ids.create({'move_line_id': row.id}))
+
+
+            move_ids = [move.id for move in to_reconciled_move_lines]
+            to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
+            rec.payment_invoice_ids += to_reconciled_move_lines
+
+    @api.onchange('aprtner_id')
+    def onchange_partner_id(self):
+        self.reset_move_type()
+
+    @api.multi
+    def pay_all(self):
+        for rec in self:
+            for line in rec.payment_invoice_ids:
+                line.full_pay()
+        self.calc_invoice_check()
+
+
+
 class PaymentInvoiceLine(models.Model):
     _name = "payment.invoice.line"
 
-    @api.multi
+    @api.one
     def _calc_amount(self):
         for rec in self:
             rec.net = rec.move_line_id.balance * -1 if rec.move_line_id.balance < 0 else rec.move_line_id.balance
@@ -326,13 +342,14 @@ class PaymentInvoiceLine(models.Model):
     company_currency_id = fields.Many2one('res.currency', related='payment_id.currency_id', readonly=True,
                                           help='Utility field to express amount currency', store=True)
 
-    move_line_id = fields.Many2one("account.move.line")
+    move_line_id = fields.Many2one("account.move.line", "Facturas")
     move_date = fields.Date("Date", related="move_line_id.date")
     date_maturity = fields.Date("Due date", related="move_line_id.date_maturity")
     net = fields.Float("Amount", compute=_calc_amount)
     balance_cash_basis = fields.Float("Paid", compute=_calc_amount)
     balance = fields.Float("Balance", compute=_calc_amount)
     amount = fields.Float("To pay", default=0.0)
+
 
     @api.onchange('amount')
     def onchange_amount(self):
@@ -341,13 +358,13 @@ class PaymentInvoiceLine(models.Model):
         elif self.amount < 0:
             self.amount = 0
 
-    @api.multi
+    @api.one
     def full_pay(self):
-        for rec in self:
-            if round(rec.amount,2) == round(rec.balance,2):
-                rec.amount = 0
-            else:
-                rec.amount = rec.balance
+        self.amount = self.balance
+
+    @api.one
+    def unfull_pay(self):
+        self.amount = 0
 
 
 class PaymentMoveLine(models.Model):

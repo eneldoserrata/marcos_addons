@@ -26,6 +26,7 @@
                     <field name="check_number"/>
                 </field>
 
+
             </field>
         </record>
 
@@ -40,6 +41,7 @@
                 <field name="check_number" position="replace">
                     <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],
                                                         'readonly': [('check_manual_sequencing','!=',False)]}"/>
+                    <field name="check_name" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')]}"/>
                 </field>
 
             </field>

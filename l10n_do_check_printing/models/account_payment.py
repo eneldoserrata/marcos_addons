@@ -33,7 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, api, exceptions
+from openerp import models, api, exceptions, fields
 import number_to_word
 
 
@@ -47,6 +47,8 @@ class account_register_payments(models.TransientModel):
 
 class account_payment(models.Model):
     _inherit = "account.payment"
+
+    check_name = fields.Many2one("res.partner", string="Nombre en ck")
 
     @api.one
     @api.onchange("check_number")
