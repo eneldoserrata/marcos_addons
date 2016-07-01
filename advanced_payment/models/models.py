@@ -95,7 +95,8 @@ class AccountPayment(models.Model):
                          'journal_id': counterpart_aml_dict["journal_id"],
                          'move_id': counterpart_aml_dict["move_id"],
                          'name': line.name or counterpart_aml_dict["name"],
-                         'partner_id': counterpart_aml_dict["partner_id"],
+                         'partner_id': line.partner_id.id if line.partner_id else counterpart_aml_dict["partner_id"],
+                         'product_id': line.product_id.id,
                          'payment_id': counterpart_aml_dict["payment_id"]}
             aml_obj.create(line_dict)
 
@@ -294,6 +295,11 @@ class AccountPayment(models.Model):
                                                                ('partner_id','=',rec.partner_id.id),
                                                                ('journal_id.type','=',journal_type)])
 
+
+            open_invoice += self.env["account.invoice"].search([('state','=', 'open'),
+                                                                ('pay_to','=',rec.partner_id.id),
+                                                                ('journal_id.type','=',journal_type)])
+
             inv_ids = [inv.id for inv in open_invoice]
 
             rows = self.env['account.move.line'].search([('invoice_id','in',inv_ids),
@@ -313,7 +319,7 @@ class AccountPayment(models.Model):
             to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
             rec.payment_invoice_ids += to_reconciled_move_lines
 
-    @api.onchange('aprtner_id')
+    @api.onchange('partner_id')
     def onchange_partner_id(self):
         self.reset_move_type()
 
@@ -371,8 +377,9 @@ class PaymentMoveLine(models.Model):
     _name = "payment.move.line"
 
     payment_id = fields.Many2one("account.payment")
-    account_id = fields.Many2one("account.account", string="Account")
+    account_id = fields.Many2one("account.account", string="Account", required=True)
     name = fields.Char("Etiqueta")
+    product_id = fields.Many2one('product.product', string='Producto')
     partner_id = fields.Many2one('res.partner', string='Partner', index=True, ondelete='restrict')
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True,

@@ -40,7 +40,7 @@
                             'readonly': [('state','!=','draft')]}" create="false">
                         <tree delete="false" create="false" editable="bottom" limit="1000">
                             <button name="full_pay" type="object" string="Pagar" icon="kanban-apply"/>
-                            <button name="unfull_pay" type="object" string="Pagar" icon="kanban-stop"/>
+                            <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"/>
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
@@ -55,8 +55,9 @@
                             'readonly': [('state','!=','draft')]}">
 
                         <tree editable="bottom" string="Journal Items">
-                            <field name="partner_id" invisible="1"
+                            <field name="partner_id" invisible="0"
                                    domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>
+                            <field name="product_id"/>
                             <field name="account_id" domain="[('deprecated', '=', False)]"/>
                             <field name="name"/>
                             <field name="analytic_account_id" groups="analytic.group_analytic_accounting"
