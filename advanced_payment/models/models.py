@@ -33,8 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, fields, api, exceptions, _
-
+from openerp import models, fields, api, exceptions, _, release
 
 class AccountPayment(models.Model):
     _inherit = "account.payment"
@@ -274,7 +273,8 @@ class AccountPayment(models.Model):
             [rec.unlink() for rec in self.payment_invoice_ids]
             self.set_default_account_move()
         elif self.move_type == "invoice":
-            self.update_invoice()
+            # if not release.version == "9.0e":
+            #     self.update_invoice()
             [rec.unlink() for rec in self.payment_move_ids]
         else:
             [rec.unlink() for rec in self.payment_invoice_ids]
@@ -322,7 +322,7 @@ class AccountPayment(models.Model):
 
             for row in rows:
                 if not row.id in lines_on_payment:
-                    to_reconciled_move_lines.append(rec.payment_invoice_ids.create({'move_line_id': row.id}))
+                    to_reconciled_move_lines.append(rec.payment_invoice_ids.new({'move_line_id': row.id}))
 
 
             [inv_line.unlink() for inv_line in rec.payment_invoice_ids if not inv_line.move_line_id or inv_line.balance == 0]
@@ -374,8 +374,8 @@ class PaymentInvoiceLine(models.Model):
     date_maturity = fields.Date("Due date", related="move_line_id.date_maturity", readonly=True)
     net = fields.Float("Amount", compute=_calc_amount)
     balance_cash_basis = fields.Float("Paid", compute=_calc_amount)
-    balance = fields.Float("Balance", compute=_calc_amount)
-    amount = fields.Float("To pay", default=0.0)
+    balance = fields.Float("Balance", compute=_calc_amount, digits=(16,2))
+    amount = fields.Float("To pay", default=0.0, digits=(16,2))
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state")
 

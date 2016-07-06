@@ -88,37 +88,37 @@
                                 <t t-if="doc.payment_type == 'outbound'">
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.journal_id.default_credit_account_id"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
                                     </tr>
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.partner_id.property_account_payable_id"></span></td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
                                     </tr>
                                 </t>
                                 <t t-if="doc.payment_type == 'inbound'">
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.journal_id.default_debit_account_id"></span></td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
                                     </tr>
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.partner_id.property_account_receivable_id"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
                                     </tr>
                                 </t>
                                 <t t-if="doc.payment_type == 'transfer'">
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.destination_journal_id.default_debit_account_id"></span></td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
                                     </tr>
                                     <tr>
                                         <td class="tg-yw4l"><span t-field="doc.journal_id.default_credit_account_id"></span></td>
-                                        <td class="tg-yw4l">0.00</td>
-                                        <td class="tg-yw4l"><span t-field="doc.amount"></span></td>
+                                        <td class="text-right tg-yw4l">0.00</td>
+                                        <td class="text-right tg-yw4l"><span t-field="doc.amount"></span></td>
                                     </tr>
                                 </t>
                                 </table>
@@ -137,8 +137,8 @@
                                         <td class="tg-yw4l"><span t-field="manual.account_id"/> </td>
                                         <td class="tg-yw4l"><span t-field="manual.name"/> </td>
                                         <td class="tg-yw4l"><span t-field="manual.analytic_account_id"/> </td>
-                                        <td class="tg-yw4l"><span t-field="manual.debit"/> </td>
-                                        <td class="tg-yw4l"><span t-field="manual.credit"/> </td>
+                                        <td class="text-right tg-yw4l"><span t-field="manual.debit"/> </td>
+                                        <td class="text-right tg-yw4l"><span t-field="manual.credit"/> </td>
                                       </tr>
                                     </t>
                                 </table>
@@ -158,7 +158,7 @@
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.number"/> </td>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.date_invoice"/> </td>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.partner_id"/> </td>
-                                        <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.amount_total"/> </td>
+                                        <td class="text-right tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.amount_total"/> </td>
                                       </tr>
                                     </table>
 
@@ -175,8 +175,8 @@
                                                 <td class="tg-yw4l"><span t-field="move_line.account_id"/> </td>
                                                 <td class="tg-yw4l"><span t-field="move_line.name"/> </td>
                                                 <td class="tg-yw4l"><span t-field="move_line.analytic_account_id"/> </td>
-                                                <td class="tg-yw4l"><span t-field="move_line.debit"/> </td>
-                                                <td class="tg-yw4l"><span t-field="move_line.credit"/> </td>
+                                                <td class="text-right tg-yw4l"><span t-field="move_line.debit"/> </td>
+                                                <td class="text-right tg-yw4l"><span t-field="move_line.credit"/> </td>
                                               </tr>
                                             </t>
                                         </table>
