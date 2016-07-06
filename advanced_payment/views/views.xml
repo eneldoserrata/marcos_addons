@@ -49,11 +49,10 @@
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
-                            'readonly': [('state','!=','draft')]}" create="false" >
+                            'readonly': [('state','!=','draft')]}" mode="tree" options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
-                              decoration-warning="(amount &lt; balance)"
-                              editable="bottom" limit="1000">
+                              decoration-warning="(amount &lt; balance)" limit="1000" create="false" edit="true" editable="top" delete="false">
                             <field name="state" invisible="1"/>
                             <button name="full_pay" type="object" string="Pagar" icon="kanban-apply" attrs="{'invisible': [('state','!=','draft')]}"/>
                             <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop" attrs="{'invisible': [('state','!=','draft')]}"/>

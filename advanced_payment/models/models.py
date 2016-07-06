@@ -42,11 +42,12 @@ class AccountPayment(models.Model):
     move_type = fields.Selection([('auto', 'Automatic'), ('manual', 'Manual'), ('invoice', 'Pay bills')],
                                  string=u"Method of accounting entries",
                                  default="auto", required=True, copy=False)
-    payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
-    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], readonly=True, default='draft', copy=False,
                              string="Status")
+    payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
+    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
+
 
     def _create_payment_entry_manual(self, amount):
         manual_debit = round(sum([line.debit for line in self.payment_move_ids]), 2)
@@ -151,8 +152,8 @@ class AccountPayment(models.Model):
         return move
 
     def set_payment_name(self):
-        if self.state != 'draft':
-            raise Exception.UserError(
+        if self.state not in ('draft', 'request'):
+            raise exceptions.UserError(
                 _("Only a draft payment can be posted. Trying to post a payment in state %s.") % self.state)
 
         if any(inv.state != 'open' for inv in self.invoice_ids):
@@ -200,18 +201,15 @@ class AccountPayment(models.Model):
     @api.multi
     def payment_request(self):
         for rec in self:
-
-            rec.set_payment_name()
-            rec.calc_invoice_check()
             if rec.move_type == "auto":
                 rec.state = 'request'
             elif rec.move_type == "manual":
                 rec.state = 'request'
             elif rec.move_type == "invoice":
-                for inv in rec.payment_invoice_ids:
-                    if inv.amount == 0:
-                        inv.unlink()
+                rec.calc_invoice_check()
+                [inv_line.unlink for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
                 rec.state = 'request'
+            rec.set_payment_name()
 
     @api.model
     def set_default_account_move(self):
@@ -273,14 +271,14 @@ class AccountPayment(models.Model):
     @api.onchange("move_type")
     def onchange_move_type(self):
         if self.move_type == "manual":
-            self.payment_invoice_ids = False
+            [rec.unlink for rec in self.payment_invoice_ids]
             self.set_default_account_move()
         elif self.move_type == "invoice":
             self.update_invoice()
-            self.payment_move_ids = False
+            [rec.unlink for rec in self.payment_move_ids]
         else:
-            self.payment_invoice_ids = False
-            self.payment_move_ids = False
+            [rec.unlink for rec in self.payment_invoice_ids]
+            [rec.unlink for rec in self.payment_move_ids]
 
     @api.multi
     def update_invoice(self):
@@ -368,8 +366,8 @@ class PaymentInvoiceLine(models.Model):
                                           help='Utility field to express amount currency', store=True)
 
     move_line_id = fields.Many2one("account.move.line", "Facturas", readonly=True)
-    move_date = fields.Date("Date", related="move_line_id.date")
-    date_maturity = fields.Date("Due date", related="move_line_id.date_maturity")
+    move_date = fields.Date("Date", related="move_line_id.date", readonly=True)
+    date_maturity = fields.Date("Due date", related="move_line_id.date_maturity", readonly=True)
     net = fields.Float("Amount", compute=_calc_amount)
     balance_cash_basis = fields.Float("Paid", compute=_calc_amount)
     balance = fields.Float("Balance", compute=_calc_amount)
