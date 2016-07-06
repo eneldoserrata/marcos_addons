@@ -271,14 +271,14 @@ class AccountPayment(models.Model):
     @api.onchange("move_type")
     def onchange_move_type(self):
         if self.move_type == "manual":
-            [rec.unlink for rec in self.payment_invoice_ids]
+            [rec.unlink() for rec in self.payment_invoice_ids]
             self.set_default_account_move()
         elif self.move_type == "invoice":
             self.update_invoice()
-            [rec.unlink for rec in self.payment_move_ids]
+            [rec.unlink() for rec in self.payment_move_ids]
         else:
-            [rec.unlink for rec in self.payment_invoice_ids]
-            [rec.unlink for rec in self.payment_move_ids]
+            [rec.unlink() for rec in self.payment_invoice_ids]
+            [rec.unlink() for rec in self.payment_move_ids]
 
     @api.multi
     def update_invoice(self):
@@ -323,6 +323,10 @@ class AccountPayment(models.Model):
             for row in rows:
                 if not row.id in lines_on_payment:
                     to_reconciled_move_lines.append(rec.payment_invoice_ids.create({'move_line_id': row.id}))
+
+
+            [inv_line.unlink() for inv_line in rec.payment_invoice_ids if not inv_line.move_line_id or inv_line.balance == 0]
+
 
             move_ids = [move.id for move in to_reconciled_move_lines]
             to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
