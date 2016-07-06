@@ -271,7 +271,7 @@ class AccountPayment(models.Model):
     def onchange_move_type(self):
         if self.move_type == "manual":
             [rec.unlink() for rec in self.payment_invoice_ids]
-            self.set_default_account_move()
+            # self.set_default_account_move()
         elif self.move_type == "invoice":
             # if not release.version == "9.0e":
             #     self.update_invoice()

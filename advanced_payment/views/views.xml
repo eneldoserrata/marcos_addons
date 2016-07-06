@@ -70,8 +70,8 @@
                             'readonly': [('state','!=','draft')]}">
                         <tree editable="bottom" string="Journal Items">
                             <field name="partner_id" invisible="0"
-                                   domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>
-                            <field name="product_id"/>
+                                   domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]" groups="analytic.group_analytic_accounting"/>
+                            <field name="product_id" groups="analytic.group_analytic_accounting"/>
                             <field name="account_id" domain="[('deprecated', '=', False)]"/>
                             <field name="name"/>
                             <field name="analytic_account_id" groups="analytic.group_analytic_accounting"
