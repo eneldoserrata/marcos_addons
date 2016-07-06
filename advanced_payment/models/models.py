@@ -207,7 +207,7 @@ class AccountPayment(models.Model):
                 rec.state = 'request'
             elif rec.move_type == "invoice":
                 rec.calc_invoice_check()
-                [inv_line.unlink for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
+                [inv_line.unlink() for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
                 rec.state = 'request'
             rec.set_payment_name()
 
