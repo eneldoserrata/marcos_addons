@@ -44,7 +44,9 @@ class AccountPayment(models.Model):
                                  default="auto", required=True, copy=False)
     payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
     payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
-    # amount = fields.Monetary(string='Payment Amount', required=True, compute=_get_total, store=True)
+    state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
+                              ('reconciled', 'Reconciled')], readonly=True, default='draft', copy=False,
+                             string="Status")
 
     def _create_payment_entry_manual(self, amount):
         manual_debit = round(sum([line.debit for line in self.payment_move_ids]), 2)
@@ -109,7 +111,6 @@ class AccountPayment(models.Model):
 
         return move
 
-
     def _create_payment_entry_invoice(self, amount):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
@@ -149,7 +150,6 @@ class AccountPayment(models.Model):
         move.post()
         return move
 
-
     def set_payment_name(self):
         if self.state != 'draft':
             raise Exception.UserError(
@@ -175,7 +175,6 @@ class AccountPayment(models.Model):
             self.name = self.env['ir.sequence'].with_context(ir_sequence_date=self.payment_date).next_by_code(
                 sequence_code)
 
-
     @api.multi
     def post(self):
         for rec in self:
@@ -183,9 +182,6 @@ class AccountPayment(models.Model):
                 # Create the journal entry
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 move = rec._create_payment_entry(amount)
-
-                # In case of a transfer, the first journal entry created debited the source liquidity account and credited
-                # the transfer account. Now we debit the transfer account and credit the destination liquidity account.
                 if rec.payment_type == 'transfer':
                     transfer_credit_aml = move.line_ids.filtered(
                         lambda r: r.account_id == rec.company_id.transfer_account_id)
@@ -193,16 +189,29 @@ class AccountPayment(models.Model):
                     (transfer_credit_aml + transfer_debit_aml).reconcile()
                 rec.state = 'posted'
             elif rec.move_type == "manual":
-                self.set_payment_name()
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 rec._create_payment_entry_manual(amount)
                 rec.state = 'posted'
             elif rec.move_type == "invoice":
-                self.set_payment_name()
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 rec._create_payment_entry_invoice(amount)
                 rec.state = 'posted'
 
+    @api.multi
+    def payment_request(self):
+        for rec in self:
+
+            rec.set_payment_name()
+            rec.calc_invoice_check()
+            if rec.move_type == "auto":
+                rec.state = 'request'
+            elif rec.move_type == "manual":
+                rec.state = 'request'
+            elif rec.move_type == "invoice":
+                for inv in rec.payment_invoice_ids:
+                    if inv.amount == 0:
+                        inv.unlink()
+                rec.state = 'request'
 
     @api.model
     def set_default_account_move(self):
@@ -219,34 +228,31 @@ class AccountPayment(models.Model):
                     {"account_id": self.journal_id.default_debit_account_id.id, "debit": self.amount})
                 self.payment_move_ids = first_move
 
-
     def reset_move_type(self):
         self.move_type = "auto"
-
 
     @api.onchange('payment_type')
     def _onchange_payment_type(self):
         self.reset_move_type()
         return super(AccountPayment, self)._onchange_payment_type()
 
-
     @api.onchange('journal_id')
     def _onchange_journal(self):
         self.reset_move_type()
         return super(AccountPayment, self)._onchange_journal()
-
 
     @api.onchange('partner_type')
     def _onchange_partner_type(self):
         self.reset_move_type()
         return super(AccountPayment, self)._onchange_partner_type()
 
-
     @api.onchange("payment_invoice_ids")
     def onchange_payment_invoice_ids(self):
         self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
-        full_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if rec.amount == rec.balance]
-        partinal_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if rec.amount < rec.balance and rec.amount > 0]
+        full_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if
+                        rec.amount == rec.balance]
+        partinal_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if
+                            rec.amount < rec.balance and rec.amount > 0]
         communication = ""
         if full_payment:
             communication += "PAGO FAC: {} ".format(",".join(full_payment))
@@ -258,12 +264,11 @@ class AccountPayment(models.Model):
     @api.constrains('amount')
     def _check_amount(self):
         if not self.amount > 0.0 and self.state != "draft":
-            raise exceptions.ValidationError('The payment amount must be strictly positive.')
+            raise exceptions.ValidationError(_('The payment amount must be strictly positive.'))
 
     @api.multi
     def calc_invoice_check(self):
         self.onchange_payment_invoice_ids()
-
 
     @api.onchange("move_type")
     def onchange_move_type(self):
@@ -291,29 +296,35 @@ class AccountPayment(models.Model):
 
             to_reconciled_move_lines = []
 
-            open_invoice = self.env["account.invoice"].search([('state','=','open'),
-                                                               ('partner_id','=',rec.partner_id.id),
-                                                               ('journal_id.type','=',journal_type)])
+
+            open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
+                                                                    ('pay_to', '=', rec.partner_id.id),
+                                                                    ('journal_id.type', '=', journal_type)])
 
 
-            open_invoice += self.env["account.invoice"].search([('state','=', 'open'),
-                                                                ('pay_to','=',rec.partner_id.id),
-                                                                ('journal_id.type','=',journal_type)])
+            if not open_invoice:
+                open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
+                                                               ('partner_id', '=', rec.partner_id.id),
+                                                               ('journal_id.type', '=', journal_type),
+                                                               ('pay_to', '=', False)])
+
 
             inv_ids = [inv.id for inv in open_invoice]
 
-            rows = self.env['account.move.line'].search([('invoice_id','in',inv_ids),
-                                                         ('account_id.reconcile','=',True),
-                                                         ('reconciled','=',False)
-                                                         ])
 
+            if inv_ids == []:
+                rec.move_type = "auto"
+
+            rows = self.env['account.move.line'].search([('invoice_id', 'in', inv_ids),
+                                                         ('account_id.reconcile', '=', True),
+                                                         ('reconciled', '=', False)
+                                                         ])
 
             lines_on_payment = [line.move_line_id.id for line in rec.payment_invoice_ids]
 
             for row in rows:
                 if not row.id in lines_on_payment:
                     to_reconciled_move_lines.append(rec.payment_invoice_ids.create({'move_line_id': row.id}))
-
 
             move_ids = [move.id for move in to_reconciled_move_lines]
             to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
@@ -330,6 +341,14 @@ class AccountPayment(models.Model):
                 line.full_pay()
         self.calc_invoice_check()
 
+    @api.multi
+    def payment_request_print(self):
+        """ Print the invoice and mark it as sent, so that we can see more
+            easily the next step of the workflow
+        """
+        self.ensure_one()
+        self.sent = True
+        return self.env['report'].get_action(self, 'advanced_payment.payment_request_report_doc')
 
 
 class PaymentInvoiceLine(models.Model):
@@ -348,14 +367,15 @@ class PaymentInvoiceLine(models.Model):
     company_currency_id = fields.Many2one('res.currency', related='payment_id.currency_id', readonly=True,
                                           help='Utility field to express amount currency', store=True)
 
-    move_line_id = fields.Many2one("account.move.line", "Facturas")
+    move_line_id = fields.Many2one("account.move.line", "Facturas", readonly=True)
     move_date = fields.Date("Date", related="move_line_id.date")
     date_maturity = fields.Date("Due date", related="move_line_id.date_maturity")
     net = fields.Float("Amount", compute=_calc_amount)
     balance_cash_basis = fields.Float("Paid", compute=_calc_amount)
     balance = fields.Float("Balance", compute=_calc_amount)
     amount = fields.Float("To pay", default=0.0)
-
+    state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
+                              ('reconciled', 'Reconciled')], related="payment_id.state")
 
     @api.onchange('amount')
     def onchange_amount(self):
@@ -390,3 +410,19 @@ class PaymentMoveLine(models.Model):
 
     debit = fields.Monetary(string="Debit", default=0.0, currency_field='company_currency_id', digits=(16, 2))
     credit = fields.Monetary(string="Credit", default=0.0, currency_field='company_currency_id', digits=(16, 2))
+
+
+class PaymentRquestReport(models.AbstractModel):
+    _name = 'report.advanced_payment.payment_request_report_doc'
+
+    @api.multi
+    def render_html(self, data=None):
+        report_obj = self.env['report']
+        report = report_obj._get_report_from_name('advanced_payment.payment_request_report_doc')
+        payments = self.env["account.payment"].browse(self._ids)
+        docargs = {
+            'doc_ids': self._ids,
+            'doc_model': report.model,
+            'docs': payments,
+        }
+        return report_obj.render('advanced_payment.payment_request_report_doc', docargs)

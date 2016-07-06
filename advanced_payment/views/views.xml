@@ -7,6 +7,18 @@
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
+
+                <button name="post" position="replace">
+                    <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar" type="object"/>
+                    <button name="payment_request_print" class="oe_highlight" states="request" string="Imprimir Solicitud" type="object"/>
+                    <button name="post" class="oe_highlight" states="request" string="Confirm" type="object"/>
+                </button>
+
+
+                <field name="state" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="request,posted,reconciled"/>
+                </field>
+
                 <sheet>
 
                     <group attrs="{'invisible': [('payment_type','=','transfer')]}">
@@ -14,7 +26,7 @@
                             <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
                         </group>
                         <group>
-                            <table class="table">
+                            <table class="table" states="draft">
                                 <tr>
                                     <th class="tg-yw4l">
                                         <button name="update_invoice" type="object" string="Actulizar facturas pendientes"
@@ -37,10 +49,14 @@
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
-                            'readonly': [('state','!=','draft')]}" create="false">
-                        <tree delete="false" create="false" editable="bottom" limit="1000">
-                            <button name="full_pay" type="object" string="Pagar" icon="kanban-apply"/>
-                            <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"/>
+                            'readonly': [('state','!=','draft')]}" create="false" >
+                        <tree decoration-success="(balance == amount)"
+                              decoration-danger="(amount == 0)"
+                              decoration-warning="(amount &lt; balance)"
+                              editable="bottom" limit="1000">
+                            <field name="state" invisible="1"/>
+                            <button name="full_pay" type="object" string="Pagar" icon="kanban-apply" attrs="{'invisible': [('state','!=','draft')]}"/>
+                            <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop" attrs="{'invisible': [('state','!=','draft')]}"/>
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
