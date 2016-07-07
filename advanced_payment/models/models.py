@@ -99,6 +99,7 @@ class AccountPayment(models.Model):
                          'name': line.name or counterpart_aml_dict["name"],
                          'partner_id': line.partner_id.id if line.partner_id else counterpart_aml_dict["partner_id"],
                          'product_id': line.product_id.id,
+                         'analytic_account_id': line.analytic_account_id.id,
                          'payment_id': counterpart_aml_dict["payment_id"]}
             aml_obj.create(line_dict)
 
