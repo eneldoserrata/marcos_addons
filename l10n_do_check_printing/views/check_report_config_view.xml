@@ -15,6 +15,7 @@
 
                         <group string="Cabecera">
                             <field name="check_header_top"/>
+                            <field name="check_header_left"/>
                             <field name="check_header"/>
                         </group>
 
@@ -32,6 +33,7 @@
 
                         <group string="Detalle">
                             <field name="check_footer_top"/>
+                            <field name="check_footer_left"/>
                             <field name="check_footer"/>
                         </group>
                     </sheet>

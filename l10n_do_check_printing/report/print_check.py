@@ -52,15 +52,16 @@ class PrintCheck(models.AbstractModel):
             year, month, day = payment.payment_date.split("-")
             payment.report_date = "{} {} {} {} {} {} {} {}".format(day[0],day[1],month[0],month[1],year[0],year[1],
                                                                    year[2], year[3])
+            payment.report_amount = '{:20,.2f}'.format(payment.amount).strip()
+            payment.report_communication = payment.communication.rstrip('\r|\n')
+
             payments.append(payment)
 
 
-
-
         docargs = {
-            "doc_ids": self._ids,
-            "doc_model": report.model,
-            "docs": payments
+            u"doc_ids": self._ids,
+            u"doc_model": report.model,
+            u"docs": payments
         }
         return report_obj.render('l10n_do_check_printing.check_print_report', docargs)
 
