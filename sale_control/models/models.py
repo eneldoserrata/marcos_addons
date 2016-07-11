@@ -39,7 +39,7 @@ class pos_config(models.Model):
     _inherit = "res.users"
 
     allow_payments = fields.Boolean(u"Permitir cobrar", default=True)
-    allow_delete_order = fields.Boolean(u"Allow remove non-empty order", default=True)
+    allow_delete_order = fields.Boolean(u"Permitir eliminar fin que no esté vacía", default=True)
     allow_discount = fields.Float(u"Maximo descuento permitido en (%)", default=0)
     allow_edit_price = fields.Boolean(u"Permitir cambiar el precio", default=True)
     allow_delete_order = fields.Boolean(u"Permitir eliminar orde no vacías en el POS", default=True)
@@ -48,6 +48,7 @@ class pos_config(models.Model):
     allow_cancel = fields.Boolean(u"Pueden cancelar ordenes nuevas")
     allow_cash_refund = fields.Boolean(u"Permitir devolver dinero de la caja", default=False)
     allow_credit = fields.Boolean(u"Permitir facturar a credito", default=False)
+    allow_line_rename = fields.Boolean(u"Permitir cambiar descripcion del producto", default=False)
 
 
 class AccountInvoiceLine(models.Model):

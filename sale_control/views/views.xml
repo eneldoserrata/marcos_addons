@@ -21,6 +21,7 @@
                             <field name="allow_cancel"/>
                             <field name="allow_cash_refund"/>
                             <field name="allow_credit"/>
+                            <field name="allow_line_rename"/>
                         </group>
                     </page>
                 </xpath>
