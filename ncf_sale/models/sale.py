@@ -33,7 +33,9 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, fields, api, exceptions
+from openerp import models, fields, api, exceptions, _
+
+import time
 
 
 class SaleOrder(models.Model):
@@ -48,10 +50,12 @@ class SaleOrder(models.Model):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return self.env["account.journal"].browse(shop_user_config["sale_journal_ids"][0])
 
+    @api.multi
     def _default_user_wh(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         if not shop_user_config.get("warehouse_ids", False):
-            raise exceptions.UserError(u"Su usuario ningun almacen asignado para continuar comuníquese con su administrador.")
+            return False
+            # raise exceptions.UserError(u"Su usuario ningun almacen asignado para continuar comuníquese con su administrador.")
         return self.env["stock.warehouse"].browse(shop_user_config["warehouse_ids"][0])
 
 
@@ -70,7 +74,7 @@ class SaleOrder(models.Model):
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal", default=_default_user_shop)
     journal_id = fields.Many2one("account.journal", string="Tipo de factura", domain=[('type', '=', 'sale')], default=_default_user_journal)
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse',
-                                   required=True, readonly=True,
+                                   required=False, readonly=True,
                                    states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, default=_default_user_wh)
 
     @api.onchange("fiscal_position_id")
@@ -107,3 +111,6 @@ class SaleOrder(models.Model):
             for order in orders:
                 order.invoice_ids.write({"journal_id": order.journal_id.id})
         return res
+
+
+

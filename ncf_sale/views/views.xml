@@ -2,7 +2,6 @@
 <openerp>
     <data>
 
-
         <record id="ncf_sale_view_order_form_inherit_sale_stock" model="ir.ui.view">
             <field name="name">ncf_sale_view_order_form_inherit_sale_stock</field>
             <field name="model">sale.order</field>
@@ -36,7 +35,7 @@
                 </field>
 
                 <field name="amount_untaxed" position="after">
-                    <field name="total_discount"/>
+                    <field name="total_discount" groups="sale.group_discount_per_so_line"/>
                 </field>
 
             </field>
