@@ -52,7 +52,7 @@
                             'readonly': [('state','!=','draft')]}" mode="tree" options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
-                              decoration-warning="balance &gt; amount" limit="1000" create="false" edit="true" editable="top" delete="false">
+                              decoration-warning="balance &gt; amount" limit="1000" create="false" editable="true" delete="true">
                             <field name="state" invisible="1"/>
                             <button name="full_pay" type="object" string="Pagar" icon="kanban-apply" attrs="{'invisible': [('state','!=','draft')]}"/>
                             <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop" attrs="{'invisible': [('state','!=','draft')]}"/>
