@@ -148,6 +148,7 @@
                                     <table class="table table-condensed" >
                                       <tr>
                                         <th class="tg-yw4l">Diario</th>
+                                        <th class="tg-yw4l">Analitica</th>
                                         <th class="tg-yw4l">Número</th>
                                         <th class="tg-yw4l">Fecha</th>
                                         <th class="tg-yw4l">Relacionado</th>
@@ -155,6 +156,7 @@
                                       </tr>
                                       <tr>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.journal_id"/> </td>
+                                        <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.fiscal_position_id"/> </td>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.number"/> </td>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.date_invoice"/> </td>
                                         <td class="tg-yw4l"><span t-field="invoice.move_line_id.invoice_id.partner_id"/> </td>
