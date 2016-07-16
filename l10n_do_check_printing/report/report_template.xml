@@ -69,8 +69,6 @@
                         <span class="check_footer" t-if="o.journal_id.check_layout.check_footer">
                             <t t-call="{{o.journal_id.check_layout.check_footer.id}}"/>
                         </span>
-
-
                     </div>
                 </t>
             </t>
