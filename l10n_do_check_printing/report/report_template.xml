@@ -56,10 +56,10 @@
                         </span>
 
                         <span class="check_body">
-                            <t t-if="o.check_name.name">
-                                <span class="check_name" t-field="o.partner_id.name"/>
+                            <t t-if="o.check_name">
+                                <span class="check_name" t-field="o.check_name.name"/>
                             </t>
-                            <t t-if="not o.check_name.name">
+                            <t t-if="not o.check_name">
                                 <span class="check_name" t-field="o.partner_id.name"/>
                             </t>
                             <span class="check_date" style="word-spacing: 7px;" t-esc="o.report_date"/>
