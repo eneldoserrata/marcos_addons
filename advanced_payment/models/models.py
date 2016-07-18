@@ -247,10 +247,15 @@ class AccountPayment(models.Model):
     @api.onchange("payment_invoice_ids")
     def onchange_payment_invoice_ids(self):
         self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
-        full_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if
-                        rec.amount == rec.balance]
-        partinal_payment = [rec.move_line_id.invoice_id.number[-4:] for rec in self.payment_invoice_ids if
-                            rec.amount < rec.balance and rec.amount > 0]
+
+        full_payment = []
+        partinal_payment = []
+        for rec in self.payment_invoice_ids:
+            if rec.amount == rec.balance:
+                full_payment.append(rec.move_line_id.invoice_id.number[-4:])
+            elif rec.amount < rec.balance and rec.amount > 0:
+                partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
+
         communication = ""
         if full_payment:
             communication += "PAGO FAC: {} ".format(",".join(full_payment))
@@ -271,15 +276,15 @@ class AccountPayment(models.Model):
     @api.onchange("move_type")
     def onchange_move_type(self):
         if self.move_type == "manual":
-            [rec.unlink() for rec in self.payment_invoice_ids]
-            # self.set_default_account_move()
-        elif self.move_type == "invoice":
+            # [rec.unlink() for rec in self.payment_invoice_ids]
+            self.set_default_account_move()
+        # elif self.move_type == "invoice":
             # if not release.version == "9.0e":
             #     self.update_invoice()
-            [rec.unlink() for rec in self.payment_move_ids]
-        else:
-            [rec.unlink() for rec in self.payment_invoice_ids]
-            [rec.unlink() for rec in self.payment_move_ids]
+            # [rec.unlink() for rec in self.payment_move_ids]
+        # else:
+            # [rec.unlink() for rec in self.payment_invoice_ids]
+            # [rec.unlink() for rec in self.payment_move_ids]
 
     @api.multi
     def update_invoice(self):
@@ -358,11 +363,11 @@ class PaymentInvoiceLine(models.Model):
     _name = "payment.invoice.line"
 
     @api.one
-    def _calc_amount(self):
-        for rec in self:
-            rec.net = rec.move_line_id.balance * -1 if rec.move_line_id.balance < 0 else rec.move_line_id.balance
-            rec.balance_cash_basis = rec.move_line_id.balance_cash_basis * -1 if rec.move_line_id.balance_cash_basis < 0 else rec.move_line_id.balance_cash_basis
-            rec.balance = rec.net - rec.balance_cash_basis
+    @api.depends("move_line_id")
+    def _render_amount_sing(self):
+        self.net = abs(self.move_line_id.amount_residual)
+        self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis)
+        self.balance = abs(self.move_line_id.balance)
 
     payment_id = fields.Many2one("account.payment")
     currency_id = fields.Many2one('res.currency', string='Currency', related="payment_id.currency_id",
@@ -373,10 +378,10 @@ class PaymentInvoiceLine(models.Model):
     move_line_id = fields.Many2one("account.move.line", "Facturas", readonly=True)
     move_date = fields.Date("Date", related="move_line_id.date", readonly=True)
     date_maturity = fields.Date("Due date", related="move_line_id.date_maturity", readonly=True)
-    net = fields.Float("Amount", compute=_calc_amount)
-    balance_cash_basis = fields.Float("Paid", compute=_calc_amount)
-    balance = fields.Float("Balance", compute=_calc_amount, digits=(16,2))
-    amount = fields.Float("To pay", default=0.0, digits=(16,2))
+    net = fields.Monetary("Amount", compute="_render_amount_sing")
+    balance_cash_basis = fields.Monetary("Balance", compute="_render_amount_sing")
+    balance = fields.Monetary("Balance", compute="_render_amount_sing")
+    amount = fields.Monetary("To pay", default=0.0)
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state")
 

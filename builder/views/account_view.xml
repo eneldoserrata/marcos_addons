@@ -30,5 +30,19 @@
             </field>
         </record>
 
+        <!-- Inherit Form View to Modify it -->
+        <record id="builder_view_move_form" model="ir.ui.view">
+            <field name="name">builder_view_move_form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <field name="account_id" position="before">
+                    <field name="product_id"/>
+                </field>
+
+            </field>
+        </record>
+
     </data>
 </openerp>
