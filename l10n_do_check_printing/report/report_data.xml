@@ -18,5 +18,8 @@
             <field name="paperformat_id" ref="l10n_do_check_printing.paper_format_check"/>
         </record>
 
+
+
+
     </data>
 </openerp>

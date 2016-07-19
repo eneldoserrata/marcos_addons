@@ -35,18 +35,38 @@
 
 from openerp import models, fields, api, exceptions, _, release
 
+
 class AccountPayment(models.Model):
     _inherit = "account.payment"
 
+    @api.one
+    def _calc_payment_amount(self):
+        if self.move_type == "invoice":
+            self.invoice_payment_amount = sum([rec.amount for rec in self.payment_invoice_ids])
+            if self.rate_currency_id:
+                self.amount = self.payment_amount = self.amount_currency*self.rate
+                self.currency_diff = self.invoice_payment_amount-self.payment_amount
+
+
+
+    @api.onchange("amount_currency","rate")
+    def onchange_change(self):
+        self._calc_payment_amount()
+
     move_type = fields.Selection([('auto', 'Automatic'), ('manual', 'Manual'), ('invoice', 'Pay bills')],
-                                 string=u"Method of accounting entries",
+                                 string=u"Método de asientos contables",
                                  default="auto", required=True, copy=False)
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], readonly=True, default='draft', copy=False,
                              string="Status")
     payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
     payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
-
+    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id')
+    rate = fields.Monetary("Tasa", digits=(16, 4), currency_field='rate_currency_id')
+    rate_currency_id = fields.Many2one("res.currency", string="Compra de divisa", default=False)
+    payment_amount = fields.Monetary("Pago calculado", compute="_calc_payment_amount")
+    currency_diff = fields.Monetary("Diferencia cambiaria", compute="_calc_payment_amount")
+    invoice_payment_amount = fields.Monetary(compute="_calc_payment_amount")
 
     def _create_payment_entry_manual(self, amount):
         manual_debit = round(sum([line.debit for line in self.payment_move_ids]), 2)
@@ -116,6 +136,10 @@ class AccountPayment(models.Model):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
         """
+        [inv.unlink() for inv in self.payment_invoice_ids if inv.amount == 0]
+        self.invoice_ids = self.env["account.invoice"].browse(
+            [m_line.move_line_id.invoice_id.id for m_line in self.payment_invoice_ids])
+
 
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
         invoice_currency = False
@@ -128,28 +152,75 @@ class AccountPayment(models.Model):
 
         move = self.env['account.move'].create(self._get_move_vals())
 
-        [inv.unlink() for inv in self.payment_invoice_ids if inv.amount == 0]
-        self.invoice_ids = self.env["account.invoice"].browse(
-            [m_line.move_line_id.invoice_id.id for m_line in self.payment_invoice_ids])
         for inv in self.payment_invoice_ids:
+
             # Write line corresponding to invoice payment
             inv_credit = inv.amount if credit > 0 else 0
             inv_debit = inv.amount if debit > 0 else 0
+            credit += inv_credit
             counterpart_aml_dict = self._get_shared_move_line_vals(inv_debit, inv_credit, amount_currency, move.id,
                                                                    False)
             counterpart_aml_dict.update(self._get_counterpart_move_line_vals(inv.move_line_id.invoice_id))
             counterpart_aml_dict.update({'currency_id': currency_id})
+
+            if inv.currency_id:
+                counterpart_aml_dict.update({"currency_id": inv.currency_id.id,
+                                             "amount_currency": counterpart_aml_dict["debit"]/self.rate})
+
             counterpart_aml = aml_obj.create(counterpart_aml_dict)
             inv.move_line_id.invoice_id.register_payment(counterpart_aml)
 
         # Write counterpart lines
-        if not self.currency_id != self.company_id.currency_id:
+        if not self.rate_currency_id != self.company_id.currency_id:
             amount_currency = 0
+
+
         liquidity_aml_dict = self._get_shared_move_line_vals(credit, debit, -amount_currency, move.id, False)
         liquidity_aml_dict.update(self._get_liquidity_move_line_vals(-amount))
+
+        currency_id = False
+        if self.amount_currency > 0:
+            liquidity_aml_dict.update({"currency_id": self.rate_currency_id.id, "amount_currency": -self.amount_currency})
         aml_obj.create(liquidity_aml_dict)
+
+        if self.currency_diff:
+            writeoff_line = self._get_shared_move_line_vals(0, 0, 0, move.id, False)
+            debit_wo, credit_wo, amount_currency_wo, currency_id = aml_obj.with_context(date=self.payment_date).compute_amount_fields(self.payment_difference, self.currency_id, self.company_id.currency_id, invoice_currency)
+
+            if self.currency_diff < 0:
+                self.writeoff_account_id = self.company_id.currency_exchange_journal_id.default_debit_account_id
+                amount_currency = abs(round(self.currency_diff/self.rate, 2))
+                debit_wo = abs(self.currency_diff)
+                credit_wo = 0
+            else:
+                self.writeoff_account_id = self.company_id.currency_exchange_journal_id.default_credit_account_id
+                amount_currency = abs(round(self.currency_diff/self.rate, 2))*-1
+                credit_wo = abs(self.currency_diff)
+                debit_wo = 0
+
+            writeoff_line['name'] = _('Diferencia cambiaria')
+            writeoff_line['account_id'] = self.writeoff_account_id.id
+            writeoff_line['debit'] = debit_wo
+            writeoff_line['credit'] = credit_wo
+            writeoff_line['amount_currency'] = amount_currency
+            writeoff_line['currency_id'] = currency_id
+            writeoff_line['payment_id'] = self.id
+            aml_obj.create(writeoff_line)
+
         move.post()
         return move
+
+    temp = {'account_id': 245,
+            'amount_currency': -980.4200000000001,
+            'credit': 45000.0,
+            'currency_id': False,
+            'debit': 0.0,
+            'invoice_id': False,
+            'journal_id': 8,
+            'move_id': 78389,
+            'name': u'SUPP.OUT/2016/0603',
+            'partner_id': 3463,
+            'payment_id': 13779}
 
     def set_payment_name(self):
         if self.state not in ('draft', 'request'):
@@ -206,8 +277,24 @@ class AccountPayment(models.Model):
             elif rec.move_type == "manual":
                 rec.state = 'request'
             elif rec.move_type == "invoice":
-                rec.calc_invoice_check()
+                rec.onchange_payment_invoice_ids(no_communication=True)
                 [inv_line.unlink() for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
+
+                if not rec.payment_invoice_ids:
+                    raise exceptions.ValidationError("Debe espesificar los montos a pagar por facturas.")
+
+                currency_ids = set()
+
+                for inv in rec.payment_invoice_ids:
+                    currency_ids.add(inv.currency_id.id)
+
+                if len(currency_ids) > 1:
+                    raise exceptions.ValidationError("No puede pagar facturas en diferentes monedas.")
+
+                if currency_ids.pop() != False and not self.rate_currency_id:
+                    raise exceptions.ValidationError("Para pagar una factura registrada en otra moneda debe indicar el tipo de divisa su importe y tasa.")
+
+
                 rec.state = 'request'
             rec.set_payment_name()
 
@@ -245,23 +332,28 @@ class AccountPayment(models.Model):
         return super(AccountPayment, self)._onchange_partner_type()
 
     @api.onchange("payment_invoice_ids")
-    def onchange_payment_invoice_ids(self):
-        self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
+    def onchange_payment_invoice_ids(self, no_communication=False):
+        if self.rate_currency_id:
+            if self.payment_amount <> self.invoice_payment_amount:
+                self.amount = self.payment_amount
+        else:
+            self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
 
-        full_payment = []
-        partinal_payment = []
-        for rec in self.payment_invoice_ids:
-            if rec.amount == rec.balance:
-                full_payment.append(rec.move_line_id.invoice_id.number[-4:])
-            elif rec.amount < rec.balance and rec.amount > 0:
-                partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
+        if no_communication == False:
+            full_payment = []
+            partinal_payment = []
+            for rec in self.payment_invoice_ids:
+                if rec.amount == rec.balance:
+                    full_payment.append(rec.move_line_id.invoice_id.number[-4:])
+                elif rec.amount < rec.balance and rec.amount > 0:
+                    partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
 
-        communication = ""
-        if full_payment:
-            communication += "PAGO FAC: {} ".format(",".join(full_payment))
-        if partinal_payment:
-            communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
-        self.communication = communication
+            communication = ""
+            if full_payment:
+                communication += "PAGO FAC: {} ".format(",".join(full_payment))
+            if partinal_payment:
+                communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
+            self.communication = communication
 
     @api.one
     @api.constrains('amount')
@@ -365,23 +457,31 @@ class PaymentInvoiceLine(models.Model):
     @api.one
     @api.depends("move_line_id")
     def _render_amount_sing(self):
-        self.net = abs(self.move_line_id.amount_residual)
+        self.net = abs(self.move_line_id.balance)
         self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis)
-        self.balance = abs(self.move_line_id.balance)
+        self.balance = abs(self.move_line_id.amount_residual)
+        self.amount_currency = abs(self.move_line_id.amount_currency)
 
     payment_id = fields.Many2one("account.payment")
-    currency_id = fields.Many2one('res.currency', string='Currency', related="payment_id.currency_id",
-                                  help="The optional other currency if it is a multi-currency entry.")
-    company_currency_id = fields.Many2one('res.currency', related='payment_id.currency_id', readonly=True,
-                                          help='Utility field to express amount currency', store=True)
 
     move_line_id = fields.Many2one("account.move.line", "Facturas", readonly=True)
+
+    currency_id = fields.Many2one( string='Currency', related="move_line_id.currency_id",
+                                  help="The optional other currency if it is a multi-currency entry.")
+    company_currency_id = fields.Many2one(related='move_line_id.company_currency_id', readonly=True,
+                                          help='Utility field to express amount currency')
+
+
     move_date = fields.Date("Date", related="move_line_id.date", readonly=True)
     date_maturity = fields.Date("Due date", related="move_line_id.date_maturity", readonly=True)
-    net = fields.Monetary("Amount", compute="_render_amount_sing")
-    balance_cash_basis = fields.Monetary("Balance", compute="_render_amount_sing")
-    balance = fields.Monetary("Balance", compute="_render_amount_sing")
-    amount = fields.Monetary("To pay", default=0.0)
+
+    net = fields.Monetary("Amount", compute="_render_amount_sing", currency_field='company_currency_id')
+    balance_cash_basis = fields.Monetary("Balance", compute="_render_amount_sing", currency_field='company_currency_id')
+    balance = fields.Monetary("Balance", compute="_render_amount_sing", currency_field='company_currency_id')
+
+    amount_currency = fields.Monetary("Divisa", compute="_render_amount_sing", currency_field='currency_id')
+
+    amount = fields.Monetary("To pay", default=0.0, currency_field='company_currency_id')
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state")
 

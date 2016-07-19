@@ -9,8 +9,10 @@
             <field name="arch" type="xml">
 
                 <button name="post" position="replace">
-                    <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar" type="object"/>
-                    <button name="payment_request_print" class="oe_highlight" states="request" string="Imprimir Solicitud" type="object"/>
+                    <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar"
+                            type="object"/>
+                    <button name="payment_request_print" class="oe_highlight" states="request"
+                            string="Imprimir Solicitud" type="object"/>
                     <button name="post" class="oe_highlight" states="request" string="Confirm" type="object"/>
                 </button>
 
@@ -23,46 +25,64 @@
 
                     <group attrs="{'invisible': [('payment_type','=','transfer')]}">
                         <group>
-                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="rate_currency_id" attrs="{'invisible': [('move_type','|=', 'invoice')], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="amount_currency"
+                                   attrs="{'invisible': [('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="rate"
+                                   attrs="{'invisible': [('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="payment_amount" attrs="{'invisible': [('rate_currency_id','=', False)]}"/>
+                            <field name="currency_diff" attrs="{'invisible': [('rate_currency_id','=', False)]}"/>
                         </group>
-                        <group>
-                            <table class="table" states="draft">
+
+                        <group attrs="{'invisible': [('move_type','!=','invoice')]}">
+
+                            <table class="table" attrs="{'invisible': [('state','!=','draft')]}">
                                 <tr>
-                                    <th class="tg-yw4l">
-                                        <button name="update_invoice" type="object" string="Actulizar facturas pendientes"
-                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
-                                                class="btn btn-sm btn-primary"/>
-                                    </th>
-                                    <th class="tg-yw4l">
+                                    <td>
+                                        <button name="update_invoice" type="object"
+                                                string="Actulizar facturas pendientes"
+                                                class="btn btn-sm btn-primary btn-block"/>
+                                    </td>
+                                    <td>
                                         <button name="calc_invoice_check" type="object" string="Calcular pago"
-                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
-                                                class="btn btn-sm btn-primary"/>
-                                    </th>
-                                    <th class="tg-yw4l">
+                                                class="btn btn-sm btn-primary btn-block"/>
+                                    </td>
+                                    <td>
                                         <button name="pay_all" type="object" string="Pagar todas"
-                                                attrs="{'invisible': [('move_type','!=','invoice')]}"
-                                                class="btn btn-sm btn-primary"/>
-                                    </th>
+                                                class="btn btn-sm btn-primary btn-block"/>
+                                    </td>
                                 </tr>
                             </table>
+
+
                         </group>
+
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
-                            'readonly': [('state','!=','draft')]}" mode="tree" options="{'reload_whole_on_button': false}">
+                            'readonly': [('state','!=','draft')]}" mode="tree"
+                           options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
-                              decoration-warning="balance &gt; amount" limit="1000" create="false" editable="true" delete="true">
+                              decoration-warning="balance &gt; amount" limit="1000" create="false" editable="true"
+                              delete="true">
                             <field name="state" invisible="1"/>
-                            <button name="full_pay" type="object" string="Pagar" icon="kanban-apply" attrs="{'invisible': [('state','!=','draft')]}"/>
-                            <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop" attrs="{'invisible': [('state','!=','draft')]}"/>
+                            <button name="full_pay" type="object" string="Pagar" icon="kanban-apply"
+                                    attrs="{'invisible': [('state','!=','draft')]}"/>
+                            <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"
+                                    attrs="{'invisible': [('state','!=','draft')]}"/>
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
-                            <field name="net" readonly="1"/>
-                            <field name="balance_cash_basis" readonly="1"/>
-                            <field name="balance" readonly="1"/>
-                            <field name="amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="amount_currency" sum="amount_currency"/>
+                            <field name="net" readonly="1" sum="net"/>
+                            <field name="balance_cash_basis" readonly="1" sum="balance_cash_basis"/>
+                            <field name="balance" readonly="1" sum="balance"/>
+                            <field name="amount" sum="amount"/>
+
                         </tree>
                     </field>
 
@@ -70,7 +90,8 @@
                             'readonly': [('state','!=','draft')]}">
                         <tree editable="bottom" string="Journal Items">
                             <field name="partner_id" invisible="0"
-                                   domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]" groups="analytic.group_analytic_accounting"/>
+                                   domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
+                                   groups="analytic.group_analytic_accounting"/>
                             <field name="product_id" groups="analytic.group_analytic_accounting"/>
                             <field name="account_id" domain="[('deprecated', '=', False)]"/>
                             <field name="name"/>

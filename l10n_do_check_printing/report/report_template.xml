@@ -2,19 +2,48 @@
 <openerp>
     <data>
 
+        <template name="ck_footer_banco_popular" id="ck_footer_banco_popular">
+            <style type="text/css">
+                .tg {border-collapse:collapse;border-spacing:0;}
+                .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;overflow:hidden;word-break:normal;}
+                .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px
+                5px;overflow:hidden;word-break:normal;}
+                .tg .tg-rg0h{font-size:12px;text-align:center;vertical-align:top}
+                .tg .tg-dx8v{font-size:12px;vertical-align:top}
+            </style>
+            <table class="tg" style="undefined;table-layout: fixed; width: 915px">
+                <colgroup>
+                    <col style="width: 138px"/>
+                    <col style="width: 600px"/>
+                    <col style="width: 177px"/>
+                </colgroup>
+                <tr>
+                    <th class="tg-rg0h">
+                        <span t-field="o.payment_date"/>
+                    </th>
+                    <th class="tg-dx8v">
+                        <span t-field="o.communication"/>
+                    </th>
+                    <th class="tg-dx8v">
+                        <span t-field="o.amount"/>
+                    </th>
+                </tr>
+            </table>
+        </template>
+
         <template id="check_print_report">
             <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <div class="page">
                         <style>
                             body {
-                                font-size: <t t-esc="o.journal_id.check_layout.font_zise"/>px;
+                            font-size:<t t-esc="o.journal_id.check_layout.font_zise"/>px;
                             }
                             .check_header{
                             margin-top:<t t-esc="o.journal_id.check_layout.check_header_top"/>mm;
                             margin-top:<t t-esc="o.journal_id.check_layout.check_header_left"/>mm;
                             position: absolute;
-                            
+
                             }
                             .check_body{
                             margin-top:<t t-esc="o.journal_id.check_layout.body_top"/>mm;
