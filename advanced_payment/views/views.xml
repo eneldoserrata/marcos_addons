@@ -26,7 +26,7 @@
                     <group attrs="{'invisible': [('payment_type','=','transfer')]}">
                         <group>
                             <field name="move_type" attrs="{'readonly': [('state','!=','draft')], 'readonly': [('state','!=','draft')]}"/>
-                            <field name="rate_currency_id" attrs="{'invisible': [('move_type','|=', 'invoice')], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="rate_currency_id" attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': [('state','!=','draft')]}"/>
                             <field name="amount_currency"
                                    attrs="{'invisible': [('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
                             <field name="rate"
