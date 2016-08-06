@@ -11,7 +11,7 @@ class RateUpdateWizard(models.TransientModel):
     _name = "update.rate.wizard"
 
     update_method = fields.Selection([('server','Desde internet'),('manual','Introducir tasa manualmente')],
-                                   string=u"Metodo de actualizaciónn de tasa", default="server")
+                                   string=u"Metodo de actualizaciónn de tasa", default="manual")
     name = fields.Date("Fecha", required=True)
     rate = fields.Float("Monto", requiered=True)
     currency_id = fields.Many2one("res.currency", string="Moneda", readonly=True)
