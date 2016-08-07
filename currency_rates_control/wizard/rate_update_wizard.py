@@ -10,11 +10,15 @@ _logger = logging.getLogger(__name__)
 class RateUpdateWizard(models.TransientModel):
     _name = "update.rate.wizard"
 
+    def _get_currency_domain(self):
+        return [('id','!=',self.env.user.company_id.currency_id.id)]
+
     update_method = fields.Selection([('server','Desde internet'),('manual','Introducir tasa manualmente')],
                                    string=u"Metodo de actualizaciónn de tasa", default="manual")
     name = fields.Date("Fecha", required=True)
-    rate = fields.Float("Monto", requiered=True)
-    currency_id = fields.Many2one("res.currency", string="Moneda", readonly=True)
+    rate = fields.Float("Monto", required=True)
+    currency_id = fields.Many2one("res.currency", string="Moneda", required=True, domain=_get_currency_domain)
+
 
     @api.multi
     def update_rate(self):
