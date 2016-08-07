@@ -240,11 +240,11 @@ class Currency_rate_update_service(models.Model):
         rate_obj = self.env['res.currency.rate']
 
         # import pdb;pdb.set_trace()
-        company_conf = self.env['account.config.settings'].search([('company_id', '=', self.env.user.company_id.id)])[0]
+        company_conf = self.env['account.config.settings'].search([('company_id', '=', self.env.user.company_id.id)])
         # The multi company currency can be set or no so we handle
         # The two case
         if company_conf.group_multi_currency:
-            main_currency = company_conf.currency_id
+            main_currency = self.env.user.company_id.currency_id
             if not main_currency:
                 raise exceptions.Warning('No hay una divisa base!')
             if main_currency.rate != 1:
@@ -268,8 +268,9 @@ class Currency_rate_update_service(models.Model):
                     if curr.id == main_currency.id:
                         continue
                     do_create = True
+
                     for rate in curr.rate_ids:
-                        if rate.name == rate_name:
+                        if rate.name == rate_name.split(" ")[0]:
                             rate.rate = res[curr.name]
                             do_create = False
                             break
