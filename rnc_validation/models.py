@@ -54,12 +54,6 @@ class ResPartner(models.Model):
             else:
                 partners = self.search([('vat','ilike',name)])
 
-            # if not partners:
-            #     if self._context.get("search_default_customer", False):
-            #         partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('customer','=',True)])
-            #     elif self._context.get("search_default_supplier", False):
-            #         partners = self.search(['|','&',('phone','ilike',name),('mobile','ilike',name),('supplier','=',True)])
-
             if partners:
                 res = partners.name_get()
         return res

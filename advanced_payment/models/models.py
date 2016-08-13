@@ -60,7 +60,7 @@ class AccountPayment(models.Model):
     payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
     payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
     amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id')
-    rate = fields.Monetary("Tasa", digits=(16, 4), currency_field='rate_currency_id')
+    rate = fields.Monetary("Tasa", digits=(16, 4), currency_field='currency_id')
     rate_currency_id = fields.Many2one("res.currency", string="Compra de divisa", default=False)
     payment_amount = fields.Monetary("Pago calculado", compute="_calc_payment_amount")
     currency_diff = fields.Monetary("Diferencia cambiaria", compute="_calc_payment_amount")
@@ -160,13 +160,16 @@ class AccountPayment(models.Model):
             counterpart_aml_dict.update(self._get_counterpart_move_line_vals(inv.move_line_id.invoice_id))
             counterpart_aml_dict.update({'currency_id': currency_id})
 
-            if inv.currency_id:
-                counterpart_aml_dict.update({"currency_id": inv.currency_id.id,
-                                             "amount_currency": counterpart_aml_dict["debit"] / self.rate})
+            if currency_id:
+                if inv_credit > 0:
+                    counterpart_aml_dict.update({"amount_currency": abs(counterpart_aml_dict["credit"])*-1 / self.rate})
+                else:
+                    counterpart_aml_dict.update({"amount_currency": abs(counterpart_aml_dict["debit"]) / self.rate})
 
             counterpart_aml = aml_obj.create(counterpart_aml_dict)
 
             inv.move_line_id.invoice_id.register_payment(counterpart_aml)
+
 
         # Write counterpart lines
         if not self.rate_currency_id != self.company_id.currency_id:
@@ -186,7 +189,7 @@ class AccountPayment(models.Model):
                 date=self.payment_date).compute_amount_fields(self.payment_difference, self.currency_id,
                                                               self.company_id.currency_id, invoice_currency)
 
-            if self.currency_diff < 0:
+            if self.currency_diff > 0:
                 self.writeoff_account_id = self.company_id.currency_exchange_journal_id.default_debit_account_id
                 amount_currency = abs(round(self.currency_diff / self.rate, 2))
                 debit_wo = abs(self.currency_diff)
@@ -204,12 +207,14 @@ class AccountPayment(models.Model):
             writeoff_line['amount_currency'] = amount_currency
             writeoff_line['currency_id'] = currency_id
             writeoff_line['payment_id'] = self.id
+
             aml_obj.create(writeoff_line)
 
         move.post()
         return move
 
     def set_payment_name(self):
+
         if self.state not in ('draft', 'request'):
             raise exceptions.UserError(
                 _("Only a draft payment can be posted. Trying to post a payment in state %s.") % self.state)
@@ -241,14 +246,14 @@ class AccountPayment(models.Model):
 
             if rec.move_type == "auto":
                 # Create the journal entry
-                super(AccountPayment, self).post()
-                # move = rec._create_payment_entry(amount)
-                # if rec.payment_type == 'transfer':
-                #     transfer_credit_aml = move.line_ids.filtered(
-                #         lambda r: r.account_id == rec.company_id.transfer_account_id)
-                #     transfer_debit_aml = rec._create_transfer_entry(amount)
-                #     (transfer_credit_aml + transfer_debit_aml).reconcile()
-                # rec.state = 'posted'
+                amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
+                move = rec._create_payment_entry(amount)
+                if rec.payment_type == 'transfer':
+                    transfer_credit_aml = move.line_ids.filtered(
+                        lambda r: r.account_id == rec.company_id.transfer_account_id)
+                    transfer_debit_aml = rec._create_transfer_entry(amount)
+                    (transfer_credit_aml + transfer_debit_aml).reconcile()
+                rec.state = 'posted'
             elif rec.move_type == "manual":
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
                 rec._create_payment_entry_manual(amount)
