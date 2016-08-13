@@ -72,6 +72,7 @@
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
                             <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
+                            <field name="account_id"/>
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>

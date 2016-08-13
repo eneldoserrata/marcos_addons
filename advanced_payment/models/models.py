@@ -455,6 +455,8 @@ class PaymentInvoiceLine(models.Model):
 
     move_line_id = fields.Many2one("account.move.line", "Facturas", readonly=True)
 
+    account_id = fields.Many2one(string="Cuenta", related="move_line_id.account_id")
+
     currency_id = fields.Many2one(string='Currency', related="move_line_id.currency_id",
                                   help="The optional other currency if it is a multi-currency entry.")
     company_currency_id = fields.Many2one(related='move_line_id.company_currency_id', readonly=True,
