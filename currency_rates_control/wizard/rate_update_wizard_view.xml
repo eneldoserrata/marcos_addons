@@ -11,9 +11,9 @@
                         <field name="update_method" widget="radio"/>
                     </group>
                     <group attrs="{'invisible': [('update_method','=','server')]}">
-                        <field name="currency_id"/>
-                        <field name="name"/>
-                        <field name="rate"/>
+                        <field name="currency_id" attrs="{'required': [('update_method','=','manual')]}"/>
+                        <field name="name" attrs="{'required': [('update_method','=','manual')]}"/>
+                        <field name="rate" attrs="{'required': [('update_method','=','manual')]}"/>
                     </group>
                     <footer>
                         <button name="update_rate" type="object" string="Actualizar" class="oe_highlight"/>

@@ -243,68 +243,66 @@ class Currency_rate_update_service(models.Model):
         company_conf = self.env['account.config.settings'].search([('company_id', '=', self.env.user.company_id.id)])
         # The multi company currency can be set or no so we handle
         # The two case
-        if company_conf.group_multi_currency:
-            main_currency = self.env.user.company_id.currency_id
-            if not main_currency:
-                raise exceptions.Warning('No hay una divisa base!')
-            if main_currency.rate != 1:
-                raise exceptions.Warning('La tasa de la moneda base debe ser 1.00!')
-            note = self.note or ''
-            try:
-                # We initalize the class that will handle the request
-                # and return a dict of rate
-                getter = factory.register(self.service)
-                curr_to_fetch = map(lambda x: x.name,
-                                    self.currency_to_update)
-                res, log_info = getter.get_updated_currency(
-                    curr_to_fetch,
-                    main_currency.name,
-                    self.max_delta_days
-                )
-                rate_name = \
-                    fields.Datetime.to_string(datetime.utcnow().replace(
-                        hour=0, minute=0, second=0, microsecond=0))
-                for curr in self.currency_to_update:
-                    if curr.id == main_currency.id:
-                        continue
-                    do_create = True
+        # if company_conf.group_multi_currency:
+        main_currency = self.env.user.company_id.currency_id
+        if not main_currency:
+            raise exceptions.Warning('No hay una divisa base!')
+        if main_currency.rate != 1:
+            raise exceptions.Warning('La tasa de la moneda base debe ser 1.00!')
+        note = self.note or ''
+        try:
+            # We initalize the class that will handle the request
+            # and return a dict of rate
+            getter = factory.register(self.service)
+            curr_to_fetch = map(lambda x: x.name,
+                                self.currency_to_update)
+            res, log_info = getter.get_updated_currency(
+                curr_to_fetch,
+                main_currency.name,
+                self.max_delta_days
+            )
+            rate_name = fields.Datetime.to_string(datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0))
+            for curr in self.currency_to_update:
+                if curr.id == main_currency.id:
+                    continue
+                do_create = True
 
-                    for rate in curr.rate_ids:
-                        if rate.name == rate_name.split(" ")[0]:
-                            rate.rate = res[curr.name]
-                            do_create = False
-                            break
-                    if do_create:
-                        vals = {
-                            'currency_id': curr.id,
-                            'rate': res[curr.name],
-                            'name': rate_name
-                        }
-                        rate_obj.create(vals)
+                for rate in curr.rate_ids:
+                    if rate.name == rate_name.split(" ")[0]:
+                        rate.rate = res[curr.name]
+                        do_create = False
+                        break
+                if do_create:
+                    vals = {
+                        'currency_id': curr.id,
+                        'rate': res[curr.name],
+                        'name': rate_name
+                    }
+                    rate_obj.create(vals)
 
-                # Show the most recent note at the top
-                msg = '%s \n%s currency updated. %s' % (
-                    log_info or '',
-                    fields.Datetime.to_string(datetime.today()),
-                    note
-                )
-                self.write({'note': msg})
-            except Exception as exc:
-                error_msg = '\n%s ERROR : %s %s' % (
-                    fields.Datetime.to_string(datetime.today()),
-                    repr(exc),
-                    note
-                )
-                _logger.info(repr(exc))
-                self.write({'note': error_msg})
-            if self._context.get('cron', False):
-                midnight = time(0, 0)
-                next_run = (datetime.combine(
-                    fields.Date.from_string(self.next_run),
-                    midnight) +
-                            _intervalTypes[str(self.interval_type)]
-                            (self.interval_number)).date()
-                self.sudo().write({"next_run": next_run.strftime(DATE_FORMAT)})
+            # Show the most recent note at the top
+            msg = '%s \n%s currency updated. %s' % (
+                log_info or '',
+                fields.Datetime.to_string(datetime.today()),
+                note
+            )
+            self.write({'note': msg})
+        except Exception as exc:
+            error_msg = '\n%s ERROR : %s %s' % (
+                fields.Datetime.to_string(datetime.today()),
+                repr(exc),
+                note
+            )
+            _logger.info(repr(exc))
+            self.write({'note': error_msg})
+        if self._context.get('cron', False):
+            midnight = time(0, 0)
+            next_run = (datetime.combine(
+                fields.Date.from_string(self.next_run),
+                midnight) +
+                        _intervalTypes[str(self.interval_type)]
+                        (self.interval_number)).date()
+            self.sudo().write({"next_run": next_run.strftime(DATE_FORMAT)})
 
     @api.multi
     def run_currency_update(self):

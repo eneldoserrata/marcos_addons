@@ -13,11 +13,11 @@ class RateUpdateWizard(models.TransientModel):
     def _get_currency_domain(self):
         return [('id','!=',self.env.user.company_id.currency_id.id)]
 
-    update_method = fields.Selection([('server','Desde internet'),('manual','Introducir tasa manualmente')],
+    update_method = fields.Selection([('server',u'Desde internet actulizar la tasa de hoy.'),('manual','Introducir tasa manualmente')],
                                    string=u"Metodo de actualizaciónn de tasa", default="manual")
-    name = fields.Date("Fecha", required=True)
-    rate = fields.Float("Monto", required=True)
-    currency_id = fields.Many2one("res.currency", string="Moneda", required=True, domain=_get_currency_domain)
+    name = fields.Date("Fecha", required=False)
+    rate = fields.Float("Monto", required=False)
+    currency_id = fields.Many2one("res.currency", string="Moneda", required=False, domain=_get_currency_domain)
 
 
     @api.multi
@@ -32,7 +32,7 @@ class RateUpdateWizard(models.TransientModel):
                 return self.env["res.currency.rate"].create({"name": self.name, "rate": 1/self.rate, "currency_id": self.currency_id.id})
         else:
             try:
-                self.env["currency.rate.update.service"]._run_currency_update()
+                self.env.user.company_id.button_refresh_currency()
             except Exception as e:
                 _logger.error("{}".format(e))
                 raise exceptions.ValidationError("Ocurrio un error al intentar actualizar la tasa desde el servidor de internet.")

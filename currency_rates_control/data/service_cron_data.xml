@@ -7,8 +7,8 @@
             <field name="interval_type">days</field><!-- it s every day -->
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
-            <field name="model" eval="'currency.rate.update.service'"/>
-            <field name="function" eval="'_run_currency_update'"/>
+            <field name="model" eval="'res.company'"/>
+            <field name="function" eval="'button_refresh_currency'"/>
             <field name="args">(None,)</field>
         </record>
 
