@@ -220,7 +220,7 @@ class AccountPayment(models.Model):
                 _("Only a draft payment can be posted. Trying to post a payment in state %s.") % self.state)
 
         if any(inv.state != 'open' for inv in self.invoice_ids):
-            raise Exception.ValidationError(_("The payment cannot be processed because the invoice is not open!"))
+            raise exceptions.ValidationError(_("The payment cannot be processed because the invoice is not open!"))
 
         if not self.name or self.name == "Draft Payment":
             if self.payment_type == 'transfer':
