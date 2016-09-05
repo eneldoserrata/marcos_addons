@@ -36,6 +36,9 @@
 from openerp import models, fields, api, exceptions, _, release
 
 
+import textwrap
+
+
 class AccountPayment(models.Model):
     _inherit = "account.payment"
 
@@ -347,6 +350,9 @@ class AccountPayment(models.Model):
                 communication += "PAGO FAC: {} ".format(",".join(full_payment))
             if partinal_payment:
                 communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
+
+            communication = textwrap.fill(communication, 20)
+
             self.communication = communication
 
     @api.one
