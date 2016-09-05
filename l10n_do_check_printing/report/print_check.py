@@ -53,7 +53,7 @@ class PrintCheck(models.AbstractModel):
             payment.report_date = "{} {} {} {} {} {} {} {}".format(day[0],day[1],month[0],month[1],year[0],year[1],
                                                                    year[2], year[3])
             payment.report_amount = '{:20,.2f}'.format(payment.amount).strip()
-            payment.report_communication = payment.communication.rstrip('\r|\n')
+            payment.report_communication = payment.communication.rstrip('\r|\n') if payment.communication else ""
 
             payments.append(payment)
 
