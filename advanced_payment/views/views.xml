@@ -23,59 +23,47 @@
                     <field name="state" widget="statusbar" statusbar_visible="request,posted,reconciled"/>
                 </field>
 
+
                 <sheet>
 
-                    <group attrs="{'invisible': [('payment_type','=','transfer')]}" col="3">
-                        <group>
-                            <field name="move_type"
-                                   attrs="{'readonly': [('state','!=','draft')], 'readonly': [('state','!=','draft')]}"/>
-                            <field name="is_base_currency" invisible="1"/>
-                            <field name="rate_currency_id"
-                                   attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': ['|',('state','!=','draft'),('is_base_currency','=',False)]}"/>
-                            <field name="amount_currency"
-                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('is_base_currency','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
-                            <field name="amount_currency_readonly"
-                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('is_base_currency','=', True)]}"/>
-                            <field name="rate"
-                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
-                        </group>
-                        <group>
+                    <field name="is_base_currency" invisible="1"/>
+                    <group attrs="{'invisible': [('payment_type','in',('transfer'))]}" col="4">
+                        <group col="4" colspan="3">
+
+                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
                             <field name="payment_amount"
                                    attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
-
+                            <field name="rate_currency_id" options="{'no_create': True, 'no_open': True}"
+                                   attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': ['|',('state','!=','draft'),('is_base_currency','=',False)]}"/>
                             <field name="currency_diff"
                                    attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
+                            <field name="amount_currency"
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice')], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft'),('is_base_currency','=', False)]}"/>
                             <field name="currency_diff_type"
                                    attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
+                            <field name="rate"
+                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+
+
+
+
                         </group>
+                        <group attrs="{'invisible': [('move_type','!=','invoice')]}" col="1">
 
-                        <group attrs="{'invisible': [('move_type','!=','invoice')]}">
+                            <button name="update_invoice" type="object"
+                                    string="Actulizar facturas"
+                                    class="btn btn-sm btn-primary btn-block" icon="fa-refresh"/>
+                            <button name="amount_total" type="object" string="Calcular pago"
+                                    class="btn btn-sm btn-primary btn-block" icon="fa-calculator"/>
 
-                            <table class="table" attrs="{'invisible': [('state','!=','draft')]}">
-                                <tr>
-                                    <td>
-                                        <button name="update_invoice" type="object"
-                                                string="Actulizar facturas pendientes"
-                                                class="btn btn-sm btn-primary btn-block"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button name="amount_total" type="object" string="Calcular pago"
-                                                class="btn btn-sm btn-primary btn-block"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button name="pay_all" type="object" string="Pagar todas"
-                                                class="btn btn-sm btn-primary btn-block"/>
-                                    </td>
-                                </tr>
-                            </table>
+                            <button name="pay_all" type="object" string="Pagar todas"
+                                    class="btn btn-sm btn-primary btn-block" icon="fa-check-circle"/>
+
+                            <button name="pay_all" type="object" string="Borrar pagos"
+                                    class="btn btn-sm btn-primary btn-block" icon="fa-minus-circle"/>
+
                         </group>
-
                     </group>
-
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
                             'readonly': [('state','!=','draft')]}" mode="tree" readonly="0"
                            options="{'reload_whole_on_button': false}">
@@ -124,20 +112,6 @@
             </field>
         </record>
 
-
-        <!-- Inherit Form View to Modify it -->
-        <!--<record id="advanced_payment_view_account_payment_form" model="ir.ui.view">-->
-            <!--<field name="name">advanced_payment_view_account_payment_form</field>-->
-            <!--<field name="model">account.payment</field>-->
-            <!--<field name="inherit_id" ref="account_check_printing.view_account_payment_form"/>-->
-            <!--<field name="arch" type="xml">-->
-<!---->
-                <!--<xpath expr="//field[@name='name']" position="">-->
-
-                <!--</xpath>-->
-<!---->
-            <!--</field>-->
-        <!--</record>-->
 
     </data>
 </openerp>
