@@ -101,8 +101,6 @@ class AccountPayment(models.Model):
         self.is_base_currency = self.currency_id.id == self.company_id.currency_id.id
         if not self.is_base_currency:
             self.rate_currency_id = self.company_id.currency_id.id
-        else:
-            self.rate_currency_id = False
 
     move_type = fields.Selection([('auto', 'Automatic'), ('manual', 'Manual'), ('invoice', 'Pay bills')],
                                  string=u"Method of accounting entries",
@@ -191,6 +189,7 @@ class AccountPayment(models.Model):
 
         return move
 
+    @api.model
     def _create_payment_entry_invoice(self, amount):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
@@ -417,9 +416,7 @@ class AccountPayment(models.Model):
 
     @api.multi
     def post(self):
-
         for rec in self:
-
             if rec.move_type == "auto":
                 # Create the journal entry
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and 1 or -1)
