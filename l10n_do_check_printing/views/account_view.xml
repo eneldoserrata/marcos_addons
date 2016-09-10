@@ -38,10 +38,12 @@
             <field name="inherit_id" ref="account_check_printing.view_account_payment_form_inherited"/>
             <field name="arch" type="xml">
 
+                <field name="check_amount_in_words" position="replace"/>
                 <field name="check_number" position="replace">
                     <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],
                                                         'readonly': [('check_manual_sequencing','!=',False)]}"/>
                     <field name="check_name" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')]}"/>
+                    <field name="check_amount_in_words" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')], 'readonly': [('state', '!=', 'draft')]}" groups="base.group_no_one"/>
                 </field>
 
             </field>

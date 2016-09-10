@@ -8,11 +8,13 @@
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
 
+                <field name="check_amount_in_words" position="replace"/>
+
                 <button name="post" position="replace">
                     <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar"
                             type="object"/>
                     <button name="payment_request_print" class="oe_highlight" states="request"
-                            string="Imprimir Solicitud" type="object"/>
+                            string="Imprimir Solicitud" type="object" context="{'rate_currency_id': rate_currency_id}"/>
                     <button name="post" class="oe_highlight" states="request" string="Confirm" type="object"/>
                 </button>
 
@@ -23,16 +25,28 @@
 
                 <sheet>
 
-                    <group attrs="{'invisible': [('payment_type','=','transfer')]}">
+                    <group attrs="{'invisible': [('payment_type','=','transfer')]}" col="3">
                         <group>
-                            <field name="move_type" attrs="{'readonly': [('state','!=','draft')], 'readonly': [('state','!=','draft')]}"/>
-                            <field name="rate_currency_id" attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="move_type"
+                                   attrs="{'readonly': [('state','!=','draft')], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="is_base_currency" invisible="1"/>
+                            <field name="rate_currency_id"
+                                   attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': ['|',('state','!=','draft'),('is_base_currency','=',False)]}"/>
                             <field name="amount_currency"
-                                   attrs="{'invisible': [('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('is_base_currency','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+                            <field name="amount_currency_readonly"
+                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('is_base_currency','=', True)]}"/>
                             <field name="rate"
-                                   attrs="{'invisible': [('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
-                            <field name="payment_amount" attrs="{'invisible': [('rate_currency_id','=', False)]}"/>
-                            <field name="currency_diff" attrs="{'invisible': [('rate_currency_id','=', False)]}"/>
+                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="payment_amount"
+                                   attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
+
+                            <field name="currency_diff"
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
+                            <field name="currency_diff_type"
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                         </group>
 
                         <group attrs="{'invisible': [('move_type','!=','invoice')]}">
@@ -44,24 +58,26 @@
                                                 string="Actulizar facturas pendientes"
                                                 class="btn btn-sm btn-primary btn-block"/>
                                     </td>
+                                </tr>
+                                <tr>
                                     <td>
-                                        <button name="calc_invoice_check" type="object" string="Calcular pago"
+                                        <button name="amount_total" type="object" string="Calcular pago"
                                                 class="btn btn-sm btn-primary btn-block"/>
                                     </td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <button name="pay_all" type="object" string="Pagar todas"
                                                 class="btn btn-sm btn-primary btn-block"/>
                                     </td>
                                 </tr>
                             </table>
-
-
                         </group>
 
                     </group>
 
                     <field name="payment_invoice_ids" attrs="{'invisible': [('move_type','!=','invoice')],
-                            'readonly': [('state','!=','draft')]}" mode="tree"
+                            'readonly': [('state','!=','draft')]}" mode="tree" readonly="0"
                            options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
@@ -72,13 +88,14 @@
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
                             <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
-                            <field name="account_id"/>
+                            <field name="account_id" readonly="1"/>
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="company_currency_id" invisible="1"/>
                             <field name="amount_currency" sum="amount_currency"/>
+                            <field name="invoice_rate"/>
                             <field name="net" readonly="1" sum="net"/>
                             <field name="balance_cash_basis" readonly="1" sum="balance_cash_basis"/>
                             <field name="balance" readonly="1" sum="balance"/>
@@ -106,6 +123,21 @@
                 </sheet>
             </field>
         </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <!--<record id="advanced_payment_view_account_payment_form" model="ir.ui.view">-->
+            <!--<field name="name">advanced_payment_view_account_payment_form</field>-->
+            <!--<field name="model">account.payment</field>-->
+            <!--<field name="inherit_id" ref="account_check_printing.view_account_payment_form"/>-->
+            <!--<field name="arch" type="xml">-->
+<!---->
+                <!--<xpath expr="//field[@name='name']" position="">-->
+
+                <!--</xpath>-->
+<!---->
+            <!--</field>-->
+        <!--</record>-->
 
     </data>
 </openerp>

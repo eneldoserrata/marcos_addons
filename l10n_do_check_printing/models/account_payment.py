@@ -48,7 +48,7 @@ class account_register_payments(models.TransientModel):
 class account_payment(models.Model):
     _inherit = "account.payment"
 
-    check_name = fields.Many2one("res.partner", string="Nombre en ck")
+    check_name = fields.Many2one("res.partner", string="A nombre de")
 
     @api.one
     @api.onchange("check_number")

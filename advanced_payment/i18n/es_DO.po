@@ -182,7 +182,7 @@ msgstr "Mayor de facturas pagadas"
 #. module: advanced_payment
 #: model:ir.model.fields,field_description:advanced_payment.field_account_payment_move_type
 msgid "Method of accounting entries"
-msgstr "Method of accounting entries"
+msgstr "Contabilidad"
 
 #. module: advanced_payment
 #: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
