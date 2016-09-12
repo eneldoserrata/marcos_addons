@@ -67,7 +67,7 @@
         'demo/demo.xml',
     ],
     'images': ['static/description/main.png'],
-    "price": 49,
+    "price": 500,
     'currency': 'EUR',
     'license': "Other proprietary"
 }
