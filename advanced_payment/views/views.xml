@@ -23,7 +23,6 @@
                     <field name="state" widget="statusbar" statusbar_visible="request,posted,reconciled"/>
                 </field>
 
-
                 <sheet>
 
                     <field name="is_base_currency" invisible="1"/>
@@ -31,35 +30,32 @@
                         <group col="4" colspan="3">
 
                             <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <newline/>
+
+                            <field name="rate_currency_id" attrs="{'invisible': [('id','=', False)]}"/>
                             <field name="payment_amount"
                                    attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
-                            <field name="rate_currency_id" options="{'no_create': True, 'no_open': True}"
-                                   attrs="{'invisible': [('move_type','!=', 'invoice')], 'readonly': ['|',('state','!=','draft'),('is_base_currency','=',False)]}"/>
-                            <field name="currency_diff"
-                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                             <field name="amount_currency"
-                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice')], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft'),('is_base_currency','=', False)]}"/>
-                            <field name="currency_diff_type"
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice')]}"/>
+                            <field name="currency_diff"
                                    attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                             <field name="rate"
                                    attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
-
-
-
-
+                            <field name="currency_diff_type"
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                         </group>
                         <group attrs="{'invisible': [('move_type','!=','invoice')]}" col="1">
 
-                            <button name="update_invoice" type="object"
+                            <button name="update_invoice" type="object" states="draft,"
                                     string="Actulizar facturas"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-refresh"/>
-                            <button name="amount_total" type="object" string="Calcular pago"
+                            <button name="amount_total" type="object" string="Calcular pago" states="draft,"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-calculator"/>
 
-                            <button name="pay_all" type="object" string="Pagar todas"
+                            <button name="pay_all" type="object" string="Pagar todo" states="draft,"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-check-circle"/>
 
-                            <button name="pay_all" type="object" string="Borrar pagos"
+                            <button name="unpay_all" type="object" string="limpiar pagos" states="draft,"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-minus-circle"/>
 
                         </group>
@@ -76,7 +72,7 @@
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
                             <button name="unfull_pay" type="object" string="No Pagar" icon="kanban-stop"
                                     attrs="{'invisible': [('state','!=','draft')]}"/>
-                            <field name="account_id" readonly="1"/>
+                            <!--<field name="account_id" readonly="1"/>-->
                             <field name="move_line_id"/>
                             <field name="move_date" readonly="1"/>
                             <field name="date_maturity" readonly="1"/>

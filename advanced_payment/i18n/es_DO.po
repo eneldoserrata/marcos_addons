@@ -40,12 +40,12 @@ msgstr "Cuenta analítica"
 #. module: advanced_payment
 #: selection:account.payment,move_type:0
 msgid "Automatic"
-msgstr "Automatic"
+msgstr "Automatica"
 
 #. module: advanced_payment
 #: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_balance
 msgid "Balance"
-msgstr "Saldo pendiente"
+msgstr "Balance"
 
 #. module: advanced_payment
 #: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
@@ -182,7 +182,7 @@ msgstr "Mayor de facturas pagadas"
 #. module: advanced_payment
 #: model:ir.model.fields,field_description:advanced_payment.field_account_payment_move_type
 msgid "Method of accounting entries"
-msgstr "Contabilidad"
+msgstr "Contabilización"
 
 #. module: advanced_payment
 #: model:ir.ui.view,arch_db:advanced_payment.report_invoice_move
@@ -214,7 +214,7 @@ msgstr "Empresa"
 #. module: advanced_payment
 #: selection:account.payment,move_type:0
 msgid "Pay bills"
-msgstr "Pagar las facturas"
+msgstr "Pago de factura(s)"
 
 #. module: advanced_payment
 #: model:ir.model.fields,field_description:advanced_payment.field_payment_invoice_line_payment_id
