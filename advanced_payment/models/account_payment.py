@@ -100,7 +100,7 @@ class AccountPayment(models.Model):
                     self.payment_amount = self.invoice_payment_amount_currency
 
     @api.multi
-    def amount_total(self):
+    def amount_total(self, update_communication=True):
         if self.is_base_currency:
             if self.currency_diff > 0:
                 self.amount = self.invoice_payment_amount - abs(self.currency_diff)
@@ -115,26 +115,26 @@ class AccountPayment(models.Model):
             elif self.currency_diff < 0:
                 self.amount = self.payment_amount + (sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
 
+        if update_communication:
+            full_payment = []
+            partinal_payment = []
+            for rec in self.payment_invoice_ids:
+                if rec.move_line_id:
+                    if rec.amount == rec.balance:
+                        full_payment.append(rec.move_line_id.invoice_id.number[-4:])
+                    elif rec.amount < rec.balance and rec.amount > 0:
+                        partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
 
-        full_payment = []
-        partinal_payment = []
-        for rec in self.payment_invoice_ids:
-            if rec.move_line_id:
-                if rec.amount == rec.balance:
-                    full_payment.append(rec.move_line_id.invoice_id.number[-4:])
-                elif rec.amount < rec.balance and rec.amount > 0:
-                    partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
+            communication = ""
 
-        communication = ""
+            if full_payment:
+                communication += "PAGO FAC: {} ".format(",".join(full_payment))
+            if partinal_payment:
+                communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
 
-        if full_payment:
-            communication += "PAGO FAC: {} ".format(",".join(full_payment))
-        if partinal_payment:
-            communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
+            communication = textwrap.fill(communication, 60)
 
-        communication = textwrap.fill(communication, 60)
-
-        self.communication = communication
+            self.communication = communication
 
     @api.depends("currency_id")
     def _check_is_base_currency(self):
@@ -450,8 +450,6 @@ class AccountPayment(models.Model):
                 rec.state = 'request'
             elif rec.move_type == "manual":
 
-
-
                 payment_account = rec.journal_id.default_debit_account_id.id
 
                 if self.payment_type == "inbound":
@@ -469,7 +467,7 @@ class AccountPayment(models.Model):
 
                 rec.state = 'request'
             elif rec.move_type == "invoice":
-                rec.onchange_payment_invoice_ids()
+                rec.amount_total(update_communication=False)
                 [inv_line.unlink() for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
 
                 if not rec.payment_invoice_ids:
@@ -479,9 +477,6 @@ class AccountPayment(models.Model):
 
                 for inv in rec.payment_invoice_ids:
                     currency_ids.add(inv.currency_id.id)
-
-                # if len(currency_ids) > 1:
-                #     raise exceptions.ValidationError("No puede pagar facturas en diferentes monedas.")
 
                 if len(currency_ids) > 1 and not self.rate_currency_id:
                     raise exceptions.ValidationError(
