@@ -165,8 +165,6 @@ class AccountPayment(models.Model):
 
     is_base_currency = fields.Boolean(compute="_check_is_base_currency")
 
-
-
     def _create_payment_entry_manual(self, amount):
         manual_debit = round(sum([line.debit for line in self.payment_move_ids]), 2)
         manual_credit = round(sum([line.credit for line in self.payment_move_ids]), 2)
@@ -229,6 +227,7 @@ class AccountPayment(models.Model):
             amount_currency = 0
         liquidity_aml_dict = self._get_shared_move_line_vals(credit, debit, -amount_currency, move.id, False)
         liquidity_aml_dict.update(self._get_liquidity_move_line_vals(-amount))
+
         aml_obj.create(liquidity_aml_dict)
 
         return move
@@ -457,7 +456,7 @@ class AccountPayment(models.Model):
                 else:
                     payment_account_amount = sum([cre.credit for cre in rec.payment_move_ids if cre.account_id.id == payment_account])
 
-                if payment_account_amount != rec.amount:
+                if round(payment_account_amount,2) != round(rec.amount,2):
                     raise exceptions.ValidationError("El monto del pago no coincide con la suma de los apuntes de la cuenta del pago.")
 
                 debits = sum([deb.debit for deb in rec.payment_move_ids])
