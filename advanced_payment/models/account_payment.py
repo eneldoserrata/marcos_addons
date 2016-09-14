@@ -42,6 +42,7 @@ class AccountPayment(models.Model):
     _inherit = "account.payment"
 
     @api.depends("rate")
+    @api.one
     def _calc_payment_amount(self):
         if self.move_type == "invoice":
 
