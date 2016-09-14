@@ -137,6 +137,7 @@ class AccountPayment(models.Model):
             self.communication = communication
 
     @api.depends("currency_id")
+    @api.one
     def _check_is_base_currency(self):
         self.is_base_currency = self.currency_id.id == self.company_id.currency_id.id
 
