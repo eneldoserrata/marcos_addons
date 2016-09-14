@@ -463,7 +463,8 @@ class AccountPayment(models.Model):
 
                 debits = sum([deb.debit for deb in rec.payment_move_ids])
                 credits = sum([cre.credit for cre in rec.payment_move_ids])
-                if debits-credits !=0:
+
+                if round(debits,2)-round(credits,2) !=0:
                     raise exceptions.ValidationError("El asiento manual no esta cuadrado.")
 
                 rec.state = 'request'
