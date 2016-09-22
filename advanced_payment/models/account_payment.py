@@ -459,7 +459,7 @@ class AccountPayment(models.Model):
                     payment_account_amount = sum([cre.credit for cre in rec.payment_move_ids if cre.account_id.id == payment_account])
 
                 if round(payment_account_amount,2) != round(rec.amount,2):
-                    raise exceptions.ValidationError("El monto del pago no coincide con la suma de los apuntes de la cuenta del pago.")
+                    raise exceptions.ValidationError("El monto del pago no coincide con la suma de los apuntes.")
 
                 debits = sum([deb.debit for deb in rec.payment_move_ids])
                 credits = sum([cre.credit for cre in rec.payment_move_ids])
