@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
-#  (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+#  (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -60,7 +60,7 @@ class AccountInvoice(models.Model):
 
     def _default_user_journal(self):
         if (self._context.get("type", False)
-            in ("out_invoice", "out_refound") or
+            in ("out_invoice", "out_refund") or
                 self._context.get("active_model", False) == "sale.order"):
             shop_user_config = (self.env["shop.ncf.config"].
                                 get_user_shop_config())
@@ -70,7 +70,7 @@ class AccountInvoice(models.Model):
                                                  corectamente.")
             else:
                 return shop_user_config["sale_journal_ids"][0]
-        elif self._context.get("type", False) in ("in_invoice", "in_refound"):
+        elif self._context.get("type", False) in ("in_invoice", "in_refund"):
             res = False
             journal = self.env["account.journal"].search([('type', '=',
                                                            'purchase'),
