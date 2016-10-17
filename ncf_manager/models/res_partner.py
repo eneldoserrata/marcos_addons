@@ -65,5 +65,4 @@ class ResPartner(models.Model):
          the Customer.",
         oldname="property_account_position",
         domain=[('supplier', '=', False)]))
-
     balance = fields.Float(compute=_get_balance, string=_('Balance'))
