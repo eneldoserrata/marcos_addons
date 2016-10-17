@@ -46,37 +46,35 @@ import re
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    payment_tax_on_606 = fields.Boolean
-    ("Reportar retenciones del 606 en la fecha del pago")
+    payment_tax_on_606 = fields.Boolean(
+        "Reportar retenciones del 606 en la fecha del pago")
 
 
 class DgiiPurchaseReport(models.Model):
     _name = "dgii.purchase.report"
 
-    company_id = fields.Many2one('res.company', string='Company',
-                                 required=True,
-                                 default=lambda self:
-                                 self.env['res.company']._company_default_get
-                                 ('dgii.purchase.report'))
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, default=lambda self:
+        self.env['res.company']._company_default_get('dgii.purchase.report'))
     name = fields.Char()
-    year = fields.Integer(u"Año", size=4,
-                          default=lambda s:
-                          int(time.strftime("%Y")))
-    month = fields.Integer("Mes", size=2,
-                           default=lambda s:
-                           int(time.strftime("%m")))
+    year = fields.Integer(
+        u"Año", size=4, default=lambda s: int(time.strftime("%Y")))
+    month = fields.Integer(
+        "Mes", size=2, default=lambda s: int(time.strftime("%m")))
     CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
-    ITBIS_RETENIDO = fields.Float("TOTAL ITBIS RETENIDO")
-    ITBIS_TOTAL = fields.Float("TOTAL ITBIS PAGADO")
-    TOTAL_MONTO_FACTURADO = fields.Float("TOTAL FACTURADO")
-    RETENCION_RENTA = fields.Float("TOTAL RETENCION RENTA")
+    ITBIS_RETENIDO = fields.Float("Total ITBIS Retenido")
+    ITBIS_TOTAL = fields.Float("Total ITBIS Pagado")
+    TOTAL_MONTO_FACTURADO = fields.Float("Total Facturad")
+    RETENCION_RENTA = fields.Float("Total Retención ISR")
     report_lines = fields.One2many("dgii.purchase.report.line",
                                    "purchase_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
     txt_filename = fields.Char("Nombre del archivo",
                                readonly=True)
-    state = fields.Selection([('draft', 'Nuevo'), ('done', 'Generado')],
-                             default="draft")
+    state = fields.Selection([
+        ('draft', 'Nuevo'),
+        ('done', 'Generado')
+        ], default="draft")
 
     @api.model
     def create(self, vals):
@@ -88,12 +86,12 @@ class DgiiPurchaseReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError("El mes es invalido!")
+            raise exceptions.ValidationError(u"El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
-        return ("{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
-                                  "01"),
-                "{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
-                                  str(last_day).zfill(2)))
+        return (
+            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
+            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), str(
+             last_day).zfill(2)))
 
     def create_report_lines(self, invoices, tax_account):
         if self._context.get("recreate", False):
@@ -152,24 +150,24 @@ class DgiiPurchaseReport(models.Model):
             TOTAL_MONTO_FACTURADO += inv.amount_untaxed*CURRENCY_RATE
 
             if not inv.partner_id.vat:
-                raise exceptions.UserError
-                (u"El número de RNC/Cédula del proveedor {} no es valido para\
-                 el NCF {}".format(inv.partner_id.name, inv.number))
+                raise exceptions.UserError(
+                    u"El número de RNC/Cédula del proveedor {} no es válido\
+                    para el NCF {}".format(inv.partner_id.name, inv.number))
 
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
-            TIPO_BIENES_SERVICIOS_COMPRADOS = (inv.fiscal_position_id.
-                                               supplier_fiscal_type)
+            TIPO_BIENES_SERVICIOS_COMPRADOS = (
+                inv.fiscal_position_id.supplier_fiscal_type)
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
-                raise exceptions.UserError
-                (u"Debe de definir el tipo de gasto para la posición fiscal\
-                  {}! en la factura {}".format(inv.fiscal_position_id.name,
-                                               inv.number))
+                raise exceptions.UserError(
+                    u"Debe de definir el tipo de gasto para la posición fiscal\
+                     {}! en la factura {}".format(inv.fiscal_position_id.name,
+                                                  inv.number))
 
             if not is_ncf(inv.number, inv.type):
-                raise exceptions.UserError
-                (u"El número de NCF {} no es valido!".format(inv.number))
+                raise exceptions.UserError(
+                    u"El número de NCF {} no es valido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
 
@@ -186,14 +184,14 @@ class DgiiPurchaseReport(models.Model):
                 FECHA_PAGO = False
 
             lines.append((0, False, {
-                          "LINE": LINE,
-                          "RNC_CEDULA": RNC_CEDULA,
-                          "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
+                          "LÍNEA": LINE,
+                          u"RNC_CEDÚLA": RNC_CEDULA,
+                          u"TIPO_IDENTIFICACIÓN": TIPO_IDENTIFICACION,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
                           TIPO_BIENES_SERVICIOS_COMPRADOS,
-                          "NUMERO_COMPROBANTE_FISCAL":
+                          u"NÚMERO_COMPROBANTE_FISCAL":
                           NUMERO_COMPROBANTE_FISCAL,
-                          "NUMERO_COMPROBANTE_MODIFICADO":
+                          u"NÚMERO_COMPROBANTE_MODIFICADO":
                           NUMERO_COMPROBANTE_MODIFICADO,
                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                           "FECHA_PAGO": FECHA_PAGO,
@@ -201,7 +199,7 @@ class DgiiPurchaseReport(models.Model):
                           "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
                           "MONTO_FACTURADO":
                           (inv.amount_untaxed + LINE_TAX_COST) * CURRENCY_RATE,
-                          "RETENCION_RENTA": LINE_RETENCION_RENTA
+                          u"RETENCIÓN_ISR": LINE_RETENCION_RENTA
                           }))
 
         self.write({
@@ -319,7 +317,7 @@ class DgiiPurchaseReportline(models.Model):
     _name = "dgii.purchase.report.line"
 
     purchase_report_id = fields.Many2one("dgii.purchase.report")
-    LINE = fields.Integer("Linea")
+    LINE = fields.Integer("Línea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)
     TIPO_IDENTIFICACION = fields.Char("Tipo ID", size=1)
     TIPO_BIENES_SERVICIOS_COMPRADOS = fields.Char("Tipo", size=2)
@@ -330,4 +328,4 @@ class DgiiPurchaseReportline(models.Model):
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     ITBIS_RETENIDO = fields.Float("ITBIS Retenido")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
-    RETENCION_RENTA = fields.Float(u"Retención Renta")
+    RETENCION_RENTA = fields.Float(u"Retención ISR")
