@@ -274,4 +274,3 @@ class AccountTax(models.Model):
     #         return incl_tax.compute_all(price)['total_excluded']
     #
     #     return price
-s
