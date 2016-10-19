@@ -99,12 +99,12 @@ class ShopJournalConfig(models.Model):
             elif position.name == u"Regímenes Especiales":
                 position.client_fiscal_type = "special"
 
-        final_prefix = u"A0100100102"
         fiscal_prefix = u"A0100100101"
-        gov_prefix = u"A0100100114"
-        esp_prefix = u"A0100100115"
-        unique_prefix = u"A0100100112"
+        final_prefix = u"A0100100102"
         nc_prefix = u"A0100100104"
+        unique_prefix = u"A0100100112"
+        esp_prefix = u"A0100100114"
+        gov_prefix = u"A0100100115"
 
         seq_values = {u'padding': 8,
                       u'code': False,
