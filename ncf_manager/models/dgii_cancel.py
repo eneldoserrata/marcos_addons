@@ -49,19 +49,25 @@ class DgiiCancelReport(models.Model):
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
 
-    company_id = fields.Many2one(
-        'res.company', string='Company', required=True, default=lambda self:
-        self.env['res.company']._company_default_get('dgii.cancel.report'))
+    company_id = fields.Many2one('res.company', string='Company',
+                                 required=True, default=lambda self:
+                                 self.env['res.company']._company_default_get(
+                                                        'dgii.cancel.report'))
     name = fields.Char(u"Descripción")
     year = fields.Integer(
-        u"Año", size=4,
-        default=lambda s: int(time.strftime("%Y")))
+        u"Año",
+        size=4,
+        default=lambda
+        s: int(time.strftime("%Y")))
     month = fields.Integer(
-        "Mes", size=2, default=lambda s: int(time.strftime("%m")))
+        "Mes",
+        size=2,
+        default=lambda
+        s: int(time.strftime("%m")))
 
     CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
-    report_lines = fields.One2many(
-        "dgii.cancel.report.line", "cancel_report_id")
+    report_lines = fields.One2many("dgii.cancel.report.line",
+                                   "cancel_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
     txt_name = fields.Char("Nombre", readonly=True)
     state = fields.Selection([
@@ -79,7 +85,7 @@ class DgiiCancelReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError("El mes es invalido!")
+            raise exceptions.ValidationError(u"El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
@@ -110,8 +116,8 @@ class DgiiCancelReport(models.Model):
         res = self.write(
                          {"report_lines": lines,
                           "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
-                          "state": "done"
-                          })
+                          "state": "done"}
+                          )
         return res
 
     def generate_txt(self):
@@ -120,8 +126,8 @@ class DgiiCancelReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(
-                "Debe de configurar el RNC de su empresa!")
+            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
+                                             " su empresa!")
 
         path = '/tmp/608{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -161,8 +167,8 @@ class DgiiCancelReport(models.Model):
              ('date_invoice', '>=', start_date),
              ('date_invoice', '<=', end_date),
              ('state', '=', 'cancel'),
-             ('type', 'in', ('out_invoice', 'out_refund'))
-             ]))
+             ('type', 'in', ('out_invoice', 'out_refund'))])
+            )
 
         self.create_report_lines(invoices)
         self.generate_txt()
@@ -173,7 +179,7 @@ class DgiiCancelReportline(models.Model):
     _name = "dgii.cancel.report.line"
 
     cancel_report_id = fields.Many2one("dgii.cancel.report")
-    LINE = fields.Integer("Linea")
+    LINE = fields.Integer(u"Línea")
     NUMERO_COMPROBANTE_FISCAL = fields.Char("NCF", size=19)
     FECHA_COMPROBANTE = fields.Date("Fecha")
     TIPO_ANULACION = fields.Char(u"Tipo de anulación", size=2)

@@ -46,20 +46,21 @@ import re
 class DgiiExteriorReport(models.Model):
     _name = "dgii.exterior.report"
 
-    company_id = fields.Many2one(
-        'res.company', string='Company', required=True, default=lambda self:
-        self.env['res.company']._company_default_get('dgii.exterior.report'))
+    company_id = fields.Many2one('res.company', string='Company',
+                                 required=True, default=lambda self:
+                                 self.env['res.company']._company_default_get(
+                                                    'dgii.exterior.report'))
     name = fields.Char("Nombre")
-    year = fields.Integer(
-        u"Año", size=4, default=lambda s: int(time.strftime("%Y")))
-    month = fields.Integer(
-        "Mes", size=2, default=lambda s: int(time.strftime("%m")))
+    year = fields.Integer(u"Año", size=4, default=lambda
+                          s: int(time.strftime("%Y")))
+    month = fields.Integer("Mes", size=2, default=lambda
+                           s: int(time.strftime("%m")))
 
     CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
     TOTAL_MONTO_FACTURADO = fields.Float("Total Facturado")
 
-    report_lines = fields.One2many(
-        "dgii.exterior.report.line", "exterior_report_id")
+    report_lines = fields.One2many("dgii.exterior.report.line",
+                                   "exterior_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
     txt_name = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
@@ -102,8 +103,8 @@ class DgiiExteriorReport(models.Model):
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.ValidationError(
-                    u"Debe de definir el tipo de gasto para la posición fiscal\
-                     {}".format(inv.fiscal_position_id.name))
+                    u"Debe de definir el tipo de gasto para la posición fiscal"
+                    "{}".format(inv.fiscal_position_id.name))
 
             FECHA_FACTURA = inv.date_invoice
             FECHA_RETENCION_ISR = False
@@ -121,16 +122,15 @@ class DgiiExteriorReport(models.Model):
                     MONTO_FACTURADO = MONTO_FACTURADO * -1
 
             MONTO_FACTURADO = MONTO_FACTURADO
-
             ISR_RETENCION = 0
 
             for tax in inv.tax_line_ids:
                 if tax.tax_id.purchase_tax_type == "itbis":
-                    raise exceptions.UserError(
-                        u"Impuesto inválido para el tipo de comprobante!")
+                    raise exceptions.UserError(u"¡Impuesto inválido para el"
+                                               " tipo de comprobante!")
                 elif tax.tax_id.purchase_tax_type == "ritbis":
-                    raise exceptions.UserError(
-                        u"Impuesto inválido para el tipo de comprobante!")
+                    raise exceptions.UserError(u"¡Impuesto inválido para el"
+                                               " tipo de comprobante!")
                 else:
                     account_ids = [t.account_id.id for t in tax]
                     move_lines = self.env["account.move.line"].search([
@@ -164,14 +164,12 @@ class DgiiExteriorReport(models.Model):
         return res
 
     def generate_txt(self):
-
         company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
-
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError
-            (u"¡Debe de configurar el RNC de su empresa!")
+            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
+                                             "su empresa!")
 
         path = '/tmp/609{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')

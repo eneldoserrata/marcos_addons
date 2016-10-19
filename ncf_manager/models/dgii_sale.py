@@ -51,40 +51,47 @@ class DgiiSaleReport(models.Model):
     @api.depends("ITBIS_TOTAL", "TOTAL_MONTO_FACTURADO")
     def _calc_total(self):
 
-        self.TOTAL_MONTO_FACTURAS = sum([
-            line.MONTO_FACTURADO for line in
-            self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()
-            ])
-        self.TOTAL_MONTO_NC = sum([
-            line.MONTO_FACTURADO for line in
-            self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()
-            ])
-        self.ITBIS_TOTAL_FACTURAS = sum([
-            line.ITBIS_FACTURADO for line in
-            self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()
-            ])
-        self.ITBIS_TOTAL_NC = sum([
-            line.ITBIS_FACTURADO for line in
-            self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()
-            ])
+        self.TOTAL_MONTO_FACTURAS = sum(
+            [line.MONTO_FACTURADO for line in
+                self.report_lines
+                if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
+                )
+        self.TOTAL_MONTO_NC = sum(
+            [line.MONTO_FACTURADO for line in
+                self.report_lines
+                if line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
+                )
+        self.ITBIS_TOTAL_FACTURAS = sum(
+            [line.ITBIS_FACTURADO for line in
+                self.report_lines
+                if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
+                )
+        self.ITBIS_TOTAL_NC = sum(
+            [line.ITBIS_FACTURADO for line in
+                self.report_lines
+                if line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
+                )
         self.TOTAL_VENTA = self.TOTAL_MONTO_FACTURAS-self.TOTAL_MONTO_NC
         self.TOTAL_VENTA_ITBIS = self.ITBIS_TOTAL_FACTURAS-self.ITBIS_TOTAL_NC
 
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
-    company_id = fields.Many2one(
-        'res.company', string='Company', required=True, default=lambda self:
-        self.env['res.company']._company_default_get('dgii.sale.report'))
+    company_id = fields.Many2one('res.company', string='Company',
+                                 required=True, default=lambda self:
+                                 self.env['res.company']._company_default_get(
+                                                        'dgii.sale.report'))
     name = fields.Char("Nombre")
-    year = fields.Integer(
-        u"Año", size=4, default=lambda s: int(time.strftime("%Y")))
-    month = fields.Integer(
-        u"Mes", size=2, default=lambda s: int(time.strftime("%m")))
+    year = fields.Integer(u"Año", size=4, default=lambda
+                          s: int(time.strftime("%Y")))
+    month = fields.Integer(u"Mes", size=2, default=lambda
+                           s: int(time.strftime("%m")))
+
     CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
     ITBIS_TOTAL = fields.Float(u"OFV ITBIS")
-    TOTAL_MONTO_FACTURADO = fields.Float(
-        u"OFV Facturado", help=u"Suma de las facturas y las notas de crédito\
-         como se digitan en el formulario de la DGII")
+    TOTAL_MONTO_FACTURADO = fields.Float(u"OFV Facturado",
+                                         help=u"Suma de las facturas y las"
+                                         u"notas de crédito como se digitan en"
+                                         "el formulario de la DGII")
 
     TOTAL_MONTO_FACTURAS = fields.Float(u"Facturado", compute=_calc_total)
     TOTAL_MONTO_NC = fields.Float(u"Notas Crédito", compute=_calc_total)
@@ -117,7 +124,8 @@ class DgiiSaleReport(models.Model):
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
-                              str(last_day).zfill(2)))
+                              str(last_day).zfill(2))
+            )
 
     def create_report_lines(self, invoices):
         if self._context.get("recreate", False):
@@ -135,17 +143,18 @@ class DgiiSaleReport(models.Model):
             else:
                 if not inv.partner_id.vat:
                     raise exceptions.UserError(
-                        u"El cliente para la factura {} no tiene RNC/Cédula."
-                        .format(inv.number))
+                        u"El cliente para la factura {} no tiene"
+                        u" RNC/Cédula.".format(inv.number))
+
                 RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
-                TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).
-                                                 strip()) == 9 else "2"
+                TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()
+                                                 ) == 9 else "2"
 
             if not is_ncf(inv.number, inv.type):
-                raise exceptions.ValidationError(u"El número de NCF o el RNC/\
-                                                 Cédula del clienten para el\
-                                                 comprobante {} no es valido!".
-                                                 format(inv.number))
+                raise exceptions.ValidationError(u"¡El número de NCF o el RNC/"
+                                                 u"Cédula del clienten para el"
+                                                 " comprobante {} no es"
+                                                 u"válido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             if inv.type == "out_invoice":
@@ -163,10 +172,10 @@ class DgiiSaleReport(models.Model):
             MONTO_FACTURADO = 0.00
             for line in inv.invoice_line_ids:
                 account_ids = [l.account_id.id for l in line]
-                move_lines = self.env["account.move.line"].search([
-                    ('move_id', '=', inv.move_id.id),
-                    ('account_id', 'in', account_ids)
-                    ])
+                move_lines = self.env["account.move.line"].search(
+                    [('move_id', '=', inv.move_id.id),
+                     ('account_id', 'in', account_ids)]
+                     )
                 MONTO_FACTURADO = abs(sum([l.credit for l in move_lines]) -
                                       sum([l.debit for l in move_lines]))
 
@@ -179,10 +188,10 @@ class DgiiSaleReport(models.Model):
 
             for tax in inv.tax_line_ids:
                 account_ids = [t.account_id.id for t in tax]
-                move_lines = self.env["account.move.line"].search([
-                    ('move_id', '=', inv.move_id.id),
-                    ('account_id', 'in', account_ids)
-                    ])
+                move_lines = self.env["account.move.line"].search(
+                    [('move_id', '=', inv.move_id.id),
+                     ('account_id', 'in', account_ids)]
+                     )
                 ITBIS_FACTURADO += (sum([l.debit for l in move_lines]) -
                                     sum([l.credit for l in move_lines]) * -1)
                 if inv.type == "out_refund":
@@ -199,34 +208,35 @@ class DgiiSaleReport(models.Model):
                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                           "FECHA_PAGO": FECHA_PAGO,
                           "ITBIS_FACTURADO": ITBIS_FACTURADO,
-                          "MONTO_FACTURADO": MONTO_FACTURADO
-                          }))
+                          "MONTO_FACTURADO": MONTO_FACTURADO})
+                         )
 
             line_number += 1
 
         CANTIDAD_REGISTRO = len(lines)
         ITBIS_TOTAL = sum([line[2]["ITBIS_FACTURADO"] for line in lines])
-        TOTAL_MONTO_FACTURADO = sum([line[2]["MONTO_FACTURADO"] for line in
-                                    lines])
+        TOTAL_MONTO_FACTURADO = sum([line[2]["MONTO_FACTURADO"] for
+                                    line in lines]
+                                    )
 
         res = self.write({
                          "report_lines": lines,
                          "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
                          "ITBIS_TOTAL": ITBIS_TOTAL,
                          "TOTAL_MONTO_FACTURADO": TOTAL_MONTO_FACTURADO,
-                         "state": "done"
-                         })
+                         "state": "done"}
+                         )
         return res
 
     def generate_txt(self):
 
-        company_fiscal_identificacion = re.sub(
-            "[^0-9]", "", self.company_id.vat)
+        company_fiscal_identificacion = re.sub("[^0-9]", "",
+                                               self.company_id.vat)
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(
-                u"¡Debe de configurar el RNC de su empresa!")
+            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
+                                             "su empresa!")
 
         path = '/tmp/607{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -267,10 +277,12 @@ class DgiiSaleReport(models.Model):
     @api.multi
     def create_report(self):
         start_date, end_date = self.get_date_range()
-        invoices = self.env["account.invoice"].search
-        ([('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date),
-         ('state', 'in', ('open', 'paid')),
-         ('type', 'in', ('out_invoice', 'out_refund'))])
+        invoices = self.env["account.invoice"].search(
+            [('date_invoice', '>=', start_date),
+             ('date_invoice', '<=', end_date),
+             ('state', 'in', ('open', 'paid')),
+             ('type', 'in', ('out_invoice', 'out_refund'))]
+             )
         self.create_report_lines(invoices)
         self.generate_txt()
         return True
@@ -278,7 +290,6 @@ class DgiiSaleReport(models.Model):
 
 class DgiiSaleReportline(models.Model):
     _name = "dgii.sale.report.line"
-
     sale_report_id = fields.Many2one("dgii.sale.report")
     LINE = fields.Integer(u"Línea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)

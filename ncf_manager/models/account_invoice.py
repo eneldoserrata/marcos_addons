@@ -66,8 +66,8 @@ class AccountInvoice(models.Model):
                 self.env["shop.ncf.config"].get_user_shop_config())
             if not shop_user_config:
                 raise exceptions.ValidationError(
-                        u"Los diarios de ventas no están configurados\
-                         corectamente.")
+                        u"Los diarios de ventas no están configurados"
+                        " corectamente.")
             else:
                 return shop_user_config["sale_journal_ids"][0]
         elif self._context.get("type", False) in ("in_invoice", "in_refund"):
@@ -139,8 +139,8 @@ class AccountInvoice(models.Model):
         if not self.date_invoice:
             self.date_invoice = fields.Date.today()
 
-        view_id = self.env.ref
-        ("ncf_manager.invoice_currency_change_wizard_form", True)
+        view_id = self.env.ref(
+            "ncf_manager.invoice_currency_change_wizard_form", True)
         return {
             'name': _('Cambiar moneda de la factura'),
             'view_type': 'form',
@@ -196,10 +196,10 @@ class AccountInvoice(models.Model):
         default=_default_user_shop)
     move_name = fields.Char(
         string='Journal Entry', default=False, copy=False,
-        help="Technical field holding the number given to the invoice,\
-         automatically set when the invoice is validated then stored to set\
-         the same number again if the invoice is cancelled, set to draft and\
-         re-validated.")
+        help="Technical field holding the number given to the invoice,"
+             " automatically set when the invoice is validated then stored to"
+             " set the same number again if the invoice is cancelled, set to"
+             " draft and re-validated.")
     ncf_required = fields.Boolean(copy=True)
     client_fiscal_type = (
         fields.Selection(related="fiscal_position_id.client_fiscal_type"))
@@ -232,10 +232,10 @@ class AccountInvoice(models.Model):
 
     move_name = fields.Char(
         string='Journal Entry', readonly=False, default=False, copy=False,
-        help="Technical field holding the number given to the invoice,\
-         automatically set when the invoice validated then stored to set the\
-         same number again if the invoice is cancelled, set to draft and\
-         re-validated.")
+        help="Technical field holding the number given to the invoice,"
+        " automatically set when the invoice validated then stored to set the"
+        "same number again if the invoice is cancelled, set to draft and"
+        " re-validated.")
 
     rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
 
@@ -248,8 +248,9 @@ class AccountInvoice(models.Model):
          'draft': [('readonly', False)]}, copy=False)
 
     _sql_constraints = [
-        ('number_uniq', 'unique(number, company_id, journal_id, type,\
-        partner_id)', 'Invoice Number must be unique per Company!'),
+        ('number_uniq',
+         'unique(number, company_id, journal_id, type, partner_id)',
+         'Invoice Number must be unique per Company!'),
         ]
 
     @api.onchange("move_name")
@@ -258,12 +259,14 @@ class AccountInvoice(models.Model):
             if not is_ncf(self.move_name, self.type):
                 self.move_name = False
                 return {
-                    'warning': {'title': "Ncf invalido",
-                                'message': "El numero de comprobante fiscal no\
-                                 es valido verifique de que no esta digitando\
-                                 un comprobante de consumidor final codigo 02\
-                                 o revise si lo ha digitado incorrectamente"}
-                        }
+                    'warning': {
+                            'title': "NCF invalido",
+                            'message': "El numero de comprobante fiscal no"
+                            " es valido verifique de que no esta digitando"
+                            " un comprobante de consumidor final codigo 02"
+                            " o revise si lo ha digitado incorrectamente"
+                            }
+                    }
             self.invoice_ncf_validation()
 
     @api.onchange('journal_id')
@@ -303,9 +306,8 @@ class AccountInvoice(models.Model):
     def _onchange_partner_id(self):
         super(AccountInvoice, self)._onchange_partner_id()
         if self.type in ("in_invoice", "in_refund"):
-            self.fiscal_position_id = (self.partner_id.
-                                       property_account_position_supplier_id.
-                                       id)
+            self.fiscal_position_id = (
+                self.partner_id.property_account_position_supplier_id.id)
 
     @api.onchange("payment_term_id")
     def onchange_payment_term_id(self):
@@ -357,8 +359,8 @@ class AccountInvoice(models.Model):
 
     def _check_ncf(self, rnc, ncf):
         if ncf and rnc:
-            res = requests.get
-            ('http://api.marcos.do/ncf/{}/{}'.format(rnc, ncf))
+            res = requests.get(
+                    'http://api.marcos.do/ncf/{}/{}'.format(rnc, ncf))
 
             if res.status_code == 200:
                 return res.json()
@@ -375,9 +377,9 @@ class AccountInvoice(models.Model):
                  ('state', 'in', ('open', 'paid', 'draft, cancel'))])
 
                 if inv_exist:
-                    raise exceptions.Warning
-                    (u"Este número de comprobante ya fue registrado para este\
-                     proveedor")
+                    raise exceptions.Warning(
+                        u"Este número de comprobante ya fue registrado para"
+                        " este proveedor")
 
                 if _internet_on() and self.journal_id.ncf_remote_validation:
                     result = self._check_ncf
@@ -385,11 +387,12 @@ class AccountInvoice(models.Model):
 
                     if not result.get("valid", False):
                         raise exceptions.UserError(
-                            u"¡El número de comprobante no es válido! No pasó\
-                             la validación en DGII. Verifique que el NCF y el\
-                             RNC del proveedor estén correctamente digitados,\
-                             si es de proveedor informal o de gasto menor\
-                             vefifique si debe solicitar nuevos número.")
+                            u"¡El número de comprobante no es válido! No pasó"
+                            u" la validación en DGII. Verifique que el NCF y"
+                            u" el RNC del proveedor estén correctamente"
+                            " digitados si es de proveedor informal o de gasto"
+                            " menor vefifique si debe solicitar nuevo"
+                            u"número.")
 
             self.signal_workflow("invoice_open")
 
@@ -411,8 +414,8 @@ class AccountInvoice(models.Model):
                          search([('client_fiscal_type', '=', 'final')]))
                         if not fiscal_position_id:
                             raise exceptions.ValidationError(
-                                "Antes de generar una factura debe definir las\
-                                posiciones fiscales.")
+                                "Antes de generar una factura debe definir las"
+                                " posiciones fiscales.")
                         else:
                             vals.update({"fiscal_position_id":
                                         fiscal_position_id.id})
@@ -428,7 +431,7 @@ class AccountInvoice(models.Model):
     def _refund_cleanup_lines(self, lines):
         """ Convert records to dict of values suitable for one2many line creation
             :param recordset lines: records to convert
-            :return: list of command tuple for one2many line creation\
+            :return: list of command tuple for one2many line creation
              [(0, 0, dict of valueis), ...]
         """
 
@@ -477,8 +480,8 @@ class AccountInvoice(models.Model):
             result.append((0, 0, values))
 
         if not result:
-            raise exceptions.UserError
-            ("Todos los productos de esta factura ya fueron devueltos.")
+            raise exceptions.UserError("Todos los productos de esta factura ya"
+                                       "fueron devueltos.")
 
         return result
 
@@ -543,8 +546,9 @@ class AccountInvoice(models.Model):
             domain = [
                 ('journal_id.type', 'in', ('bank', 'cash', 'sale')),
                 ('account_id', '=', self.account_id.id),
-                ('partner_id', '=', self.env['res.partner'].
-                 _find_accounting_partner(self.partner_id).id),
+                ('partner_id', '=',
+                 self.env['res.partner']._find_accounting_partner(
+                                                self.partner_id).id),
                 ('reconciled', '=', False),
                 ('amount_residual', '!=', 0.0)]
 
@@ -590,16 +594,16 @@ class AccountInvoice(models.Model):
     @api.one
     def copy(self, default=None):
         if self.type in ("in_refund", "out_refund"):
-            raise exceptions.UserError
-            (u"¡No está permitido duplicar notas de crédito!")
+            raise exceptions.UserError(u"¡No está permitido duplicar notas de"
+                                       u" crédito!")
         return super(AccountInvoice, self).copy(default=default)
 
     @api.multi
     def authorize_credit(self):
         for rec in self:
             overdue_type = {
-                'overlimit_overdue': u'Este cliente tiene el límite de\
-                 crédito agotado y facturas vencidas',
+                'overlimit_overdue': u"Este cliente tiene el límite de"
+                                     u"crédito agotado y facturas vencidas",
                 'overlimit': u'Este cliente no tiene crédito disponible',
                 'overdue': u'Este cliente tiene facturas vencidas',
                 'none': 'None'
@@ -614,11 +618,11 @@ class AccountInvoice(models.Model):
     def disallows_credit(self):
         for rec in self:
             overdue_type = {
-                    'overlimit_overdue': u'Este cliente tiene el lÍmite de\
-                     crédito agotado y facturas vencidas',
-                    'overlimit': u'Este cliente no tiene crédito disponible',
-                    'overdue': 'Este cliente tiene facturas vencidas',
-                    'none': 'None'}
+                'overlimit_overdue': u"Este cliente tiene el límite de"
+                                     u"crédito agotado y facturas vencidas",
+                'overlimit': u'Este cliente no tiene crédito disponible',
+                'overdue': 'Este cliente tiene facturas vencidas',
+                'none': 'None'}
             rec.authorize = False
             rec.message_post(body=u"<p>Crédito cancelado con {}</p>".
                              format(overdue_type[rec.overdue_type]),
@@ -644,8 +648,8 @@ class AccountInvoice(models.Model):
 
                 if not sequence:
                     raise exceptions.ValidationError(
-                        u"Las secuencias para este diario de ventas no están\
-                        configuradas.")
+                        u"Las secuencias para este diario de ventas no están"
+                        " configuradas.")
 
                 next_ncf = True
                 while next_ncf:
@@ -655,8 +659,8 @@ class AccountInvoice(models.Model):
                                              ('journal_id', '=',
                                               self.journal_id.id)]):
                         _logger.info(
-                            u"El Sistema Saltó el Número {} del Diario {}\
-                             porque ya Existe desde Contabilidad".format(
+                            u"El Sistema Saltó el Número {} del Diario {}"
+                            " porque ya Existe desde Contabilidad".format(
                              ncf_next, self.journal_id.name))
                         next_ncf = False
                 inv.move_name = ncf_next

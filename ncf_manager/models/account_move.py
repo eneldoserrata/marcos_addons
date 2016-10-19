@@ -59,8 +59,8 @@ class AccountMove(models.Model):
                 else:
                     if (invoice.overdue_type == "overlimit_overdue" and
                        self.env.user.id != 1):
-                        msg = u"El cliente {} no tiene crédito disponible y\
-                         facturas vencidas".format(invoice.partner_id.name)
+                        msg = u"El cliente {} no tiene crédito disponible y"
+                        " facturas vencidas".format(invoice.partner_id.name)
                     elif (invoice.overdue_type == "overlimit" and
                           self.env.user.id != 1):
                         msg = (u"El cliente {} no tiene crédito disponible"
@@ -80,9 +80,9 @@ class AccountMove(models.Model):
                 if fiscal_position is not False and ncf_control is True:
                     if (fiscal_position != 'final' and
                        invoice.partner_id.vat is not False):
-                        raise ValidationError
-                        (u"Para este tipo de posición fiscal el contacto\
-                         debe de tener un RNC establecido!")
+                        raise ValidationError(
+                            u"Para este tipo de posición fiscal el contacto"
+                            " debe de tener un RNC establecido!")
                 invoice.set_ncf()
         return super(AccountMove, self).post()
 
