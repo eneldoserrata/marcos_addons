@@ -368,7 +368,8 @@ class AccountInvoice(models.Model):
     def _check_ncf(self, rnc, ncf):
         if ncf and rnc:
             res = requests.get(
-                    'http://api.marcos.do/ncf/{}/{}'.format(rnc, ncf))
+                    "http://api.marcos.do/ncf/{}/{}".format(rnc, ncf)
+                    )
             if res.status_code == 200:
                 return res.json()
         return {}
@@ -376,33 +377,37 @@ class AccountInvoice(models.Model):
     @api.multi
     def invoice_ncf_validation(self):
         for invoice in self:
-            if not (invoice.journal_id.purchase_type in
-                    ['exterior', 'import', 'others'] and
-                    invoice.ncf_required is True):
+            if not invoice.move_name:
+                invoice.move_name = self.journal_id.sequence_id.next_by_id()
+        for invoice in self:
                 inv_exist = self.search(
                     [('partner_id', '=', invoice.partner_id.id),
                      ('number', '=', invoice.move_name),
-                     ('state', 'in', ('open', 'paid', 'draft, cancel'))]
+                     ('state', 'in', ('open', 'paid', 'cancel'))]
                     )
-
                 if inv_exist:
                     raise exceptions.Warning(
                         u"Este número de comprobante ya fue registrado para"
                         " este proveedor")
-
-                if _internet_on() and self.journal_id.ncf_remote_validation:
-                    result = self._check_ncf(invoice.partner_id.vat,
-                                             invoice.move_name)
+                if (_internet_on() and
+                        self.journal_id.ncf_remote_validation):
+                    if invoice.journal_id.purchase_type == 'normal':
+                        result = self._check_ncf(
+                                        invoice.partner_id.vat,
+                                        invoice.move_name)
+                    result = self._check_ncf(
+                                self.env.user.company_id.vat,
+                                invoice.move_name)
                     if not result.get("valid", False):
                         raise exceptions.UserError(
                             u"¡El número de comprobante no es válido! No pasó"
                             u" la validación en DGII. Verifique que el NCF y"
                             u" el RNC del proveedor estén correctamente"
-                            " digitados si es de proveedor informal o de gasto"
-                            " menor vefifique si debe solicitar nuevo"
-                            u"número.")
-
-            self.signal_workflow("invoice_open")
+                            " digitados."
+                            u"Si es un NCF de Proveedor Informal o de Gasto"
+                            " Menor vefifique si debe solicitar nuevos"
+                            u" números.")
+        self.signal_workflow("invoice_open")
 
     @api.model
     def create(self, vals):
@@ -442,7 +447,6 @@ class AccountInvoice(models.Model):
             :return: list of command tuple for one2many line creation
              [(0, 0, dict of values), ...]
         """
-
         if not lines:
             return []
 

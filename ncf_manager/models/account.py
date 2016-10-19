@@ -43,11 +43,11 @@ class AccountJournal(models.Model):
 
     purchase_type = fields.Selection([
         ("normal", u"Requiere NCF"),
-        ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
-        ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),
-        ("exterior", u"Pagos al Exterior. NCF Generado por el Sistema"),
-        ("import", u"Importaciones. NCF Generado por el Sistema"),
-        ("others", u"Otros. No requiere NCF"),
+        ("minor", u"Gasto Menor"),
+        ("informal", u"Proveedores"),
+        ("exterior", u"Pagos al Exterior"),
+        ("import", u"Importaciones"),
+        ("others", u"Otros"),
         ], string=u"Tipo de compra", default="normal")
 
     ncf_control = fields.Boolean("Control de NCF")

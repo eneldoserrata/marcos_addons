@@ -41,8 +41,8 @@ from openerp.exceptions import UserError
 class AccountInvoiceCancel(models.TransientModel):
     """
     This wizard will cancel the all the selected invoices.
-    If in the journal, the option allow cancelling entry is not selected then\
-     it will give warning message.
+    If in the journal, the option allow cancelling entry is not selected then
+    it will give warning message.
     """
 
     _inherit = "account.invoice.cancel"
