@@ -176,7 +176,8 @@ class AccountInvoice(models.Model):
         ('overlimit', u'Cliente no tiene crédito disponible'),
         ('overdue', u'Cliente tiene facturas vencidas'),
         ('none', 'None'),
-        ], "Estado del credito", compute=_get_overdue_type, copy=False))
+        ], "Estado del credito", compute=_get_overdue_type, copy=False)
+        )
 
     internal_number = fields.Char(u"Número de factura")
     anulation_type = fields.Selection([
@@ -189,43 +190,50 @@ class AccountInvoice(models.Model):
         ("07", u"Devolución de Productos"),
         ("08", u"Omisión de Productos"),
         ("09", u"Errores en Secuencia de NCF")
-        ], string=u"Tipo de anulación", copy=False)
+        ], string=u"Tipo de anulación", copy=False
+        )
 
-    shop_id = fields.Many2one(
-        "shop.ncf.config", string="Sucursal", required=False,
-        default=_default_user_shop)
-    move_name = fields.Char(
-        string='Journal Entry', default=False, copy=False,
-        help="Technical field holding the number given to the invoice,"
-             " automatically set when the invoice is validated then stored to"
-             " set the same number again if the invoice is cancelled, set to"
-             " draft and re-validated.")
+    shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
+                              required=False, default=_default_user_shop)
+    move_name = fields.Char(string='Journal Entry', default=False, copy=False,
+                            help="Technical field holding the number given to"
+                            " the invoice, automatically set when the invoice"
+                            " is validated then stored to set the same number"
+                            " again if the invoice is cancelled, set to draft"
+                            " and re-validated."
+                            )
     ncf_required = fields.Boolean(copy=True)
-    client_fiscal_type = (
-        fields.Selection(related="fiscal_position_id.client_fiscal_type"))
-    supplier_fiscal_type = (
-        fields.Selection(related="fiscal_position_id.supplier_fiscal_type"))
+    client_fiscal_type = fields.Selection(
+                            related="fiscal_position_id.client_fiscal_type")
+    supplier_fiscal_type = fields.Selection(
+                            related="fiscal_position_id.supplier_fiscal_type")
     journal_id = fields.Many2one(
-        'account.journal', string='Journal', required=True, readonly=True,
-        states={'draft': [('readonly', False)]}, default=_default_user_journal,
-        domain="[('type', 'in', {'out_invoice':['sale'], 'out_refund':['sale'],'in_refund':['purchase'], 'in_invoice': ['purchase']}.get(type, [])), ('company_id', '=', company_id)]")
+        'account.journal', string='Journal',
+        required=True, readonly=True,
+        states={'draft': [('readonly', False)]},
+        default=_default_user_journal,
+        domain="[('type', 'in', {'out_invoice':['sale'],'out_refund':['sale'],'in_refund':['purchase'], 'in_invoice': ['purchase']}.get(type, [])), ('company_id', '=', company_id)]"
+        )
 
-    purchase_type = fields.Selection([
-        ("normal", u"Requiere NCF"),
-        ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
-        ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),
-        ("exterior", u"Pagos al Exterior. NCF Generado por el Sistema"),
-        ("import", u"Importaciones. NCF Generado por el Sistema"),
-        ("others", u"Otros. No requiere NCF"),
-        ], string=u"Tipo de compra", default="normal",
-        related="journal_id.purchase_type")
+    purchase_type = fields.Selection(
+        [("normal", u"Requiere NCF"),
+         ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
+         ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),
+         ("exterior", u"Pagos al Exterior. NCF Generado por el Sistema"),
+         ("import", u"Importaciones. NCF Generado por el Sistema"),
+         ("others", u"Otros. No requiere NCF"),
+         ], string=u"Tipo de compra", default="normal",
+        related="journal_id.purchase_type"
+        )
 
     total_discount = fields.Monetary(
         string='Descuento', currency_field="company_currency_id",
-        compute=_get_total_discount)
+        compute=_get_total_discount
+        )
 
     credit_out_invoice = fields.Boolean(
-        related="journal_id.credit_out_invoice")
+        related="journal_id.credit_out_invoice"
+        )
 
     authorize = fields.Boolean(
         u"Crédito autorizado", default=False, copy=False)
@@ -289,9 +297,9 @@ class AccountInvoice(models.Model):
                     self.partner_id.write({"journal_id": self.journal_id.id})
 
                 if self.purchase_type == "minor":
-                    self.partner_id = (self.env['res.company'].
-                                       _company_default_get
-                                       ('account.invoice').partner_id.id)
+                    self.partner_id = (
+                        self.env['res.company']._company_default_get(
+                                 'account.invoice').partner_id.id)
                     self.ncf_required = False
 
                 if (self.purchase_type != "minor" and
@@ -312,8 +320,8 @@ class AccountInvoice(models.Model):
     @api.onchange("payment_term_id")
     def onchange_payment_term_id(self):
         if (self.payment_term_id and
-           self.partner_id.property_payment_term_id.id !=
-           self.payment_term_id.id):
+                self.partner_id.property_payment_term_id.id !=
+                self.payment_term_id.id):
             self.env["res.partner"].browse(self.partner_id.id).write(
                 {"property_payment_term_id": self.payment_term_id.id})
 
@@ -361,7 +369,6 @@ class AccountInvoice(models.Model):
         if ncf and rnc:
             res = requests.get(
                     'http://api.marcos.do/ncf/{}/{}'.format(rnc, ncf))
-
             if res.status_code == 200:
                 return res.json()
         return {}
@@ -369,12 +376,14 @@ class AccountInvoice(models.Model):
     @api.multi
     def invoice_ncf_validation(self):
         for invoice in self:
-            if not (invoice.journal_id.purchase_type in ['exterior', 'import',
-                    'others'] and invoice.ncf_required is True):
-                inv_exist = self.search
-                ([('partner_id', '=', invoice.partner_id.id),
-                 ('number', '=', invoice.move_name),
-                 ('state', 'in', ('open', 'paid', 'draft, cancel'))])
+            if not (invoice.journal_id.purchase_type in
+                    ['exterior', 'import', 'others'] and
+                    invoice.ncf_required is True):
+                inv_exist = self.search(
+                    [('partner_id', '=', invoice.partner_id.id),
+                     ('number', '=', invoice.move_name),
+                     ('state', 'in', ('open', 'paid', 'draft, cancel'))]
+                    )
 
                 if inv_exist:
                     raise exceptions.Warning(
@@ -382,9 +391,8 @@ class AccountInvoice(models.Model):
                         " este proveedor")
 
                 if _internet_on() and self.journal_id.ncf_remote_validation:
-                    result = self._check_ncf
-                    (invoice.partner_id.vat, invoice.move_name)
-
+                    result = self._check_ncf(invoice.partner_id.vat,
+                                             invoice.move_name)
                     if not result.get("valid", False):
                         raise exceptions.UserError(
                             u"¡El número de comprobante no es válido! No pasó"
@@ -432,7 +440,7 @@ class AccountInvoice(models.Model):
         """ Convert records to dict of values suitable for one2many line creation
             :param recordset lines: records to convert
             :return: list of command tuple for one2many line creation
-             [(0, 0, dict of valueis), ...]
+             [(0, 0, dict of values), ...]
         """
 
         if not lines:
