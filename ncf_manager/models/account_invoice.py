@@ -277,7 +277,6 @@ class AccountInvoice(models.Model):
                                 self.journal_id.company_id.currency_id.id)
 
         if self.type in ('in_invoice', 'in_refund'):
-
             if self.purchase_type == "normal":
                 self.ncf_required = True
             else:
@@ -294,10 +293,6 @@ class AccountInvoice(models.Model):
                         self.env['res.company']._company_default_get(
                                  'account.invoice').partner_id.id)
                     self.ncf_required = False
-
-                if (self.purchase_type != "minor" and
-                   self.partner_id.id == self.env.user.company_id.id):
-                        self.partner_id = False
 
             if self.type == "out_invoice" and self.credit_out_invoice is False:
                 self.date_due = fields.Date.today()
