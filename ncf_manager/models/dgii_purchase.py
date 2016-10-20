@@ -161,7 +161,7 @@ class DgiiPurchaseReport(models.Model):
                 inv.fiscal_position_id.supplier_fiscal_type)
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
-                raise exceptions.UserError("Debe de definir el tipo de gasto"
+                raise exceptions.UserError("Debe definir el tipo de gasto"
                                            u"para la posición fiscal {}! En la"
                                            "factura {}".format(
                                              inv.fiscal_position_id.name,
@@ -186,7 +186,7 @@ class DgiiPurchaseReport(models.Model):
                 FECHA_PAGO = False
 
             lines.append((0, False, {
-                          "LÍNEA": LINE,
+                          u"LÍNEA": LINE,
                           u"RNC_CEDÚLA": RNC_CEDULA,
                           u"TIPO_IDENTIFICACIÓN": TIPO_IDENTIFICACION,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
@@ -226,7 +226,7 @@ class DgiiPurchaseReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError("Debe de configurar el RNC de su"
+            raise exceptions.ValidationError("Debe configurar el RNC de su"
                                              "empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
@@ -323,7 +323,7 @@ class DgiiPurchaseReportline(models.Model):
     _name = "dgii.purchase.report.line"
 
     purchase_report_id = fields.Many2one("dgii.purchase.report")
-    LINE = fields.Integer("Línea")
+    LINE = fields.Integer(u"Línea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)
     TIPO_IDENTIFICACION = fields.Char("Tipo ID", size=1)
     TIPO_BIENES_SERVICIOS_COMPRADOS = fields.Char("Tipo", size=2)
