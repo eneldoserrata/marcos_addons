@@ -123,9 +123,9 @@ class PosConfig(models.Model):
     print_note = fields.Boolean('Imprimir nota en re recibo', default=True)
     fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', domain=[('supplier','=',False)])
     create_invoice_from_cron = fields.Boolean(string="Crear facturas en segundo plano", help=u"Esta opción permite que despues de "
-                                                                                             u"validar un pedido la facturam el conduce, y el pago"
-                                                                                             u"se ejecuten en segundo plano permitiendo que el proceso "
-                                                                                             u"para el cliente sea de inmediato.")
+                        u"validar un pedido la facturam el conduce, y el pago"
+                        u"se ejecuten en segundo plano permitiendo que el proceso "
+                        u"para el cliente sea de inmediato.")
 
 
 class ResPartner(models.Model):
@@ -136,8 +136,6 @@ class ResPartner(models.Model):
         """ create or modify a partner from the point of sale ui.
             partner contains the partner's fields. """
         # image is a dataurl, get the data after the comma
-
-
 
         try:
             name = partner.get("name", False)
@@ -486,7 +484,7 @@ class PosOrder(models.Model):
         while next_ncf:
             ncf_next = sequence.with_context(ir_sequence_date=date_order).next_by_id()
             _logger.info(
-                "EL SISTEMA SALTO EL NUMERO {} DEL DIARIO {} PORQUE YA EXISTE DESDE EL PUNTO DE VENTA".format(ncf_next, self.sale_journal.name))
+                u"EL SISTEMA SALTO EL NÚMERO {} DEL DIARIO {} PORQUE YA EXISTE DESDE EL PUNTO DE VENTA".format(ncf_next, self.sale_journal.name))
 
             if not self.search_count([('reserve_ncf_seq', '=', ncf_next), ('sale_journal', '=', self.sale_journal.id)]):
                 next_ncf = False
