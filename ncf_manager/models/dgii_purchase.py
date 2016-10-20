@@ -65,12 +65,11 @@ class DgiiPurchaseReport(models.Model):
     ITBIS_RETENIDO = fields.Float("Total ITBIS Retenido")
     ITBIS_TOTAL = fields.Float("Total ITBIS Pagado")
     TOTAL_MONTO_FACTURADO = fields.Float("Total Facturad")
-    RETENCION_RENTA = fields.Float("Total Retención ISR")
+    RETENCION_RENTA = fields.Float(u"Total Retención ISR")
     report_lines = fields.One2many("dgii.purchase.report.line",
                                    "purchase_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
-    txt_filename = fields.Char("Nombre del archivo",
-                               readonly=True)
+    txt_filename = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
         ('draft', 'Nuevo'),
         ('done', 'Generado')
@@ -186,14 +185,14 @@ class DgiiPurchaseReport(models.Model):
                 FECHA_PAGO = False
 
             lines.append((0, False, {
-                          u"LÍNEA": LINE,
-                          u"RNC_CEDÚLA": RNC_CEDULA,
-                          u"TIPO_IDENTIFICACIÓN": TIPO_IDENTIFICACION,
+                          "LINEA": LINE,
+                          "RNC_CEDULA": RNC_CEDULA,
+                          "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
                           TIPO_BIENES_SERVICIOS_COMPRADOS,
-                          u"NÚMERO_COMPROBANTE_FISCAL":
+                          "NUMERO_COMPROBANTE_FISCAL":
                           NUMERO_COMPROBANTE_FISCAL,
-                          u"NÚMERO_COMPROBANTE_MODIFICADO":
+                          "NUMERO_COMPROBANTE_MODIFICADO":
                           NUMERO_COMPROBANTE_MODIFICADO,
                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                           "FECHA_PAGO": FECHA_PAGO,
@@ -201,7 +200,7 @@ class DgiiPurchaseReport(models.Model):
                           "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
                           "MONTO_FACTURADO":
                           (inv.amount_untaxed + LINE_TAX_COST) * CURRENCY_RATE,
-                          u"RETENCIÓN_ISR": LINE_RETENCION_RENTA
+                          "RETENCION_ISR": LINE_RETENCION_RENTA
                           }))
 
         self.write({
@@ -220,8 +219,7 @@ class DgiiPurchaseReport(models.Model):
                 u"Para poder generar el 606 primero debe especificar el RNC/"
                 u"Cédula de la compañia.")
 
-        company_fiscal_identificacion = re.sub("[^0-9]",
-                                               "",
+        company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
 
         if not (company_fiscal_identificacion or not
@@ -305,8 +303,7 @@ class DgiiPurchaseReport(models.Model):
                  ('type', 'in', ('in_invoice', 'in_refund'))]
                  )
             for inv_paid in paid_in_period_with_retention_invoices:
-                account_ids = [move_id.account_id.id for move_id in
-                               inv_paid.move_id.line_ids]
+                account_ids = [move_id.account_id.id for move_id in inv_paid.move_id.line_ids]
                 for account in account_ids:
                     if tax_account.get(account, "") in ('ritbis', 'isr'):
                         invoices += inv_paid

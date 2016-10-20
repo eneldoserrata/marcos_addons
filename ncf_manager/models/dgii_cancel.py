@@ -104,7 +104,7 @@ class DgiiCancelReport(models.Model):
             FECHA_COMPROBANTE = inv.date_invoice
             TIPO_ANULACION = inv.anulation_type
             lines.append((0, False,
-                          {"LINE": LINE,
+                          {"LINEA": LINE,
                            "NUMERO_COMPROBANTE_FISCAL":
                            NUMERO_COMPROBANTE_FISCAL,
                            "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
@@ -126,7 +126,7 @@ class DgiiCancelReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
+            raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
                                              " su empresa!")
 
         path = '/tmp/608{}.txt'.format(company_fiscal_identificacion)

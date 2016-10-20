@@ -198,12 +198,12 @@ class DgiiSaleReport(models.Model):
                     ITBIS_FACTURADO = ITBIS_FACTURADO
 
             lines.append((0, False, {
-                          u"LÍNEA": LINE,
-                          u"RNC_CEDÚLA": RNC_CEDULA,
-                          u"TIPO_IDENTIFICACIÓN": TIPO_IDENTIFICACION,
-                          u"NÚMERO_COMPROBANTE_FISCAL":
+                          "LINEA": LINE,
+                          "RNC_CEDULA": RNC_CEDULA,
+                          "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
+                          "NUMERO_COMPROBANTE_FISCAL":
                           NUMERO_COMPROBANTE_FISCAL,
-                          u"NÚMERO_COMPROBANTE_MODIFICADO":
+                          "NUMERO_COMPROBANTE_MODIFICADO":
                           NUMERO_COMPROBANTE_MODIFICADO,
                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                           "FECHA_PAGO": FECHA_PAGO,

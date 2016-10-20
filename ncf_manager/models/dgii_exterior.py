@@ -140,13 +140,13 @@ class DgiiExteriorReport(models.Model):
                                       sum([l.credit for l in move_lines]) * -1)
 
             lines.append((0, False, {
-                          u"LÍNEA": LINE,
-                          u"RAZÓN_SOCIAL": RAZON_SOCIAL,
+                          "LINEA": LINE,
+                          "RAZON_SOCIAL": RAZON_SOCIAL,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
                           TIPO_BIENES_SERVICIOS_COMPRADOS,
                           "FECHA_FACTURA": FECHA_FACTURA,
-                          u"FECHA_RETENCIÓN_ISR": FECHA_RETENCION_ISR,
-                          u"ISR_RETENCIÓN": ISR_RETENCION,
+                          "FECHA_RETENCION_ISR": FECHA_RETENCION_ISR,
+                          "ISR_RETENCION": ISR_RETENCION,
                           "MONTO_FACTURADO": MONTO_FACTURADO
                           }))
 
