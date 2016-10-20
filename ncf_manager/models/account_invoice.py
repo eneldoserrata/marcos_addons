@@ -238,13 +238,6 @@ class AccountInvoice(models.Model):
     authorize = fields.Boolean(
         u"Crédito autorizado", default=False, copy=False)
 
-    move_name = fields.Char(
-        string='Journal Entry', readonly=False, default=False, copy=False,
-        help="Technical field holding the number given to the invoice,"
-        " automatically set when the invoice validated then stored to set the"
-        "same number again if the invoice is cancelled, set to draft and"
-        " re-validated.")
-
     rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
 
     pay_to = fields.Many2one(
