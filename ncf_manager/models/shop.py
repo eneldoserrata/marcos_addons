@@ -43,12 +43,14 @@ class ShopJournalConfig(models.Model):
 
     company_id = fields.Many2one("res.company", required=True,
                                  default=lambda s: s.env.user.company_id.id,
-                                 string=u"Compañia")
+                                 string=u"Compañia"
+                                 )
     name = fields.Char("Nombre", size=40, required=True)
     sale_journal_ids = fields.Many2many("account.journal",
                                         string=u"Diarios de ventas",
                                         required=False,
-                                        domain="[('type','=','sale')]")
+                                        domain="[('type','=','sale')]"
+                                        )
     user_ids = fields.Many2many("res.users",
                                 string=u"Usuarios con acceso a esta sucursal")
 
@@ -61,23 +63,30 @@ class ShopJournalConfig(models.Model):
     def get_user_shop_config(self):
         if self._context.get("module", False) == "ncf_manager":
             if not self.search([]):
-                self.create({"name": "Principal", "sale_journal_ids":
-                            [(4, 1, False)], "user_ids": [(4, 1, False)]})
+                self.create({"name": "Principal",
+                             "sale_journal_ids": [(4, 1, False)],
+                             "user_ids": [(4, 1, False)]}
+                            )
 
         user_shops = self.search([('user_ids', '=', self._uid)])
         if not user_shops:
-            raise exceptions.UserError
-            ("Su usuario no tiene una sucursal asignada.")
+            raise exceptions.UserError("Su usuario no tiene una sucursal"
+                                       "asignada.")
 
         if self._context.get("module", False) == "ncf_manager":
             shop_ids = [rec for rec in user_shops]
         else:
             shop_ids = [rec.id for rec in user_shops]
-        sale_journal_ids = list(set(sum([[sale_journal_id.id for sale_journal_id in rec.sale_journal_ids] for rec in user_shops], [])))
+
+        sale_journal_ids = list(
+                                set(sum([[sale_journal_id.id for
+                                    sale_journal_id in rec.sale_journal_ids]
+                                    for rec in user_shops], []))
+                                )
 
         if not sale_journal_ids:
-            raise exceptions.UserError
-            ("Su sucursal no tiene diarios de facturas asignadas.")
+            raise exceptions.UserError("Su sucursal no tiene asignada Diarios"
+                                       " de Facturas asignadas.")
 
         return {"shop_ids": shop_ids, "sale_journal_ids": sale_journal_ids}
 
@@ -108,7 +117,7 @@ class ShopJournalConfig(models.Model):
 
         seq_values = {u'padding': 8,
                       u'code': False,
-                      u'name': u'Facturas de cliente final',
+                      u'name': u'Facturas de Cliente Final',
                       u'implementation': u'standard',
                       u'company_id': 1,
                       u'use_date_range': False,
@@ -124,41 +133,43 @@ class ShopJournalConfig(models.Model):
 
         if not sale_journal.final_sequence_id:
             seq_values["prefix"] = final_prefix
-            seq_values["name"] = "Facturas de cliente final"
+            seq_values["name"] = "Facturas de Cliente Final"
             final_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.final_sequence_id = final_id.id
 
         if not sale_journal.fiscal_sequence_id:
             seq_values["prefix"] = fiscal_prefix
-            seq_values["name"] = "Facturas de cliente fiscal"
+            seq_values["name"] = "Facturas de Cliente Fiscal"
             fiscal_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.fiscal_sequence_id = fiscal_id.id
 
         if not sale_journal.gov_sequence_id:
             seq_values["prefix"] = gov_prefix
-            seq_values["name"] = "Facturas de cliente gubernamental"
+            seq_values["name"] = "Facturas de Cliente Gubernamental"
             gov_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.gov_sequence_id = gov_id.id
 
         if not sale_journal.special_sequence_id:
             seq_values["prefix"] = esp_prefix
-            seq_values["name"] = "Facturas de cliente especiales"
+            seq_values["name"] = "Facturas de Clientes Especiales"
             esp_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.special_sequence_id = esp_id.id
 
         if not sale_journal.unique_sequence_id:
             seq_values["prefix"] = unique_prefix
-            seq_values["name"] = "Facturas unico ingreso"
+            seq_values["name"] = u"Facturas Único Ingreso"
             unique_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.unique_sequence_id = unique_id.id
 
         if not sale_journal.refund_sequence_id:
             seq_values["prefix"] = nc_prefix
-            seq_values["name"] = "Notas de credito"
+            seq_values["name"] = u"Notas de Crédito"
             nc_id = self.env["ir.sequence"].create(seq_values)
             sale_journal.refund_sequence_id = nc_id.id
             sale_journal.refund_sequence = True
 
         if not self.search([]):
-            self.create({"name": "Principal", "sale_journal_ids":
-                        [(4, 1, False)], "user_ids": [(4, 1, False)]})
+            self.create({"name": "Principal",
+                         "sale_journal_ids": [(4, 1, False)],
+                         "user_ids": [(4, 1, False)]}
+                        )

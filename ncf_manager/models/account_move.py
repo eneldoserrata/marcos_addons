@@ -49,8 +49,8 @@ class AccountMove(models.Model):
         if invoice:
 
             if invoice.amount_total == 0:
-                raise ValidationError
-                ("No puede grabar una factura con valor 0!")
+                raise ValidationError(
+                    u"¡No puede grabar una factura con valor 0!")
             if invoice.type == "out_invoice":
                 msg = ""
                 if invoice.journal_id.credit_out_invoice is False:
@@ -59,8 +59,8 @@ class AccountMove(models.Model):
                 else:
                     if (invoice.overdue_type == "overlimit_overdue" and
                        self.env.user.id != 1):
-                        msg = u"El cliente {} no tiene crédito disponible y\
-                         facturas vencidas".format(invoice.partner_id.name)
+                        msg = u"El cliente {} no tiene crédito disponible y"
+                        " facturas vencidas".format(invoice.partner_id.name)
                     elif (invoice.overdue_type == "overlimit" and
                           self.env.user.id != 1):
                         msg = (u"El cliente {} no tiene crédito disponible"
@@ -80,9 +80,9 @@ class AccountMove(models.Model):
                 if fiscal_position is not False and ncf_control is True:
                     if (fiscal_position != 'final' and
                        invoice.partner_id.vat is not False):
-                        raise ValidationError
-                        (u"Para este tipo de posición fiscal el relacionado\
-                         debe de tener un RNC/Establecido!")
+                        raise ValidationError(
+                            u"Para este tipo de posición fiscal el contacto"
+                            " debe de tener un RNC establecido!")
                 invoice.set_ncf()
         return super(AccountMove, self).post()
 
@@ -99,16 +99,17 @@ class AccountMove(models.Model):
 
             if invoice.charge_to:
                 sale_journal = invoice.with_context(
-                                                    {"type": "out_invoice"}
-                                                    )._default_user_journal()
-                out_invoice = invoice.copy({"type": "out_invoice",
-                                            "partner_id": invoice.charge_to.id,
-                                            "journal_id": sale_journal,
-                                            "account_id": invoice.charge_to.property_account_receivable_id.id,
-                                            "origin": "Factura de compra {}".format(invoice.number),
-                                            "tax_line_ids": False,
-                                            "fiscal_position_id": False,
-                                            })
+                    {"type": "out_invoice"})._default_user_journal()
+                out_invoice = invoice.copy(
+                    {"type": "out_invoice",
+                     "partner_id": invoice.charge_to.id,
+                     "journal_id": sale_journal,
+                     "account_id": invoice.charge_to.
+                     property_account_receivable_id.id,
+                     "origin": "Factura de compra {}".format(invoice.number),
+                     "tax_line_ids": False,
+                     "fiscal_position_id": False, }
+                     )
                 for line in out_invoice.invoice_line_ids:
                     if line.product_id:
                         line.invoice_line_tax_ids = line.product_id.taxes_id
@@ -130,5 +131,6 @@ class AccountMoveLine(models.Model):
     def _bal(self):
         self.net = self.debit-self.credit
 
-    net = fields.Float("Balance", compute=_bal,
-                       digits=dp.get_precision('Account'), store=True)
+    net = fields.Float(
+        "Balance", compute=_bal, digits=dp.get_precision('Account'), store=True
+        )

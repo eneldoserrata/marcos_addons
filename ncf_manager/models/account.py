@@ -41,44 +41,32 @@ from openerp import models, fields, api
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    purchase_type = fields.Selection([("normal",
-                                       u"REQUIERE NCF"),
-                                      ("minor",
-                                       u"GASTO MENOR NCF GENERADO POR EL\
-                                        SISTEMA"),
-                                      ("informal",
-                                       u"PROVEEDORES INFORMALES NCF GENERADO\
-                                        POR EL SISTEMA"),
-                                      ("exterior",
-                                       u"PAGOS AL EXTERIOR NO REQUIRE NCF"),
-                                      ("import",
-                                       u"IMPORTACIONES NO REQUIRE NCF"),
-                                      ("others",
-                                       u"OTROS NO REQUIRE NCF"),
-                                      ],
-                                     string=u"Tipo de compra",
-                                     default="normal")
+    purchase_type = fields.Selection([
+        ("normal", u"Requiere NCF"),
+        ("minor", u"Gasto Menor"),
+        ("informal", u"Proveedores"),
+        ("exterior", u"Pagos al Exterior"),
+        ("import", u"Importaciones"),
+        ("others", u"Otros"),
+        ], string=u"Tipo de compra", default="normal")
+
     ncf_control = fields.Boolean("Control de NCF")
-    ncf_remote_validation = fields.Boolean(u"Validar NCF con DGII",
-                                           default=True)
-    final_sequence_id = fields.Many2one("ir.sequence",
-                                        string=u"Secuencia para consumidor\
-                                         final")
-    fiscal_sequence_id = fields.Many2one("ir.sequence",
-                                         string=u"Secuencia para credito\
-                                         fiscal")
-    gov_sequence_id = fields.Many2one("ir.sequence",
-                                      string=u"Secuencia gubernamental")
-    special_sequence_id = fields.Many2one("ir.sequence",
-                                          string=u"Secuencia para regimenes\
-                                           especiales")
-    unique_sequence_id = fields.Many2one("ir.sequence",
-                                         string=u"Secuencia para unico ingreso\
-                                         ")
+    ncf_remote_validation = fields.Boolean(u"Validar con DGII", default=True)
+
+    final_sequence_id = fields.Many2one(
+        "ir.sequence", string=u"Secuencia para consumidor final")
+    fiscal_sequence_id = fields.Many2one(
+        "ir.sequence", string=u"Secuencia para crédito fiscal")
+    gov_sequence_id = fields.Many2one(
+        "ir.sequence", string=u"Secuencia gubernamental")
+    special_sequence_id = fields.Many2one(
+        "ir.sequence", string=u"Secuencia para regímenes especiales")
+    unique_sequence_id = fields.Many2one(
+        "ir.sequence", string=u"Secuencia para único ingreso")
+
     credit_out_invoice = fields.Boolean(u"Puede facturar a crédito")
-    default_dicount_account_id = fields.Many2one("account.account",
-                                                 string="Cuenta para\
-                                                  descuentos")
+    default_dicount_account_id = fields.Many2one(
+        "account.account", string="Cuenta para descuentos")
 
 
 class AccountFiscalPosition(models.Model):
@@ -88,18 +76,19 @@ class AccountFiscalPosition(models.Model):
 
     client_fiscal_type = fields.Selection([
         ("final", u"Consumidor final"),
-        ("fiscal", u"Para credito fiscal"),
+        ("fiscal", u"Para Crédito Fiscal"),
         ("gov", u"Gubernamental"),
-        ("special", u"Regimenes especiales"),
-        ("unico", u"Unico ingreso")
-        ], string="Tipo de comprobante")
+        ("special", u"Regímenes Especiales"),
+        ("unico", u"Unico Ingreso")
+        ], string="Tipo de Comprobante")
 
-    journal_id = fields.Many2one("account.journal", string="Diario de compra",
-                                 domain="[('type','=','purchase')]")
+    journal_id = fields.Many2one(
+        "account.journal", string="Diario de compra",
+        domain="[('type','=','purchase')]")
 
     supplier_fiscal_type = fields.Selection([
-        ('01', u'01 - Gastos de personal'),
-        ('02', u'02 - Gastos por trabajo, suministros y servicios'),
+        ('01', u'01 - Gastos de Personal'),
+        ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
         ('03', u'03 - Arrendamientos'),
         ('04', u'04 - Gastos de Activos Fijos'),
         ('05', u'05 - Gastos de Representación'),
@@ -114,11 +103,11 @@ class AccountFiscalPosition(models.Model):
     @api.model
     def get_fiscal_position(self, partner_id, delivery_id=None):
         if self.env.context.get("model", False) == "purchase.order":
-            return (super(AccountFiscalPosition, self).get_fiscal_position
-                    (partner_id, delivery_id=delivery_id))
+            return (super(AccountFiscalPosition, self).get_fiscal_position(
+                    partner_id, delivery_id=delivery_id))
         else:
-            return self.get_fiscal_position_supplier(partner_id,
-                                                     delivery_id=delivery_id)
+            return self.get_fiscal_position_supplier(
+                        partner_id, delivery_id=delivery_id)
 
     @api.model
     def get_fiscal_position_supplier(self, partner_id, delivery_id=None):
@@ -141,15 +130,17 @@ class AccountFiscalPosition(models.Model):
                     partner.property_account_position_supplier_id.id)
 
         def fallback_search(vat_required):
-            fpos = self._get_fpos_by_region(delivery.country_id.id,
-                                            delivery.state_id.id,
-                                            delivery.zip, vat_required)
+            fpos = self._get_fpos_by_region(
+                delivery.country_id.id, delivery.state_id.id, delivery.zip,
+                vat_required)
             if not fpos:
                 # Fallback on catchall (no country, no group)
-                fpos = self.search([('auto_apply', '=', True),
-                                    ('vat_required', '=', vat_required),
-                                    ('country_id', '=', None),
-                                    ('country_group_id', '=', None)], limit=1)
+                fpos = self.search([
+                    ('auto_apply', '=', True),
+                    ('vat_required', '=', vat_required),
+                    ('country_id', '=', None),
+                    ('country_group_id', '=', None)
+                    ], limit=1)
             return fpos
 
         # First search only matching VAT positions
@@ -167,13 +158,13 @@ class AccountFiscalPosition(models.Model):
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    purchase_tax_type = fields.Selection([('itbis', 'ITBIS Pagado'),
-                                          ('ritbis', 'ITBIS Retenido'),
-                                          ('isr', 'ISR Retenido'),
-                                          ("cost", u"Format parte del gasto"),
-                                          ('none', 'No deducible')],
-                                         default="itbis",
-                                         string="Tipo de impuesto de compra")
+    purchase_tax_type = fields.Selection([
+        ('itbis', 'ITBIS Pagado'),
+        ('ritbis', 'ITBIS Retenido'),
+        ('isr', 'ISR Retenido'),
+        ('cost', 'Forma parte del gasto'),
+        ('none', 'No deducible')
+        ], default="itbis", string="Tipo de impuesto de compra")
     tax_except = fields.Boolean(string="Exento de este impuesto")
 
     @api.v8
@@ -224,9 +215,8 @@ class AccountTax(models.Model):
 
         for tax in self:
             if tax.amount_type == 'group':
-                ret = tax.children_tax_ids.compute_all(price_unit, currency,
-                                                       quantity, product,
-                                                       partner)
+                ret = tax.children_tax_ids.compute_all(
+                        price_unit, currency, quantity, product, partner)
                 total_excluded = ret['total_excluded']
                 base = ret['base']
                 total_included = ret['total_included']
