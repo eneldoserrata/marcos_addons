@@ -74,7 +74,6 @@
         'views/account_move_view.xml',
         'wizard/account_invoice_refund_view.xml',
         'wizard/invoice_currency_change_wizard_view.xml',
-        'data/setup_ncf.xml'
     ],
     "qweb": ['static/src/xml/base.xml'],
     'demo': [],
