@@ -20,7 +20,7 @@ class RateUpdateWizard(models.TransientModel):
     currency_id = fields.Many2one("res.currency", string="Moneda", required=False, domain=_get_currency_domain)
 
 
-    @api.multis
+    @api.multi
     def update_rate(self):
         if self.update_method == "manual":
             if self.rate < 1:
