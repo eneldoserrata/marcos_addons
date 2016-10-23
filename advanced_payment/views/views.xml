@@ -47,7 +47,7 @@
                         <group attrs="{'invisible': [('move_type','!=','invoice')]}" col="1">
 
                             <button name="update_invoice" type="object" states="draft,"
-                                    string="Actulizar facturas"
+                                    string="Actualizar facturas"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-refresh"/>
                             <button name="amount_total" type="object" string="Calcular pago" states="draft,"
                                     class="btn btn-sm btn-primary btn-block" icon="fa-calculator"/>

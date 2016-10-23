@@ -13,14 +13,14 @@ class RateUpdateWizard(models.TransientModel):
     def _get_currency_domain(self):
         return [('id','!=',self.env.user.company_id.currency_id.id)]
 
-    update_method = fields.Selection([('server',u'Desde internet actulizar la tasa de hoy.'),('manual','Introducir tasa manualmente')],
+    update_method = fields.Selection([('server',u'Desde internet actualizar la tasa de hoy.'),('manual','Introducir tasa manualmente')],
                                    string=u"Metodo de actualizaciónn de tasa", default="manual")
     name = fields.Date("Fecha", required=False)
     rate = fields.Float("Monto", required=False)
     currency_id = fields.Many2one("res.currency", string="Moneda", required=False, domain=_get_currency_domain)
 
 
-    @api.multi
+    @api.multis
     def update_rate(self):
         if self.update_method == "manual":
             if self.rate < 1:
