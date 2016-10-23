@@ -165,4 +165,3 @@ class AccountTax(models.Model):
         ('cost', 'Forma parte del gasto'),
         ('none', 'No deducible')
         ], default="itbis", string="Tipo de impuesto de compra")
-    tax_except = fields.Boolean(string="Exento de este impuesto")
