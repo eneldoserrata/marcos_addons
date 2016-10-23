@@ -98,7 +98,7 @@ class DgiiCancelReport(models.Model):
             FECHA_COMPROBANTE = inv.date_invoice
             TIPO_ANULACION = inv.anulation_type
             lines.append((0, False,
-                          {"LINEA": LINE,
+                          {"LINE": LINE,
                            "NUMERO_COMPROBANTE_FISCAL":
                            NUMERO_COMPROBANTE_FISCAL,
                            "FECHA_COMPROBANTE": FECHA_COMPROBANTE,

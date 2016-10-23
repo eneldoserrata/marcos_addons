@@ -196,7 +196,7 @@ class DgiiSaleReport(models.Model):
                     ITBIS_FACTURADO = ITBIS_FACTURADO
 
             lines.append((0, False, {
-                          "LINEA": LINE,
+                          "LINE": LINE,
                           "RNC_CEDULA": RNC_CEDULA,
                           "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
                           "NUMERO_COMPROBANTE_FISCAL":

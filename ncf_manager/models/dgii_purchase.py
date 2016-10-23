@@ -184,7 +184,7 @@ class DgiiPurchaseReport(models.Model):
                 FECHA_PAGO = False
 
             lines.append((0, False, {
-                          "LINEA": LINE,
+                          "LINE": LINE,
                           "RNC_CEDULA": RNC_CEDULA,
                           "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":

@@ -134,7 +134,7 @@ class DgiiExteriorReport(models.Model):
                                       sum([l.credit for l in move_lines]) * -1)
 
             lines.append((0, False, {
-                          "LINEA": LINE,
+                          "LINE": LINE,
                           "RAZON_SOCIAL": RAZON_SOCIAL,
                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
                           TIPO_BIENES_SERVICIOS_COMPRADOS,
