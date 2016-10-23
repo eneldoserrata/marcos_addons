@@ -76,6 +76,7 @@ class DgiiSaleReport(models.Model):
 
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
+
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env['res.company']._company_default_get(
@@ -83,10 +84,10 @@ class DgiiSaleReport(models.Model):
     name = fields.Char("Nombre")
     year = fields.Integer(u"Año", size=4, default=lambda
                           s: int(time.strftime("%Y")))
-    month = fields.Integer(u"Mes", size=2, default=lambda
+    month = fields.Integer("Mes", size=2, default=lambda
                            s: int(time.strftime("%m")))
 
-    CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
+    CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
     ITBIS_TOTAL = fields.Float(u"OFV ITBIS")
     TOTAL_MONTO_FACTURADO = fields.Float(u"OFV Facturado",
                                          help=u"Suma de las facturas y las"

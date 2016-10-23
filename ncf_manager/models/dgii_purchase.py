@@ -53,14 +53,16 @@ class ResCompany(models.Model):
 class DgiiPurchaseReport(models.Model):
     _name = "dgii.purchase.report"
 
-    company_id = fields.Many2one(
-        'res.company', string='Company', required=True, default=lambda self:
-        self.env['res.company']._company_default_get('dgii.purchase.report'))
-    name = fields.Char()
-    year = fields.Integer(
-        u"Año", size=4, default=lambda s: int(time.strftime("%Y")))
-    month = fields.Integer(
-        "Mes", size=2, default=lambda s: int(time.strftime("%m")))
+    company_id = fields.Many2one('res.company', string='Company',
+                                 required=True, default=lambda self:
+                                 self.env['res.company']._company_default_get(
+                                                    'dgii.purchase.report'))
+    name = fields.Char("Nombre")
+    year = fields.Integer(u"Año", size=4, default=lambda
+                          s: int(time.strftime("%Y")))
+    month = fields.Integer("Mes", size=2, default=lambda
+                           s: int(time.strftime("%m")))
+
     CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
     ITBIS_RETENIDO = fields.Float("Total ITBIS Retenido")
     ITBIS_TOTAL = fields.Float("Total ITBIS Pagado")
