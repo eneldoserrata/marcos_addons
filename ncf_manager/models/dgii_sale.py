@@ -101,8 +101,9 @@ class DgiiSaleReport(models.Model):
     TOTAL_VENTA = fields.Float(u"Venta", compute=_calc_total)
     TOTAL_VENTA_ITBIS = fields.Float(u"ITBIS", compute=_calc_total)
 
-    report_lines = fields.One2many("dgii.sale.report.line", "sale_report_id")
-    txt = fields.Binary(u"Reporte TXT", readonly=True)
+    report_lines = fields.One2many("dgii.sale.report.line",
+                                   "sale_report_id")
+    txt = fields.Binary("Reporte TXT", readonly=True)
     txt_name = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
             ('draft', 'Nuevo'),
@@ -246,7 +247,7 @@ class DgiiSaleReport(models.Model):
         header += company_fiscal_identificacion.rjust(11)
         header += str(self.year)
         header += str(self.month).zfill(2)
-        header += str(self.CANTIDAD_REGISTRO).zfill(12)
+        header += "{:.2f}".format(self.CANTIDAD_REGISTRO).zfill(12)
         header += "{:.2f}".format(self.TOTAL_MONTO_FACTURADO).zfill(16)
         lines.append(header)
 
@@ -269,9 +270,10 @@ class DgiiSaleReport(models.Model):
         file.close()
         file = open(path, 'rb')
         report = base64.b64encode(file.read())
-        report_name = 'DGII_607_{}_{}{}.TXT'.format
-        (company_fiscal_identificacion, str(self.year),
-         str(self.month).zfill(2))
+        report_name = 'DGII_607_{}_{}{}.TXT'.format(
+                                                company_fiscal_identificacion,
+                                                str(self.year),
+                                                str(self.month).zfill(2))
         self.write({'txt': report, 'txt_name': report_name})
 
     @api.multi
@@ -290,6 +292,7 @@ class DgiiSaleReport(models.Model):
 
 class DgiiSaleReportline(models.Model):
     _name = "dgii.sale.report.line"
+
     sale_report_id = fields.Many2one("dgii.sale.report")
     LINE = fields.Integer(u"Línea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)

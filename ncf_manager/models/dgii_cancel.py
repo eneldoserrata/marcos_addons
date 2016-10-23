@@ -134,7 +134,7 @@ class DgiiCancelReport(models.Model):
         lines = []
 
         header = "608"
-        header += company_fiscal_identificacion.zfill(11)
+        header += company_fiscal_identificacion.rjust(11)
         header += str(self.year)
         header += str(self.month).zfill(2)
         lines.append(header)

@@ -78,12 +78,13 @@ class DgiiExteriorReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError(u"El mes es inválido!")
+            raise exceptions.ValidationError(u"¡El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
-            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), str(
-             last_day).zfill(2)))
+            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
+                              str(last_day).zfill(2))
+            )
 
     def create_report_lines(self, invoices):
         if self._context.get("recreate", False):
@@ -176,7 +177,7 @@ class DgiiExteriorReport(models.Model):
         lines = []
 
         header = "609"
-        header += company_fiscal_identificacion.zfill(11)
+        header += company_fiscal_identificacion.rjust(11)
         header += str(self.year)
         header += str(self.month).zfill(2)
         header += "{:.2f}".format(self.TOTAL_MONTO_FACTURADO).zfill(16)

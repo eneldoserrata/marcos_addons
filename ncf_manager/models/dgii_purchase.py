@@ -69,11 +69,11 @@ class DgiiPurchaseReport(models.Model):
     report_lines = fields.One2many("dgii.purchase.report.line",
                                    "purchase_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
-    txt_filename = fields.Char("Nombre del archivo", readonly=True)
+    txt_name = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
-        ('draft', 'Nuevo'),
-        ('done', 'Generado')
-        ], default="draft")
+            ('draft', 'Nuevo'),
+            ('done', 'Generado')
+            ], default="draft")
 
     @api.model
     def create(self, vals):
@@ -85,12 +85,13 @@ class DgiiPurchaseReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError(u"El mes es inválido!")
+            raise exceptions.ValidationError(u"¡El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
-            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), str(
-             last_day).zfill(2)))
+            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
+                              str(last_day).zfill(2))
+            )
 
     def create_report_lines(self, invoices, tax_account):
         if self._context.get("recreate", False):
@@ -265,7 +266,7 @@ class DgiiPurchaseReport(models.Model):
                                                 company_fiscal_identificacion,
                                                 str(self.year),
                                                 str(self.month).zfill(2))
-        self.write({'txt': report, 'txt_filename': report_name})
+        self.write({'txt': report, 'txt_name': report_name})
 
     @api.multi
     def create_report(self):
