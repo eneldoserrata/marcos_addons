@@ -104,6 +104,7 @@ class DgiiCancelReport(models.Model):
                            "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                            "TIPO_ANULACION": TIPO_ANULACION
                            }))
+
             line_number += 1
 
         CANTIDAD_REGISTRO = len(lines)

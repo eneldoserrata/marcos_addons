@@ -110,27 +110,23 @@ class DgiiPurchaseReport(models.Model):
         RETENCION_RENTA = 0
 
         lines = []
-        line_number = 0
+        line_number = 1
         for inv in invoices:
-            line_number += 1
             LINE = line_number
-
             LINE_ITBIS_TOTAL = 0
             LINE_ITBIS_RETENIDO = 0
             LINE_RETENCION_RENTA = 0
             LINE_TAX_COST = 0
             CURRENCY_RATE = 1
-
             move_lines = [
              move_line for move_line in inv.move_id.line_ids if move_line.
              account_id.id in account_tax_ids]
+
             for move_line in move_lines:
                 amount = (move_line.debit if move_line.debit > 0
                           else move_line.credit)
-
                 if move_line.amount_currency:
                     CURRENCY_RATE = abs(amount)/abs(move_line.amount_currency)
-
                 if tax_account[move_line.account_id.id] == "itbis":
                     ITBIS_TOTAL += amount
                     LINE_ITBIS_TOTAL += amount
@@ -205,6 +201,8 @@ class DgiiPurchaseReport(models.Model):
                           (inv.amount_untaxed + LINE_TAX_COST) * CURRENCY_RATE,
                           "RETENCION_ISR": LINE_RETENCION_RENTA
                           }))
+
+            line_number += 1
 
         self.write({
                    "report_lines": lines,

@@ -136,9 +136,7 @@ class DgiiSaleReport(models.Model):
         lines = []
         line_number = 1
         for inv in invoices:
-
             LINE = line_number
-
             if inv.fiscal_position_id.client_fiscal_type == "final":
                 RNC_CEDULA = ""
                 TIPO_IDENTIFICACION = "3"
@@ -151,13 +149,11 @@ class DgiiSaleReport(models.Model):
                 RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
                 TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()
                                                  ) == 9 else "2"
-
             if not is_ncf(inv.number, inv.type):
                 raise exceptions.ValidationError(u"¡El número de NCF o el RNC/"
                                                  u"Cédula del clienten para el"
                                                  " comprobante {} no es"
                                                  u"válido!".format(inv.number))
-
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             if inv.type == "out_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number

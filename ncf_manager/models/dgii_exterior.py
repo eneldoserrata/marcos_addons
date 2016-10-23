@@ -93,23 +93,16 @@ class DgiiExteriorReport(models.Model):
         lines = []
         line_number = 1
         for inv in invoices:
-            line = []
-
             LINE = line_number
-
             RAZON_SOCIAL = inv.partner_id.name
-
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
                 inv.fiscal_position_id.supplier_fiscal_type)
-
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.ValidationError(
                     u"Debe de definir el tipo de gasto para la posición fiscal"
                     "{}".format(inv.fiscal_position_id.name))
-
             FECHA_FACTURA = inv.date_invoice
             FECHA_RETENCION_ISR = False
-
             MONTO_FACTURADO = 0.00
 
             for line in inv.invoice_line_ids:
