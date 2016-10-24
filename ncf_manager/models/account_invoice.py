@@ -539,6 +539,59 @@ class AccountInvoice(models.Model):
         return delta.days
 
     @api.one
+    def _get_outstanding_info_JSON(self):
+        self.outstanding_credits_debits_widget = json.dumps(False)
+
+        if self.state == 'open':
+            domain = [
+                ('journal_id.type', 'in', ('bank', 'cash', 'sale')),
+                ('account_id', '=', self.account_id.id),
+                ('partner_id', '=',
+                 self.env['res.partner']._find_accounting_partner(
+                                                self.partner_id).id),
+                ('reconciled', '=', False),
+                ('amount_residual', '!=', 0.0)]
+
+            if self.type in ('out_invoice', 'in_refund'):
+                domain.extend([('credit', '>', 0), ('debit', '=', 0)])
+                type_payment = _('Outstanding credits')
+            else:
+                domain.extend([('credit', '=', 0), ('debit', '>', 0)])
+                type_payment = _('Outstanding debits')
+
+            info = {'title': '', 'outstanding': True, 'content': [],
+                    'invoice_id': self.id
+                    }
+
+            lines = self.env['account.move.line'].search(domain)
+
+            if len(lines) != 0:
+                for line in lines:
+                    # get the outstanding residual value in invoice currency
+                    # get the outstanding residual value in its currency.
+                    # We don't want to show it
+                    # in the invoice currency since the exchange rate between
+                    # the invoice date and the payment date might have changed.
+
+                    if line.currency_id:
+                        currency_id = line.currency_id
+                        amount_to_show = abs(line.amount_residual_currency)
+                    else:
+                        currency_id = line.company_id.currency_id
+                        amount_to_show = abs(line.amount_residual)
+                    info['content'].append({
+                        'journal_name': line.ref or line.move_id.name,
+                        'amount': amount_to_show,
+                        'currency': currency_id.symbol,
+                        'id': line.id,
+                        'position': currency_id.position,
+                        'digits': [69, self.currency_id.decimal_places],
+                    })
+                info['title'] = type_payment
+                self.outstanding_credits_debits_widget = json.dumps(info)
+                self.has_outstanding = True
+
+    @api.one
     def copy(self, default=None):
         if self.type in ("in_refund", "out_refund"):
             raise exceptions.UserError(u"¡No está permitido duplicar notas de"
@@ -611,3 +664,33 @@ class AccountInvoice(models.Model):
                              ncf_next, self.journal_id.name))
                         next_ncf = False
                 inv.move_name = ncf_next
+
+
+class AccountInvoiceLine(models.Model):
+    _inherit = "account.invoice.line"
+
+    @api.one
+    def compute_tax_line(self):
+        currency = self.invoice_id and self.invoice_id.currency_id or None
+        price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
+        if self.invoice_line_tax_ids:
+            taxes = (
+                self.invoice_line_tax_ids.compute_all(
+                    price, currency, self.quantity, product=self.product_id,
+                    partner=self.invoice_id.partner_id))
+            self.tax_amount = sum([t["amount"] for t in taxes["taxes"]])
+        else:
+            self.tax_amount = 0.0
+
+    qty_allow_refund = fields.Float(
+        string='qty allow refund',
+        digits=dp.get_precision('Product Unit of Measure'),
+        required=False, copy=False)
+
+    refund_line_ref = fields.Many2one(
+        "account.invoice.line", string="origin line refund", copy=False)
+
+    tax_amount = fields.Monetary(
+        string='tax_amount',
+        required=False, currency_field="company_currency_id",
+        compute=compute_tax_line)
