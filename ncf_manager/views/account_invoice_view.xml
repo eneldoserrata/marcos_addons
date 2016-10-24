@@ -36,7 +36,7 @@
                 </field>
                 <field name="fiscal_position_id" position="replace"/>
                 <field name="journal_id" position="after">
-                    <field name="fiscal_position_id"/>
+                    <field attrs="{'required': True}" name="fiscal_position_id"/>
                 </field>
                 <field name="user_id" position="after">
                     <field attrs="{'readonly': [('state','!=','draft')]}" name="shop_id" required="1"/>
@@ -98,7 +98,7 @@
                 </field>
                 <field name="fiscal_position_id" position="replace"/>
                 <field name="journal_id" position="after">
-                    <field name="fiscal_position_id"/>
+                    <field attrs="{'required': True}" name="fiscal_position_id"/>
                 </field>
                 <field name="currency_id" position="after">
                     <field attrs="{'invisible': [('rate','=',1)]}" groups="base.group_multi_currency" name="rate"/>

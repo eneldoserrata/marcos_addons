@@ -57,7 +57,8 @@ class PosOrder(models.Model):
                 for rec in orders:
                     pos_reference = ""
                     if rec.pos_reference:
-                        pos_reference = rec.pos_reference.split(" ")[1]
+                        if len(rec.pos_reference.split(" ")) == 2:
+                            pos_reference = rec.pos_reference.split(" ")[1]
                     order = {"id": rec.id,
                              "date_order": rec.date_order,
                              "lines": [],

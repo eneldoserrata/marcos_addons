@@ -16,7 +16,6 @@
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/ipf_manager/static/src/js/models.js"></script>
                 <script type="text/javascript" src="/ipf_manager/static/src/js/devices.js"></script>
-                <script type="text/javascript" src="/ipf_manager/static/src/js/screen.js"></script>
             </xpath>
         </template>
 

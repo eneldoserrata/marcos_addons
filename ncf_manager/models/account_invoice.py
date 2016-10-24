@@ -181,6 +181,7 @@ class AccountInvoice(models.Model):
 
     internal_number = fields.Char(u"Número de factura")
     anulation_type = fields.Selection([
+
         ("01", u"Deterioro de Factura Pre-impresa"),
         ("02", u"Errores de Impresión (Factura Pre-impresa)"),
         ("03", u"Impresión Defectuosa"),
@@ -373,10 +374,11 @@ class AccountInvoice(models.Model):
                      ('number', '=', invoice.move_name),
                      ('state', 'in', ('open', 'paid', 'cancel'))]
                     )
+
                 if inv_exist:
                     raise exceptions.Warning(
-                        u"Este número de comprobante ya fue registrado para"
-                        " este proveedor")
+                        u"Este número de comprobante fiscal ya se encuentra en"
+                        " una factura en borrador o cancelada este proveedor")
                 if (_internet_on() and
                         self.journal_id.ncf_remote_validation):
                     if invoice.journal_id.purchase_type == 'normal':
@@ -387,6 +389,7 @@ class AccountInvoice(models.Model):
                                 self.env.user.company_id.vat,
                                 invoice.move_name)
                     if not result.get("valid", False):
+
                         raise exceptions.UserError(
                             u"¡El número de comprobante no es válido! No pasó"
                             u" la validación en DGII. Verifique que el NCF y"

@@ -5,6 +5,11 @@
         <button class="btn ipf-button"><i class="fa fa-print"/> Impresion fiscal</button>
     </t>
 
+    <t t-extend="XmlReceipt">
+        <t t-jquery="img" t-operation="after">
+            <ipfordername><t t-esc='receipt.name' /></ipfordername>
+        </t>
+    </t>
 
 
 </template>
