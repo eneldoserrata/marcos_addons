@@ -16,33 +16,38 @@
                     <field invisible="1" name="credit_out_invoice"/>
                     <field invisible="1" name="authorize"/>
                     <field invisible="1" name="overdue_type"/>
-                    <div attrs="{'invisible': ['|','|','|','|','|',('overdue_type','=','none'),                                                ('credit_out_invoice','=',False),                                                ('state','in',('open','paid')),                                                ('partner_id','=',False),                                                ('authorize','=',True),                                                ('type','!=','out_invoice')]}" class="alert alert-danger" role="alert" style="margin-bottom:0px;">
+                    <div attrs="{'invisible': ['|','|','|','|','|',('overdue_type','=','none'), ('credit_out_invoice','=',False), ('state','in',('open','paid')), ('partner_id','=',False), ('authorize','=',True), ('type','!=','out_invoice')]}" class="alert alert-danger" role="alert" style="margin-bottom:0px;">
                         <h2>Crédito bloqueado</h2>
                         <button name="authorize_credit" string="Autorizar crédito" type="object"/>
                     </div>
-                    <div attrs="{'invisible': ['|',('authorize','=',False),                                                ('state','in',('open','paid'))]}" class="alert alert-success" role="alert" style="margin-bottom:0px;">
+                    <div attrs="{'invisible': ['|',('authorize','=',False), ('state','in',('open','paid'))]}" class="alert alert-success" role="alert" style="margin-bottom:0px;">
                         <h2>Crédito autorizado</h2>
                         <button name="disallows_credit" string="Desautorizar crédito" type="object"/>
                     </div>
                 </field>
                 <xpath expr="//button[@name='invoice_cancel']" position="replace">
-                    <button groups="account.group_account_user" name="%(account.action_account_invoice_cancel)d" states="draft,proforma2,open" string="Cancel Invoice" type="action"/>
+                    <button groups="account.group_account_user" name="188" states="draft,proforma2,open" string="Cancel Invoice" type="action"/>
                 </xpath>
-                <field name="journal_id" position="replace"/>
+                <field name="journal_id" position="replace">
+                    <field groups="account.group_account_manager" name="move_name"/>
+                </field>
                 <field name="partner_id" position="after">
                     <field attrs="{'required': True}" name="journal_id"/>
+                </field>
+                <field name="fiscal_position_id" position="replace"/>
+                <field name="journal_id" position="after">
+                    <field name="fiscal_position_id"/>
+                </field>
                 <field name="user_id" position="after">
                     <field attrs="{'readonly': [('state','!=','draft')]}" name="shop_id" required="1"/>
-                    <field name="journal_id" readonly="0"/>
                 </field>
                 <field name="date_due" position="replace"/>
                 <field name="date_invoice" position="after">
                     <field attrs="{'invisible': [('credit_out_invoice','=',False)]}" name="date_due"/>
                 </field>
-                <field name="fiscal_position_id" position="replace"/>
                 <field name="fiscal_position_id" position="attributes">
                     <attribute name="domain">[('supplier','=',False)]</attribute>
-                    <attribute name="required">1</attribute>
+                    <attribute name="required">0</attribute>
                 </field>
                 <field name="user_id" position="replace"/>
                 <field name="payment_term_id" position="replace">
@@ -86,14 +91,13 @@
                     <field attrs="{'readonly': [('purchase_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Vendor"/>
                     <field name="journal_id"/>
                     <field invisible="1" name="ncf_required"/>
-                    <field attrs="{'size': 19, 'invisible': [('ncf_required','=',False)], 'required': [('ncf_required','=',True)],                     'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>
+                    <field attrs="{'size': 19, 'invisible': [('ncf_required','=',False)], 'required': [('ncf_required','=',True)], 'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>
                 </field>
-                <field name="fiscal_position_id" position="replace"/>
                 <field name="fiscal_position_id" position="attributes">
                     <attribute name="domain">[('supplier','=',True)]</attribute>
-                    <attribute name="required">1</attribute>
                 </field>
-                <field name="fiscal_position_id" position="after">
+                <field name="fiscal_position_id" position="replace"/>
+                <field name="journal_id" position="after">
                     <field name="fiscal_position_id"/>
                 </field>
                 <field name="currency_id" position="after">
