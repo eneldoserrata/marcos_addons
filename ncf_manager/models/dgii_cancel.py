@@ -79,12 +79,13 @@ class DgiiCancelReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError(u"El mes es inválido!")
+            raise exceptions.ValidationError(u"¡El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
-            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), str(
-             last_day).zfill(2)))
+            "{}-{}-{}".format(str(self.year), str(self.month).zfill(2),
+                              str(last_day).zfill(2))
+            )
 
     def create_report_lines(self, invoices):
         if self._context.get("recreate", False):
@@ -116,6 +117,11 @@ class DgiiCancelReport(models.Model):
         return res
 
     def generate_txt(self):
+        if not self.company_id.vat:
+            raise exceptions.ValidationError(
+                u"Para poder generar el 608 primero debe especificar el RNC/"
+                u"Cédula de la compañia.")
+
         company_fiscal_identificacion = re.sub(
             "[^0-9]", "", self.company_id.vat)
 
@@ -132,6 +138,7 @@ class DgiiCancelReport(models.Model):
         header += company_fiscal_identificacion.rjust(11)
         header += str(self.year)
         header += str(self.month).zfill(2)
+        header += str(self.CANTIDAD_REGISTRO).zfill(6)
         lines.append(header)
 
         for line in self.report_lines:
@@ -142,7 +149,7 @@ class DgiiCancelReport(models.Model):
             lines.append(ln)
 
         for line in lines:
-            file.write(line+"\n")
+            file.write(line + "\n")
 
         file.close()
         file = open(path, 'rb')
