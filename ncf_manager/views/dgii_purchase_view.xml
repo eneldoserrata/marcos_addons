@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
-
-        <!-- Inherit Form View to Modify it -->
         <record id="inherit_view_company_inherit_form" model="ir.ui.view">
             <field name="name">inherit_view_company_inherit_form</field>
             <field name="model">res.company</field>
             <field name="inherit_id" ref="account.view_company_inherit_form"/>
             <field name="arch" type="xml">
-
                 <field name="tax_calculation_rounding_method" position="after">
                     <field name="payment_tax_on_606"/>
                 </field>
-
             </field>
         </record>
-
         <record id="ncf_manager_dgii_purchase_report_form" model="ir.ui.view">
             <field name="name">ncf manager dgii purchase report form</field>
             <field name="model">dgii.purchase.report</field>
             <field name="arch" type="xml">
                 <form string="Reporte 606">
                     <header>
-                        <button name="create_report" string="Regenerar reporte" class="oe_highlight" states="done" type="object" context="{'recreate':True}"/>
+                        <button class="oe_highlight" context="{'recreate':True}" name="create_report" states="done" string="Regenerar reporte" type="object"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <group>
                         <group>
                             <field name="company_id" readonly="[('state','=','done')]"/>
-                            <field name="year" placeholder="2018" required="1" attrs="{'readonly': [('state','=','done')]}"/>
-                            <field name="month" placeholder="12" required="1" attrs="{'readonly': [('state','=','done')]}"/>
-                            <field name="txt" filename="txt_filename"/>
+                            <field name="year" placeholder="2018" required="1"/>
+                            <field name="month" placeholder="12" required="1"/>
+                            <field filename="txt_name" name="txt"/>
                         </group>
                         <group>
                             <field name="CANTIDAD_REGISTRO" readonly="1"/>
@@ -40,12 +34,9 @@
                             <field name="TOTAL_MONTO_FACTURADO" readonly="1"/>
                             <field name="RETENCION_RENTA" readonly="1"/>
                         </group>
-
-
                     </group>
                     <notebook>
                         <page string="Detalle">
-
                             <field name="report_lines" readonly="1">
                                 <tree>
                                     <field name="LINE"/>
@@ -61,14 +52,11 @@
                                     <field name="RETENCION_RENTA"/>
                                 </tree>
                             </field>
-
                         </page>
                     </notebook>
-
                 </form>
             </field>
         </record>
-
         <record id="ncf_manager_dgii_purchase_report_tree" model="ir.ui.view">
             <field name="name">ncf manager dgii purchase report tree</field>
             <field name="model">dgii.purchase.report</field>
@@ -82,7 +70,6 @@
                 </tree>
             </field>
         </record>
-
         <record id="ncf_manager_dgii_purchase_report_action" model="ir.actions.act_window">
             <field name="name">Reporte 606</field>
             <field name="type">ir.actions.act_window</field>
@@ -97,10 +84,7 @@
                 </p>
             </field>
         </record>
-
         <!-- This Menu Item must have a parent and an action -->
-        <menuitem id="ncf_manager_dgii_purchase_report_menu" name="Reporte 606" parent="marcos_account_dgii_flies_menu"
-                  action="ncf_manager_dgii_purchase_report_action" sequence="1"/>
-
+        <menuitem action="ncf_manager_dgii_purchase_report_action" id="ncf_manager_dgii_purchase_report_menu" name="Reporte 606" parent="marcos_account_dgii_flies_menu" sequence="1"/>
     </data>
 </openerp>
