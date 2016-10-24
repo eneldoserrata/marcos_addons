@@ -514,10 +514,6 @@ odoo.define('ipf_manager.service', function (require) {
 
         },
         print_receipt: function (data, context) {
-            console.log("======================================");
-            console.log(data);
-            console.log(context);
-            console.log("======================================");
             console.log("print_receipt");
             var self = this;
             return $.ajax({

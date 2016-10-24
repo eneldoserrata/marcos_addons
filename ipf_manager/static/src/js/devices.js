@@ -113,7 +113,7 @@ odoo.define('ipf_manager.devices', function (require) {
                     cashier: self.pos.user.id,
                     subsidiary: self.pos.config.iface_fiscal_printer_subsidiary[0],
                     ncf: result.ncf || "Documento de no venta",
-                    reference_ncf: order.get_credit_ncf() || "",
+                    reference_ncf: result.origin || "",
                     client: order.get_client().name,
                     rnc: order.get_client().vat || "",
                     items: [],
