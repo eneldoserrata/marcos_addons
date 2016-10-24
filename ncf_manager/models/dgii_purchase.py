@@ -34,7 +34,6 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
 from openerp import models, fields, api, exceptions
 import calendar
 import base64
@@ -47,22 +46,20 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     payment_tax_on_606 = fields.Boolean("Reportar retenciones del 606 en la"
-                                        "fecha del pago")
+                                        " fecha del pago")
 
 
 class DgiiPurchaseReport(models.Model):
     _name = "dgii.purchase.report"
 
-    company_id = fields.Many2one('res.company', string='Company',
-                                 required=True, default=lambda self:
-                                 self.env['res.company']._company_default_get(
-                                                    'dgii.purchase.report'))
-    name = fields.Char("Nombre")
-    year = fields.Integer(u"Año", size=4, default=lambda
-                          s: int(time.strftime("%Y")))
-    month = fields.Integer("Mes", size=2, default=lambda
-                           s: int(time.strftime("%m")))
-
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True, default=lambda self:
+        self.env['res.company']._company_default_get('dgii.purchase.report'))
+    name = fields.Char()
+    year = fields.Integer(
+        u"Año", size=4, default=lambda s: int(time.strftime("%Y")))
+    month = fields.Integer(
+        "Mes", size=2, default=lambda s: int(time.strftime("%m")))
     CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
     ITBIS_RETENIDO = fields.Float("Total ITBIS Retenido")
     ITBIS_TOTAL = fields.Float("Total ITBIS Pagado")
@@ -73,9 +70,9 @@ class DgiiPurchaseReport(models.Model):
     txt = fields.Binary("Reporte TXT", readonly=True)
     txt_name = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
-            ('draft', 'Nuevo'),
-            ('done', 'Generado')
-            ], default="draft")
+        ('draft', 'Nuevo'),
+        ('done', 'Generado')
+        ], default="draft")
 
     @api.model
     def create(self, vals):
@@ -87,7 +84,7 @@ class DgiiPurchaseReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError(u"¡El mes es inválido!")
+            raise exceptions.ValidationError(u"El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
@@ -110,23 +107,27 @@ class DgiiPurchaseReport(models.Model):
         RETENCION_RENTA = 0
 
         lines = []
-        line_number = 1
+        line_number = 0
         for inv in invoices:
+            line_number += 1
             LINE = line_number
+
             LINE_ITBIS_TOTAL = 0
             LINE_ITBIS_RETENIDO = 0
             LINE_RETENCION_RENTA = 0
             LINE_TAX_COST = 0
             CURRENCY_RATE = 1
+
             move_lines = [
              move_line for move_line in inv.move_id.line_ids if move_line.
              account_id.id in account_tax_ids]
-
             for move_line in move_lines:
                 amount = (move_line.debit if move_line.debit > 0
                           else move_line.credit)
+
                 if move_line.amount_currency:
                     CURRENCY_RATE = abs(amount)/abs(move_line.amount_currency)
+
                 if tax_account[move_line.account_id.id] == "itbis":
                     ITBIS_TOTAL += amount
                     LINE_ITBIS_TOTAL += amount
@@ -183,36 +184,32 @@ class DgiiPurchaseReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-            lines.append((0, False, {
-                          "LINE": LINE,
-                          "RNC_CEDULA": RNC_CEDULA,
-                          "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
-                          "TIPO_BIENES_SERVICIOS_COMPRADOS":
-                          TIPO_BIENES_SERVICIOS_COMPRADOS,
-                          "NUMERO_COMPROBANTE_FISCAL":
-                          NUMERO_COMPROBANTE_FISCAL,
-                          "NUMERO_COMPROBANTE_MODIFICADO":
-                          NUMERO_COMPROBANTE_MODIFICADO,
-                          "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
-                          "FECHA_PAGO": FECHA_PAGO,
-                          "ITBIS_FACTURADO": LINE_ITBIS_TOTAL,
-                          "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
-                          "MONTO_FACTURADO":
-                          (inv.amount_untaxed + LINE_TAX_COST) * CURRENCY_RATE,
-                          "RETENCION_ISR": LINE_RETENCION_RENTA
-                          }))
+            lines.append((0, False,
+                          {"LINE": LINE,
+                           "RNC_CEDULA": RNC_CEDULA,
+                           "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
+                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
+                           TIPO_BIENES_SERVICIOS_COMPRADOS,
+                           "NUMERO_COMPROBANTE_FISCAL":
+                           NUMERO_COMPROBANTE_FISCAL,
+                           "NUMERO_COMPROBANTE_MODIFICADO":
+                           NUMERO_COMPROBANTE_MODIFICADO,
+                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
+                           "FECHA_PAGO": FECHA_PAGO,
+                           "ITBIS_FACTURADO": LINE_ITBIS_TOTAL,
+                           "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
+                           "MONTO_FACTURADO": (inv.amount_untaxed +
+                                               LINE_TAX_COST) * CURRENCY_RATE,
+                           "RETENCION_RENTA": LINE_RETENCION_RENTA}))
 
-            line_number += 1
-
-        self.write({
-                   "report_lines": lines,
-                   "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
-                   "ITBIS_RETENIDO": abs(ITBIS_RETENIDO),
-                   "ITBIS_TOTAL": ITBIS_TOTAL,
-                   "TOTAL_MONTO_FACTURADO": TOTAL_MONTO_FACTURADO,
-                   "RETENCION_RENTA": RETENCION_RENTA,
-                   "state": "done"
-                   })
+        self.write(
+                   {"report_lines": lines,
+                    "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
+                    "ITBIS_RETENIDO": abs(ITBIS_RETENIDO),
+                    "ITBIS_TOTAL": ITBIS_TOTAL,
+                    "TOTAL_MONTO_FACTURADO": TOTAL_MONTO_FACTURADO,
+                    "RETENCION_RENTA": RETENCION_RENTA,
+                    "state": "done"})
 
     def generate_txt(self):
         if not self.company_id.vat:
@@ -225,8 +222,8 @@ class DgiiPurchaseReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
-                                             " su empresa!")
+            raise exceptions.ValidationError("Debe configurar el RNC de su"
+                                             "empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -271,10 +268,11 @@ class DgiiPurchaseReport(models.Model):
     @api.multi
     def create_report(self):
         start_date, end_date = self.get_date_range()
+
         taxes = self.env["account.tax"].search(
-            [('company_id', '=', self.company_id.id),
-             ('type_tax_use', '=', 'purchase')]
-            )
+                                    [('company_id', '=', self.company_id.id),
+                                     ('type_tax_use', '=', 'purchase')]
+                                     )
         tax_account = {}
         for tax in taxes:
             if not tax_account.get("tax_id", False) == tax.account_id.id:

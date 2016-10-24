@@ -63,7 +63,7 @@ class DgiiCancelReport(models.Model):
     report_lines = fields.One2many("dgii.cancel.report.line",
                                    "cancel_report_id")
     txt = fields.Binary("Reporte TXT", readonly=True)
-    txt_name = fields.Char("Nombre", readonly=True)
+    txt_name = fields.Char("Nombre del archivo", readonly=True)
     state = fields.Selection([
             ('draft', 'Nuevo'),
             ('done', 'Generado')

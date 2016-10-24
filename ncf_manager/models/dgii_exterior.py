@@ -192,10 +192,8 @@ class DgiiExteriorReport(models.Model):
             ln += "{:.2f}".format(line.MONTO_FACTURADO).zfill(12)
             lines.append(ln)
 
-        line_count = 1
-        for l in lines:
-            line_count += 1
-            file.write(l + "\n")
+        for line in lines:
+            file.write(line + "\n")
 
         file.close()
         file = open(path, 'rb')

@@ -80,7 +80,7 @@ class DgiiSaleReport(models.Model):
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env['res.company']._company_default_get(
-                                                        'dgii.sale.report'))
+                                                    'dgii.sale.report'))
     name = fields.Char("Nombre")
     year = fields.Integer(u"Año", size=4, default=lambda
                           s: int(time.strftime("%Y")))
@@ -266,7 +266,7 @@ class DgiiSaleReport(models.Model):
             lines.append(ln)
 
         for line in lines:
-            file.write(line+"\n")
+            file.write(line + "\n")
 
         file.close()
         file = open(path, 'rb')
