@@ -28,23 +28,18 @@
                 <xpath expr="//button[@name='invoice_cancel']" position="replace">
                     <button groups="account.group_account_user" name="%(account.action_account_invoice_cancel)d" states="draft,proforma2,open" string="Cancel Invoice" type="action"/>
                 </xpath>
-                <field name="journal_id" position="replace">
+                <field name="journal_id" position="replace"/>
                 <field name="partner_id" position="after">
                     <field attrs="{'required': True}" name="journal_id"/>
-                </field>
-                <field name="fiscal_position_id" position="replace"/>
-                    <field groups="account.group_account_manager" name="move_name"/>
-                </field>
-                <field name="journal_id" position="after">
-                    <field attrs="{'required': True}" name="fiscal_position_id"/>
-                </field>
                 <field name="user_id" position="after">
                     <field attrs="{'readonly': [('state','!=','draft')]}" name="shop_id" required="1"/>
+                    <field name="journal_id" readonly="0"/>
                 </field>
                 <field name="date_due" position="replace"/>
                 <field name="date_invoice" position="after">
                     <field attrs="{'invisible': [('credit_out_invoice','=',False)]}" name="date_due"/>
                 </field>
+                <field name="fiscal_position_id" position="replace"/>
                 <field name="fiscal_position_id" position="attributes">
                     <attribute name="domain">[('supplier','=',False)]</attribute>
                     <attribute name="required">1</attribute>
@@ -98,7 +93,7 @@
                     <attribute name="domain">[('supplier','=',True)]</attribute>
                     <attribute name="required">1</attribute>
                 </field>
-                <field name="journal_id" position="after">
+                <field name="fiscal_position_id" position="after">
                     <field name="fiscal_position_id"/>
                 </field>
                 <field name="currency_id" position="after">
