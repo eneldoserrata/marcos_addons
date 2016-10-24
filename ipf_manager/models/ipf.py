@@ -153,10 +153,17 @@ class ipf_printer_config(models.Model):
 
     @api.model
     def print_done(self, values):
+
         id = values[0]
         nif = values[1]
-        if not nif == None:
-            self.pool.get("account.invoice").write(self.env.cr, self.env.uid, id, {"fiscal_nif": nif})
+
+        if self._context.get("active_model", False) == "pos.order" and nif:
+            invoice_id = self.env["pos.order"].browse(id).invoice_id
+        elif nif:
+            invoice_id = self.env["account.invoices"].browse(id)
+
+        if nif:
+            invoice_id.fiscal_nif = nif
         return True
 
     @api.model
