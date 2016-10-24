@@ -356,7 +356,7 @@ class AccountInvoice(models.Model):
     def _check_ncf(self, rnc, ncf):
         if ncf and rnc:
             res = requests.get(
-                    "http://api.iterativo.do/ncf/{}/{}".format(rnc, ncf)
+                    "http://192.168.2.158:8080/ncf/{}/{}".format(rnc, ncf)
                     )
             if res.status_code == 200:
                 return res.json()
