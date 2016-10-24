@@ -165,10 +165,11 @@ class DgiiExteriorReport(models.Model):
 
         company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
+
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
-                                             "su empresa!")
+            raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
+                                             " su empresa!")
 
         path = '/tmp/609{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -200,24 +201,25 @@ class DgiiExteriorReport(models.Model):
         file = open(path, 'rb')
         report = base64.b64encode(file.read())
         report_name = 'DGII_609_{}_{}{}.TXT'.format(
-                       company_fiscal_identificacion, str(self.year),
-                       str(self.month).zfill(2))
+                                                company_fiscal_identificacion,
+                                                str(self.year),
+                                                str(self.month).zfill(2))
         self.write({'txt': report, 'txt_name': report_name})
 
     @api.multi
     def create_report(self):
         start_date, end_date = self.get_date_range()
         exterior_journal_ids = (
-            [rec.id for rec in self.env["account.journal"].search([
-             ('purchase_type', '=', 'exterior')])
-             ])
-        invoices = self.env["account.invoice"].search([
-            ('date_invoice', '>=', start_date),
-            ('date_invoice', '<=', end_date),
-            ('state', 'in', ('open', 'paid')),
-            ('type', '=', 'in_invoice'),
-            ('journal_id', 'in', exterior_journal_ids)
-             ])
+            rec.id for rec in self.env["account.journal"].search(
+                [('purchase_type', '=', 'exterior')])
+            )
+        invoices = self.env["account.invoice"].search(
+            [('date_invoice', '>=', start_date),
+             ('date_invoice', '<=', end_date),
+             ('state', 'in', ('open', 'paid')),
+             ('type', '=', 'in_invoice'),
+             ('journal_id', 'in', exterior_journal_ids)]
+            )
         self.create_report_lines(invoices)
         self.generate_txt()
         return True

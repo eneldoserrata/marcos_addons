@@ -225,8 +225,8 @@ class DgiiPurchaseReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError("Debe configurar el RNC de su"
-                                             "empresa!")
+            raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
+                                             " su empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -271,11 +271,10 @@ class DgiiPurchaseReport(models.Model):
     @api.multi
     def create_report(self):
         start_date, end_date = self.get_date_range()
-
         taxes = self.env["account.tax"].search(
-                                    [('company_id', '=', self.company_id.id),
-                                     ('type_tax_use', '=', 'purchase')]
-                                     )
+            [('company_id', '=', self.company_id.id),
+             ('type_tax_use', '=', 'purchase')]
+            )
         tax_account = {}
         for tax in taxes:
             if not tax_account.get("tax_id", False) == tax.account_id.id:

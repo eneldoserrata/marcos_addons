@@ -237,8 +237,8 @@ class DgiiSaleReport(models.Model):
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
-            raise exceptions.ValidationError(u"¡Debe de configurar el RNC de"
-                                             "su empresa!")
+            raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
+                                             " su empresa!")
 
         path = '/tmp/607{}.txt'.format(company_fiscal_identificacion)
         file = open(path, 'w')
@@ -285,7 +285,7 @@ class DgiiSaleReport(models.Model):
              ('date_invoice', '<=', end_date),
              ('state', 'in', ('open', 'paid')),
              ('type', 'in', ('out_invoice', 'out_refund'))]
-             )
+            )
         self.create_report_lines(invoices)
         self.generate_txt()
         return True

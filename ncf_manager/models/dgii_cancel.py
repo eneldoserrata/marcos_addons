@@ -122,8 +122,8 @@ class DgiiCancelReport(models.Model):
                 u"Para poder generar el 608 primero debe especificar el RNC/"
                 u"Cédula de la compañia.")
 
-        company_fiscal_identificacion = re.sub(
-            "[^0-9]", "", self.company_id.vat)
+        company_fiscal_identificacion = re.sub("[^0-9]", "",
+                                               self.company_id.vat)
 
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
@@ -154,24 +154,21 @@ class DgiiCancelReport(models.Model):
         file.close()
         file = open(path, 'rb')
         report = base64.b64encode(file.read())
-        report_name = (
-            'DGII_608_{}_{}{}.TXT'.format(company_fiscal_identificacion,
-                                          str(self.year),
-                                          str(self.month).zfill(2))
-            )
+        report_name = 'DGII_608_{}_{}{}.TXT'.format(
+                                                company_fiscal_identificacion,
+                                                str(self.year),
+                                                str(self.month).zfill(2))
         self.write({'txt': report, 'txt_name': report_name})
 
     @api.multi
     def create_report(self):
         start_date, end_date = self.get_date_range()
-        invoices = (
-            self.env["account.invoice"].search([
-             ('date_invoice', '>=', start_date),
+        invoices = self.env["account.invoice"].search(
+            [('date_invoice', '>=', start_date),
              ('date_invoice', '<=', end_date),
              ('state', '=', 'cancel'),
-             ('type', 'in', ('out_invoice', 'out_refund'))])
+             ('type', 'in', ('out_invoice', 'out_refund'))]
             )
-
         self.create_report_lines(invoices)
         self.generate_txt()
         return True
