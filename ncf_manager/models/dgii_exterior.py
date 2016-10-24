@@ -210,9 +210,9 @@ class DgiiExteriorReport(models.Model):
     def create_report(self):
         start_date, end_date = self.get_date_range()
         exterior_journal_ids = (
-            rec.id for rec in self.env["account.journal"].search(
-                [('purchase_type', '=', 'exterior')])
-            )
+            [rec.id for rec in self.env["account.journal"].search([
+             ('purchase_type', '=', 'exterior')])
+             ])
         invoices = self.env["account.invoice"].search(
             [('date_invoice', '>=', start_date),
              ('date_invoice', '<=', end_date),
