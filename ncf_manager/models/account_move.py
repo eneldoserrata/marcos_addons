@@ -79,7 +79,7 @@ class AccountMove(models.Model):
 
                 if fiscal_position is not False and ncf_control is True:
                     if (fiscal_position != 'final' and
-                       invoice.partner_id.vat is not False):
+                       invoice.partner_id.vat is False):
                         raise ValidationError(
                             u"Para este tipo de posición fiscal el contacto"
                             " debe de tener un RNC establecido!")

@@ -1,4 +1,4 @@
-odoo.define('ncf_pos.popups', function (require) {
+    odoo.define('ncf_pos.popups', function (require) {
     "use strict";
 
 
