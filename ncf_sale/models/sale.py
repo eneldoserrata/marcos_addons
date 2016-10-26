@@ -111,6 +111,3 @@ class SaleOrder(models.Model):
             for order in orders:
                 order.invoice_ids.write({"journal_id": order.journal_id.id})
         return res
-
-
-

@@ -1,11 +1,11 @@
-odoo.define('ncf_pos.transcoder', function (require) {
+odoo.define('ncf_pos.transcoder', function(require) {
 
     var transcoder = require('web_editor.transcoder');
 
     var cache = {};
     var rulesCache = [];
 
-    var getMatchedCSSRules = function (a) {
+    var getMatchedCSSRules = function(a) {
         if (cache[a.tagName + "." + a.className]) {
             return cache[a.tagName + "." + a.className];
         }
@@ -41,7 +41,10 @@ odoo.define('ncf_pos.transcoder', function (require) {
                             selectorText.indexOf("'") === -1) {
                             var st = selectorText.split(/\s*,\s*/);
                             for (var k = 0; k < st.length; k++) {
-                                rulesCache.push({'selector': st[k], 'style': rules[r].style});
+                                rulesCache.push({
+                                    'selector': st[k],
+                                    'style': rules[r].style
+                                });
                             }
                         }
                     }
@@ -59,7 +62,7 @@ odoo.define('ncf_pos.transcoder', function (require) {
                     if (style.parentRule) {
                         var style_obj = {};
                         for (var k = 0, len = style.length; k < len; k++) {
-                            style_obj[style[k]] = style[style[k].replace(/-(.)/g, function (a, b) {
+                            style_obj[style[k]] = style[style[k].replace(/-(.)/g, function(a, b) {
                                 return b.toUpperCase();
                             })];
                             if (new RegExp(style[k] + '\s*:[^:;]+!important').test(style.cssText)) {
@@ -70,46 +73,45 @@ odoo.define('ncf_pos.transcoder', function (require) {
                     }
                     css.push([rulesCache[r].selector, style]);
                 }
-            }
-            catch(err) {
-                continue
+            } catch (err) {
+                continue;
             }
         }
 
         function specificity(selector) {
             // http://www.w3.org/TR/css3-selectors/#specificity
             var a = 0;
-            selector.replace(/#[a-z0-9_-]+/gi, function () {
+            selector.replace(/#[a-z0-9_-]+/gi, function() {
                 a++;
                 return "";
             });
             var b = 0;
-            selector.replace(/(\.[a-z0-9_-]+)|(\[.*?\])/gi, function () {
+            selector.replace(/(\.[a-z0-9_-]+)|(\[.*?\])/gi, function() {
                 b++;
                 return "";
             });
             var c = 0;
-            selector.replace(/(\s+|:+)[a-z0-9_-]+/gi, function (a) {
+            selector.replace(/(\s+|:+)[a-z0-9_-]+/gi, function(a) {
                 if (a.indexOf(':not(') === -1) c++;
                 return "";
             });
             return a * 100 + b * 10 + c;
         }
 
-        css.sort(function (a, b) {
+        css.sort(function(a, b) {
             return specificity(a[0]) - specificity(b[0]);
         });
 
         var style = {};
-        _.each(css, function (v, k) {
-            _.each(v[1], function (v, k) {
+        _.each(css, function(v, k) {
+            _.each(v[1], function(v, k) {
                 if (v && k.indexOf('-webkit') === -1 && (!style[k] || style[k].indexOf('important') === -1 || v.indexOf('important') !== -1)) {
                     style[k] = v;
                 }
             });
         });
 
-        _.each(style, function (v, k) {
+        _.each(style, function(v, k) {
             if (v.indexOf('important') !== -1) {
                 style[k] = v.slice(0, v.length - 11);
             }
@@ -138,15 +140,15 @@ odoo.define('ncf_pos.transcoder', function (require) {
 
 
     // convert class into inline style to send by mail
-    transcoder.class_to_style = function ($editable) {
+    transcoder.class_to_style = function($editable) {
         if (!rulesCache.length) {
             getMatchedCSSRules($editable[0]);
         }
-        $editable.find('*').each(function () {
+        $editable.find('*').each(function() {
             var $target = $(this);
             var css = getMatchedCSSRules(this);
             var style = $target.attr("style") || "";
-            _.each(css, function (v, k) {
+            _.each(css, function(v, k) {
                 if (!(new RegExp('(^|;)\s*' + k).test(style))) {
                     style = k + ":" + v + ";" + style;
                 }
@@ -154,24 +156,24 @@ odoo.define('ncf_pos.transcoder', function (require) {
             $target.attr("style", style);
         });
     };
-// convert style into inline class from mail
-    transcoder.style_to_class = function ($editable) {
+    // convert style into inline class from mail
+    transcoder.style_to_class = function($editable) {
         getMatchedCSSRules($editable[0]);
 
         var $c = $('<span/>').appendTo("body");
 
-        $editable.find('*').each(function () {
+        $editable.find('*').each(function() {
             var $target = $(this);
             var css = getMatchedCSSRules(this);
             var style = "";
-            _.each(css, function (v, k) {
+            _.each(css, function(v, k) {
                 if (!(new RegExp('(^|;)\s*' + k).test(style))) {
                     style = k + ":" + v + ";" + style;
                 }
             });
             css = $c.attr("style", style).attr("style").split(/\s*;\s*/);
             style = $target.attr("style") || "";
-            _.each(css, function (v) {
+            _.each(css, function(v) {
                 style = style.replace(v, '');
             });
             style = style.replace(/;+(\s;)*/g, ';').replace(/^;/g, '');

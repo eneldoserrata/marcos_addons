@@ -1,15 +1,15 @@
-odoo.define('pos_manager.chrome', function (require) {
+odoo.define('pos_manager.chrome', function(require) {
     "use strict";
 
     var chrome = require('point_of_sale.chrome');
     var screens = require('point_of_sale.screens');
 
     chrome.Chrome.include({
-        init: function () {
+        init: function() {
             this._super.apply(this, arguments);
-            this.pos.bind('change:selectedOrder', this.check_allow_delete_order, this)
+            this.pos.bind('change:selectedOrder', this.check_allow_delete_order, this);
         },
-        check_allow_delete_order: function () {
+        check_allow_delete_order: function() {
             var self = this;
             var cashier = self.pos.get_cashier();
             var order = this.pos.get_order();
@@ -28,7 +28,7 @@ odoo.define('pos_manager.chrome', function (require) {
                     if (!cashier.allow_delete_order) {
                         self.$('.deleteorder-button').toggle(order.is_empty());
                     } else if (cashier.allow_delete_order) {
-                        self.$('.deleteorder-button').show()
+                        self.$('.deleteorder-button').show();
                     }
 
                     self.$(".button.pay").toggle(cashier.allow_payments);
@@ -36,35 +36,35 @@ odoo.define('pos_manager.chrome', function (require) {
                     //allow_discount
                     self.$el.find("[data-mode='discount']").css('visibility', 'visible');
                     if (cashier.allow_discount === 0) {
-                        self.$el.find("[data-mode='discount']").css('visibility', 'hidden')
+                        self.$el.find("[data-mode='discount']").css('visibility', 'hidden');
                     }
 
                     //allow_edit_price
                     self.$el.find("[data-mode='price']").css('visibility', 'visible');
                     if (!cashier.allow_edit_price) {
-                        self.$el.find("[data-mode='price']").css('visibility', 'hidden')
+                        self.$el.find("[data-mode='price']").css('visibility', 'hidden');
                     }
 
                     self.$el.find(".numpad-minus").css('visibility', 'visible');
                     if (!cashier.allow_refund) {
-                        self.$el.find(".numpad-minus").css('visibility', 'hidden')
+                        self.$el.find(".numpad-minus").css('visibility', 'hidden');
                     }
 
                     self.$el.find(".refund-money-button").css('visibility', 'visible');
                     if (!cashier.allow_cash_refund) {
-                        self.$el.find(".refund-money-button").css('visibility', 'hidden')
+                        self.$el.find(".refund-money-button").css('visibility', 'hidden');
                     }
                 }
             }
 
         },
 
-        loading_hide: function () {
+        loading_hide: function() {
             this._super();
             //extra checks on init
             this.check_allow_delete_order();
         },
-        refund_mode: function () {
+        refund_mode: function() {
             $(".control-buttons").hide();
             $(".actionpad").hide();
             $(".numpad").hide();
@@ -74,7 +74,7 @@ odoo.define('pos_manager.chrome', function (require) {
             $(".pos-rightheader").hide();
             $(".price-tag").hide();
         },
-        order_mode: function () {
+        order_mode: function() {
             $(".control-buttons").show();
             $(".actionpad").show();
             $(".numpad").show();
@@ -88,22 +88,22 @@ odoo.define('pos_manager.chrome', function (require) {
     });
 
     chrome.OrderSelectorWidget.include({
-        renderElement: function () {
+        renderElement: function() {
             this._super();
             this.chrome.check_allow_delete_order();
         }
     });
 
     screens.OrderWidget.include({
-        bind_order_events: function () {
+        bind_order_events: function() {
             this._super();
             var order = this.pos.get('selectedOrder');
-            order.orderlines.bind('add remove', this.chrome.check_allow_delete_order, this.chrome)
+            order.orderlines.bind('add remove', this.chrome.check_allow_delete_order, this.chrome);
         }
     });
 
     screens.NumpadWidget.include({
-        clickDeleteLastChar: function () {
+        clickDeleteLastChar: function() {
             var self = this;
             var cashier = self.pos.get_cashier();
 
@@ -111,7 +111,7 @@ odoo.define('pos_manager.chrome', function (require) {
 
 
             if (!cashier.allow_delete_order_line) {
-                allow_delete_order_line = false
+                allow_delete_order_line = false;
             }
 
 
