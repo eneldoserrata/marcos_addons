@@ -32,7 +32,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-from openerp import api, models, fields, SUPERUSER_ID, exceptions
+from odoo import api, models, fields, SUPERUSER_ID, exceptions
 
 
 class pos_config(models.Model):

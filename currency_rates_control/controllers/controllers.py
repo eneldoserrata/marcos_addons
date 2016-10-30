@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class CurrencyCheck(http.Controller):
 #     @http.route('/currency_check/currency_check/', auth='public')

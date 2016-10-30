@@ -33,7 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, api
+from odoo import models, api
 
 
 class PrintCheck(models.AbstractModel):

@@ -2,7 +2,7 @@
 
 # NOTE: this code write by Alexis de Lattre <alexis.delattre@akretion.com> on odoo module Currency Rate Date Check
 
-from openerp import models, fields, api
+from odoo import models, fields, api
 
 
 class ResCompany(models.Model):

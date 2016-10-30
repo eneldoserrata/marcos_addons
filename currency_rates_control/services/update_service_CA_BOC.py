@@ -22,8 +22,8 @@
 ##############################################################################
 from .currency_getter_interface import Currency_getter_interface
 
-from openerp import _
-from openerp.exceptions import except_orm
+from odoo import _
+from odoo.exceptions import except_orm
 
 import logging
 _logger = logging.getLogger(__name__)

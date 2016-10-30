@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class Architect(http.Controller):
 #     @http.route('/architect/architect/', auth='public')

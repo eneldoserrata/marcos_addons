@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from openerp import models, fields, api
+from odoo import models, fields, api
 from lxml import etree
 
 class account_analytic_line(models.Model):

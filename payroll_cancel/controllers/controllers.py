@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class PayrollCancel(http.Controller):
 #     @http.route('/payroll_cancel/payroll_cancel/', auth='public')

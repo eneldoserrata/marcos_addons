@@ -33,7 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, api, exceptions, fields
+from odoo import models, api, exceptions, fields
 import number_to_word
 
 

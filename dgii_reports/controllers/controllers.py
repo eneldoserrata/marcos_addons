@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class ../marcosAddons/dgiiReports(http.Controller):
 #     @http.route('/../marcos_addons/dgii_reports/../marcos_addons/dgii_reports/', auth='public')

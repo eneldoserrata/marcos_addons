@@ -23,7 +23,7 @@
 from .currency_getter_interface import Currency_getter_interface
 import logging
 from datetime import datetime
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 
 _logger = logging.getLogger(__name__)
 

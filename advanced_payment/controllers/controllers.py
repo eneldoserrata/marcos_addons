@@ -33,7 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import http
+from odoo import http
 
 # class AdvancedPayment(http.Controller):
 #     @http.route('/advanced_payment/advanced_payment/', auth='public')

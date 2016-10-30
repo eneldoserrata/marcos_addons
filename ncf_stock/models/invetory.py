@@ -19,16 +19,16 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from odoo import osv, fields, models
 import time
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 
 
-class stock_inventory(osv.Model):
+class stock_inventory(models.Model):
     _inherit = "stock.inventory"
 
-    def _get_available_filters(self, cr, uid, context=None):
-        res = super(stock_inventory, self)._get_available_filters(cr, uid, context=context)
+    def _get_available_filters(self):
+        res = super(stock_inventory, self)._get_available_filters()
 
         mode_to_add = [("invenory_plus", "Importar desde los codigos y sumar al inventario actual"),
                        ("inventory_update", "Importar desde los codigos y actualizar el inventario actual")
@@ -37,19 +37,19 @@ class stock_inventory(osv.Model):
 
         return res
 
-    _columns = {
-        'filter': fields.selection(_get_available_filters, 'Inventory of', required=True,
+
+    filter = fields.Selection(_get_available_filters, 'Inventory of', required=True,
                                    help="If you do an entire inventory, you can choose 'All Products' and it will prefill the inventory with the current stock.  If you only do some products  "\
                                       "(e.g. Cycle Counting) you can choose 'Manual Selection of Products' and the system won't propose anything.  You can also let the "\
                                       "system propose for a single product / lot /... "),
-    }
 
-    def prepare_inventory(self, cr, uid, ids, context=None):
-        invetory = self.browse(cr, uid, ids, context=context)
+
+    def prepare_inventory(self):
+        invetory = self
         if invetory.filter in ["invenory_plus", "inventory_update"]:
-            return self.write(cr, uid, ids, {'state': 'confirm', 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
+            return self.write({'state': 'confirm', 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
         else:
-            return super(stock_inventory, self).prepare_inventory(cr, uid, ids, context=context)
+            return super(stock_inventory, self).prepare_inventory()
 
 
 

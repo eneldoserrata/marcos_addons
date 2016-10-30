@@ -36,9 +36,9 @@
 
 import time
 
-from openerp import api, fields, models, _
+from odoo import api, fields, models, _
 import openerp.addons.decimal_precision as dp
-from openerp.exceptions import UserError
+from odoo.exceptions import UserError
 
 
 # class SaleAdvancePaymentInv(models.TransientModel):

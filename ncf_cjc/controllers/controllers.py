@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class NcfCjc(http.Controller):
 #     @http.route('/ncf_cjc/ncf_cjc/', auth='public')

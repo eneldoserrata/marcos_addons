@@ -34,7 +34,7 @@
 ########################################################################################################################
 from tools import is_identification, _internet_on
 import requests
-from openerp import models, api, exceptions
+from odoo import models, api, exceptions
 
 import logging
 

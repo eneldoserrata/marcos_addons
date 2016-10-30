@@ -33,7 +33,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, fields
+from odoo import models, fields
 
 
 class AccountJournal(models.Model):

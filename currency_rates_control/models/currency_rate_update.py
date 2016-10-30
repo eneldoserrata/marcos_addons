@@ -24,10 +24,10 @@ import logging
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
-from openerp import models, fields, api, _
-from openerp import exceptions
+from odoo import models, fields, api, _
+from odoo import exceptions
 
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 
 from ..services.currency_getter import Currency_getter_factory
 

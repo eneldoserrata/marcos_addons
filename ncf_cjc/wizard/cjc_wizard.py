@@ -20,9 +20,9 @@
 ##############################################################################
 
 from ..tools import is_ncf
-from openerp import fields, models, api
+from odoo import fields, models, api
 import openerp.addons.decimal_precision as dp
-from openerp import netsvc
+from odoo import netsvc
 
 
 class cjc_invoice_wizard(models.TransientModel):
@@ -168,8 +168,7 @@ class cjc_invoice_wizard(models.TransientModel):
         inv = self.env["account.invoice"].browse(purchase_invoice_id.id)
         inv.check_total = inv.amount_total
 
-        wf_service = netsvc.LocalService("workflow")
-        wf_service.trg_validate(self.env.uid, 'account.invoice', inv.id, 'invoice_open', self.env.cr)
+        inv.action_invoice_open()
 
         lines_vals = {u'account_id': current_model.journal_id.default_debit_account_id.id,
                       u'amount': inv.amount_total * -1,

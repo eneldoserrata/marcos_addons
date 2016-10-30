@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import http
+from odoo import http
 
 # class L10nDoPostalCode(http.Controller):
 #     @http.route('/l10n_do_postal_code/l10n_do_postal_code/', auth='public')
