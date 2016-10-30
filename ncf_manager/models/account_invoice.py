@@ -209,14 +209,6 @@ class AccountInvoice(models.Model):
 
     rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
 
-    pay_to = fields.Many2one(
-        "res.partner", string="Pagar a", readonly=True, states={
-         'draft': [('readonly', False)]}, copy=False)
-
-    charge_to = fields.Many2one(
-        "res.partner", string="Facturar a", readonly=True, states={
-         'draft': [('readonly', False)]}, copy=False)
-
     _sql_constraints = [
         ('number_uniq',
          'unique(number, company_id, journal_id, type, partner_id)',

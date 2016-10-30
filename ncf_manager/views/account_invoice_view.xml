@@ -106,10 +106,6 @@
                 <field name="currency_id" position="after">
                     <field attrs="{'invisible': [('rate','=',1)]}" groups="base.group_multi_currency" name="rate"/>
                 </field>
-                <field name="move_id" position="after">
-                    <field name="pay_to"/>
-                    <field name="charge_to"/>
-                </field>
             </field>
         </record>
     </data>

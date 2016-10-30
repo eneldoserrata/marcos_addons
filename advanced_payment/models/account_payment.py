@@ -573,7 +573,7 @@ class AccountPayment(models.Model):
     @api.multi
     def update_invoice(self):
         if not self.journal_id:
-            raise exceptions.ValidationError("Seleccione el meétodo de pago")
+            raise exceptions.ValidationError(u"Seleccione el método de pago")
         for rec in self:
             journal_type = 'purchase' if rec.payment_type == "outbound" else 'sale'
             invoice_type = 'in_invoice' if rec.payment_type == "outbound" else 'out_invoice'
@@ -586,17 +586,17 @@ class AccountPayment(models.Model):
 
             to_reconciled_move_lines = []
 
-            open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
-                                                               ('pay_to', '=', rec.partner_id.id),
-                                                               ('journal_id.type', '=', journal_type),
-                                                               ('type', '=', invoice_type)])
+            open_invoice = self.env["account.invoice"].search(
+                [('state', '=', 'open'),
+                 ('journal_id.type', '=', journal_type),
+                 ('type', '=', invoice_type)])
 
             if not open_invoice:
-                open_invoice += self.env["account.invoice"].search([('state', '=', 'open'),
-                                                                    ('partner_id', '=', rec.partner_id.id),
-                                                                    ('journal_id.type', '=', journal_type),
-                                                                    ('pay_to', '=', False),
-                                                                    ('type', '=', invoice_type)])
+                open_invoice += self.env["account.invoice"].search(
+                    [('state', '=', 'open'),
+                     ('partner_id', '=', rec.partner_id.id),
+                     ('journal_id.type', '=', journal_type),
+                     ('type', '=', invoice_type)])
 
             inv_ids = [inv.id for inv in open_invoice]
 

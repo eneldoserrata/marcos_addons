@@ -133,7 +133,6 @@ class cjc_invoice_wizard(models.TransientModel):
                 u'supplier_invoice_number': False,
                 u'tax_line': [],
                 u'user_id': self.env.uid,
-                u'pay_to': current_model.journal_id.pay_to.id,
                 u'invoice_line': []
             })
 
