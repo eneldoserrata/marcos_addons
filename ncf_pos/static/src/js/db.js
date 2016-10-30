@@ -1,11 +1,10 @@
-
-odoo.define('ncf_pos.DB', function (require) {
+odoo.define('ncf_pos.DB', function(require) {
     "use strict";
 
     var db = require('point_of_sale.DB');
 
     db.include({
-        _partner_search_string: function (partner) {
+        _partner_search_string: function(partner) {
             var str = partner.name;
             if (partner.vat) {
                 str += '|' + partner.vat;

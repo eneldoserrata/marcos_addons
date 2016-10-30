@@ -8,27 +8,29 @@ class InvoiceCurrecyChangeWizard(models.TransientModel):
 
     def _get_currency_domain(self):
         if self.env.context.get("currency_id", False):
-            return [('id','!=',self.env.context["currency_id"])]
+            return [('id', '!=', self.env.context["currency_id"])]
 
         return[]
 
-    currency_id = fields.Many2one("res.currency", domain=_get_currency_domain, require=True, string="Moneda")
+    currency_id = fields.Many2one("res.currency",
+                                  domain=_get_currency_domain,
+                                  require=True, string="Moneda")
 
     def _get_rate(self, rate_date):
         if self.currency_id:
+            self._cr.execute(
+             """SELECT rate FROM res_currency_rate
+                WHERE currency_id = %s
+                AND name = %s
+                AND (company_id is null
+                OR company_id = %s)
+                ORDER BY company_id, name desc LIMIT 1""",
+             (self.currency_id.id, rate_date, self.env.user.company_id.id))
 
-            self._cr.execute("""SELECT rate FROM res_currency_rate
-                               WHERE currency_id = %s
-                                 AND name = %s
-                                 AND (company_id is null
-                                     OR company_id = %s)
-                            ORDER BY company_id, name desc LIMIT 1""",
-                           (self.currency_id.id, rate_date, self.env.user.company_id.id))
             if self._cr.rowcount > 0:
                 return (1 / self._cr.fetchone()[0])
 
             return False
-
 
     @api.multi
     def update_invoice_currency(self):
@@ -49,7 +51,8 @@ class InvoiceCurrecyChangeWizard(models.TransientModel):
                 default_currency_id = self.currency_id.id
 
         if update_curr:
-            view_id = self.env.ref("currency_rates_control.update_rate_wizard_form", True)
+            view_id = self.env.ref(
+             "currency_rates_control.update_rate_wizard_form", True)
             return {
                 'name': 'Fecha sin tasa, Actualizar tasa de la moneda',
                 'view_type': 'form',
@@ -59,8 +62,10 @@ class InvoiceCurrecyChangeWizard(models.TransientModel):
                 'target': 'new',
                 'views': False,
                 'type': 'ir.actions.act_window',
-                'context': {"default_currency_id": default_currency_id,
-                            "default_name": inv.date_invoice or fields.Date.today()}
+                'context': {
+                 "default_currency_id": default_currency_id,
+                 "default_name": inv.date_invoice or fields.Date.today()
+                 }
             }
 
         if self.currency_id.id != inv.currency_id.id:
@@ -70,9 +75,11 @@ class InvoiceCurrecyChangeWizard(models.TransientModel):
             else:
                 new_rate = self._get_rate(inv.date_invoice)
                 if not new_rate:
+
                     raise exceptions.ValidationError(u"Antes de cambiar la mondeda de la factura debe actualizar la tasa.")
+
                 for line in inv.invoice_line_ids:
-                   line.price_unit = line.price_unit/new_rate
+                    line.price_unit = line.price_unit/new_rate
 
             inv.currency_id = self.currency_id.id
             inv.compute_taxes()

@@ -71,7 +71,7 @@ odoo.define('ncf_pos.models', function (require) {
                             'body': error.data.debug
                         });
                     }
-                    self.set('failed', error)
+                    self.set('failed', error);
                 }
                 // prevent an error popup creation by the rpc failure
                 // we want the failure to be silent as we send the orders in the background
@@ -108,14 +108,14 @@ odoo.define('ncf_pos.models', function (require) {
         },
         set_refund_line_ref: function (refund_line_ref) {
             this.refund_line_ref = refund_line_ref || false;
-            this.trigger('change', this)
+            this.trigger('change', this);
         },
         get_refund_line_ref: function () {
             return this.refund_line_ref || false;
         },
         set_prodlot_id: function (product_serial_lot) {
             this.prodlot_id = product_serial_lot || false;
-            this.trigger('change', this)
+            this.trigger('change', this);
         },
         get_prodlot_id: function (serial_lot) {
             return this.prodlot_id || false;
@@ -125,7 +125,7 @@ odoo.define('ncf_pos.models', function (require) {
             json.qty_allow_refund = this.get_qty_allow_refund();
             json.refund_line_ref = this.get_refund_line_ref();
             json.prodlot_id = this.get_prodlot_id();
-            return json
+            return json;
         },
         export_for_printing: function () {
             var json = _order_line_super.export_for_printing.apply(this, arguments);
@@ -140,7 +140,7 @@ odoo.define('ncf_pos.models', function (require) {
     models.Paymentline = models.Paymentline.extend({
         initialize: function () {
             PaymentlineSuper.initialize.apply(this, arguments);
-            this.type = this.type || 'payment'
+            this.type = this.type || 'payment';
             return this;
         },
         set_type: function (type) {
@@ -158,7 +158,7 @@ odoo.define('ncf_pos.models', function (require) {
         export_for_printing: function () {
             var res = PaymentlineSuper.export_for_printing.apply(this, arguments);
             res.type = this.get_type();
-            return res
+            return res;
         }
     });
 
@@ -189,10 +189,10 @@ odoo.define('ncf_pos.models', function (require) {
                 _.each(self.pos.fiscal_positions, function (fiscal_position) {
                     if (client.property_account_position_id) {
                         if (fiscal_position.id === client.property_account_position_id[0]) {
-                            self.fiscal_position = fiscal_position
+                            self.fiscal_position = fiscal_position;
                         }
                     } else if (fiscal_position.client_fiscal_type === "final") {
-                        self.fiscal_position = fiscal_position
+                        self.fiscal_position = fiscal_position;
                     }
                 });
             }
@@ -205,7 +205,7 @@ odoo.define('ncf_pos.models', function (require) {
             this.order_type = json.order_type;
             this.origin = json.origin;
             this.origin_ncf = json.origin_ncf;
-            return this
+            return this;
         },
         get_order_note: function () {
             return $("#wk_note_id").val();
@@ -229,53 +229,53 @@ odoo.define('ncf_pos.models', function (require) {
             this.trigger('change', this);
         },
         get_origin: function () {
-            return this.origin || false
+            return this.origin || false;
         },
         set_ncf: function (ncf) {
             this.ncf = ncf;
             this.trigger('change', this);
         },
         get_ncf: function () {
-            return this.ncf || false
+            return this.ncf || false;
         },
         set_fiscal_type_name: function (fiscal_type_name) {
             this.fiscal_type_name = fiscal_type_name;
             this.trigger('change', this);
         },
         get_fiscal_type_name: function () {
-            return this.fiscal_type_name || false
+            return this.fiscal_type_name || false;
         },
         set_origin_ncf: function (origin_ncf) {
             this.origin_ncf = origin_ncf;
             this.trigger('change', this);
         },
         get_origin_ncf: function () {
-            return this.origin_ncf || false
+            return this.origin_ncf || false;
         },
         set_credit: function (credit) {
             this.credit = credit;
-            this.trigger('change', this)
+            this.trigger('change', this);
         },
         get_credit: function () {
             return this.credit || 0;
         },
         set_credit_ncf: function (credit) {
             this.credit_ncf = credit;
-            this.trigger('change', this)
+            this.trigger('change', this);
         },
         get_credit_ncf: function () {
             return this.credit_ncf || 0;
         },
         set_fiscal_type: function (credit) {
             this.fiscal_type = credit;
-            this.trigger('change', this)
+            this.trigger('change', this);
         },
         get_fiscal_type: function () {
             return this.fiscal_type || 0;
         },
         add_product: function (product, options) {
-            if (product.qty_allow_refund == 0 && this.get_order_type() == "refund") {
-                return
+            if (product.qty_allow_refund === 0 && this.get_order_type() == "refund") {
+                return;
             }
 
             if (this._printed) {
@@ -301,7 +301,7 @@ odoo.define('ncf_pos.models', function (require) {
             }
 
             if (options.prodlot_id !== undefined) {
-                line.set_prodlot_id(options.prodlot_id)
+                line.set_prodlot_id(options.prodlot_id);
             }
 
             if (options.quantity !== undefined) {
@@ -353,7 +353,7 @@ odoo.define('ncf_pos.models', function (require) {
             json.ncf = this.get_ncf();
             json.fiscal_type_name = this.get_fiscal_type_name();
             json.fiscal_type = this.get_fiscal_type();
-            return json
+            return json;
         }
     });
 
