@@ -86,20 +86,6 @@ class AccountFiscalPosition(models.Model):
         "account.journal", string="Diario de compra",
         domain="[('type','=','purchase')]")
 
-    supplier_fiscal_type = fields.Selection([
-        ('01', u'01 - Gastos de Personal'),
-        ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
-        ('03', u'03 - Arrendamientos'),
-        ('04', u'04 - Gastos de Activos Fijos'),
-        ('05', u'05 - Gastos de Representación'),
-        ('06', u'06 - Otras Deducciones Admitidas'),
-        ('07', u'07 - Gastos Financieros'),
-        ('08', u'08 - Gastos Extraordinarios'),
-        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
-        ('10', u'10 - Adquisiciones de Activos'),
-        ('11', u'11 - Gastos de Seguro'),
-        ], string=u"Tipo de gasto")
-
     @api.model
     def get_fiscal_position(self, partner_id, delivery_id=None):
         if self.env.context.get("model", False) == "purchase.order":

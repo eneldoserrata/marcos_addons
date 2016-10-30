@@ -9,7 +9,6 @@
                 <field name="auto_apply" position="before">
                     <field name="supplier"/>
                     <field attrs="{'invisible':[('supplier','=',True)]}" name="client_fiscal_type"/>
-                    <field attrs="{'invisible':[('supplier','!=',True)]}" name="supplier_fiscal_type"/>
                     <field attrs="{'invisible':[('supplier','!=',True)]}" name="journal_id"/>
                 </field>
                 <xpath expr="//tree//field[@name='tax_dest_id']" position="replace">

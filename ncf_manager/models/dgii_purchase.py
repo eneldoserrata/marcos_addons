@@ -40,6 +40,7 @@ import base64
 from tools import is_identification, is_ncf
 import time
 import re
+import io
 
 
 class ResCompany(models.Model):
@@ -157,7 +158,7 @@ class DgiiPurchaseReport(models.Model):
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
-                inv.fiscal_position_id.supplier_fiscal_type)
+                inv.expense_type)
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.UserError("Debe definir el tipo de gasto"
@@ -226,7 +227,7 @@ class DgiiPurchaseReport(models.Model):
                                              "empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
-        file = open(path, 'w')
+        file = io.open(path, 'w', encoding="utf-8", newline='\r\n')
         lines = []
 
         header = "606"

@@ -41,6 +41,7 @@ import base64
 from tools import is_identification
 import time
 import re
+import io
 
 
 class DgiiExteriorReport(models.Model):
@@ -96,7 +97,7 @@ class DgiiExteriorReport(models.Model):
             LINE = line_number
             RAZON_SOCIAL = inv.partner_id.name
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
-                inv.fiscal_position_id.supplier_fiscal_type)
+                inv.expense_type)
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.ValidationError(
                     u"Debe de definir el tipo de gasto para la posición fiscal"
@@ -172,7 +173,7 @@ class DgiiExteriorReport(models.Model):
                                              " su empresa!")
 
         path = '/tmp/609{}.txt'.format(company_fiscal_identificacion)
-        file = open(path, 'w')
+        file = io.open(path, 'w', encoding="utf-8", newline='\r\n')
         lines = []
 
         header = "609"
