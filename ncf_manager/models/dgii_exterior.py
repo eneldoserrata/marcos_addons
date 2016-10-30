@@ -96,7 +96,7 @@ class DgiiExteriorReport(models.Model):
             LINE = line_number
             RAZON_SOCIAL = inv.partner_id.name
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
-                inv.fiscal_position_id.supplier_fiscal_type)
+                inv.expense_type)
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.ValidationError(
                     u"Debe de definir el tipo de gasto para la posición fiscal"

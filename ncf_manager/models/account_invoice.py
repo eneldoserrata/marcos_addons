@@ -206,8 +206,23 @@ class AccountInvoice(models.Model):
     ncf_required = fields.Boolean(copy=True)
     client_fiscal_type = fields.Selection(
                             related="fiscal_position_id.client_fiscal_type")
-    supplier_fiscal_type = fields.Selection(
-                            related="fiscal_position_id.supplier_fiscal_type")
+
+    expense_type = fields.Selection([
+        ('01', u'01 - Gastos de Personal'),
+        ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
+        ('03', u'03 - Arrendamientos'),
+        ('04', u'04 - Gastos de Activos Fijos'),
+        ('05', u'05 - Gastos de Representación'),
+        ('06', u'06 - Otras Deducciones Admitidas'),
+        ('07', u'07 - Gastos Financieros'),
+        ('08', u'08 - Gastos Extraordinarios'),
+        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
+        ('10', u'10 - Adquisiciones de Activos'),
+        ('11', u'11 - Gastos de Seguro'),
+        ], string=u"Tipo de gasto")
+
+    # expense_type = fields.Selection(
+    #                         related="fiscal_position_id.expense_type")
     journal_id = fields.Many2one(
         'account.journal', string='Journal',
         required=True, readonly=True,
