@@ -44,7 +44,7 @@ class AccountJournal(models.Model):
     purchase_type = fields.Selection([
         ("normal", u"Requiere NCF"),
         ("minor", u"Gasto Menor"),
-        ("informal", u"Proveedores"),
+        ("informal", u"Proveedores Informales"),
         ("exterior", u"Pagos al Exterior"),
         ("import", u"Importaciones"),
         ("others", u"Otros"),
