@@ -40,6 +40,7 @@ import base64
 from tools import is_identification, is_ncf
 import time
 import re
+import io
 
 
 class ResCompany(models.Model):
@@ -226,7 +227,7 @@ class DgiiPurchaseReport(models.Model):
                                              "empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
-        file = open(path, 'w')
+        file = io.open(path, 'w', encoding="utf-8", newline='\r\n')
         lines = []
 
         header = "606"
