@@ -100,7 +100,6 @@
                 <field name="journal_id" position="after">
                     <field attrs="{'required': True}" name="fiscal_position_id"/>
                 </field>
-                <field name="expense_type" position="replace"/>
                 <field name="fiscal_position_id" position="after">
                     <field attrs="{'required': True}" name="expense_type"/>
                 </field>
