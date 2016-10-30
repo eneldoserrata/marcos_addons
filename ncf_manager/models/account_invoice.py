@@ -34,8 +34,6 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-import json
-
 from openerp import exceptions
 import requests
 from tools import is_ncf, _internet_on
@@ -57,35 +55,6 @@ class AccountInvoice(models.Model):
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config["shop_ids"][0]
-
-    def _default_user_journal(self):
-        if (self._context.get("type", False)
-            in ("out_invoice", "out_refund") or
-                self._context.get("active_model", False) == "sale.order"):
-            shop_user_config = (
-                self.env["shop.ncf.config"].get_user_shop_config())
-            if not shop_user_config:
-                raise exceptions.ValidationError(
-                        u"Los diarios de ventas no están configurados"
-                        " corectamente.")
-            else:
-                return shop_user_config["sale_journal_ids"][0]
-        elif self._context.get("type", False) in ("in_invoice", "in_refund"):
-            res = False
-            journal = self.env[
-             "account.journal"].search([('type', '=', 'purchase'),
-                                       ('purchase_type', '=', 'normal')])
-            if not journal:
-                journal = self.env[
-                 "account.journal"].search([('type', '=', 'purchase')])
-
-            if journal:
-                res = journal[0].id
-            if not res:
-                raise exceptions.ValidationError(
-                    "Debe Configurar Diarios de Compra.")
-            else:
-                return res
 
     @api.one
     def _get_total_discount(self):
@@ -196,13 +165,7 @@ class AccountInvoice(models.Model):
 
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
                               required=False, default=_default_user_shop)
-    move_name = fields.Char(string='Journal Entry', default=False, copy=False,
-                            help="Technical field holding the number given to"
-                            " the invoice, automatically set when the invoice"
-                            " is validated then stored to set the same number"
-                            " again if the invoice is cancelled, set to draft"
-                            " and re-validated."
-                            )
+
     ncf_required = fields.Boolean(copy=True)
     client_fiscal_type = fields.Selection(
                             related="fiscal_position_id.client_fiscal_type")
@@ -220,16 +183,6 @@ class AccountInvoice(models.Model):
         ('10', u'10 - Adquisiciones de Activos'),
         ('11', u'11 - Gastos de Seguro'),
         ], string=u"Tipo de gasto")
-
-    # expense_type = fields.Selection(
-    #                         related="fiscal_position_id.expense_type")
-    journal_id = fields.Many2one(
-        'account.journal', string='Journal',
-        required=True, readonly=True,
-        states={'draft': [('readonly', False)]},
-        default=_default_user_journal,
-        domain="[('type', 'in', {'out_invoice':['sale'],'out_refund':['sale'],'in_refund':['purchase'], 'in_invoice': ['purchase']}.get(type, [])), ('company_id', '=', company_id)]"
-        )
 
     purchase_type = fields.Selection(
         [("normal", u"Requiere NCF"),

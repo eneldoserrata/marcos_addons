@@ -99,7 +99,7 @@ class AccountMove(models.Model):
 
             if invoice.charge_to:
                 sale_journal = invoice.with_context(
-                    {"type": "out_invoice"})._default_user_journal()
+                    {"type": "out_invoice"})._default_journal()
                 out_invoice = invoice.copy(
                     {"type": "out_invoice",
                      "partner_id": invoice.charge_to.id,
