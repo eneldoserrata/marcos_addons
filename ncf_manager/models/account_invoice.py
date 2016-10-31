@@ -288,13 +288,12 @@ class AccountInvoice(models.Model):
                 shop_user_config = (
                     self.env["shop.ncf.config"]. get_user_shop_config())
 
-                return {"domain": {
-                        "shop_id": [
-                         ('shop_id', 'in', shop_user_config["shop_ids"])
-                         ],
-                        "journal_id": [
-                         ('id', 'in', shop_user_config["sale_journal_ids"])]}
-                        }
+                return {
+                    "domain": {"shop_id": [('shop_id', 'in', shop_user_config[
+                                            "shop_ids"])],
+                               "journal_id": [('id', 'in', shop_user_config[
+                                               "sale_journal_ids"])]}
+                    }
 
             elif self.type in ('in_invoice', 'in_refund'):
                 if self.partner_id.journal_id:
@@ -444,7 +443,7 @@ class AccountInvoice(models.Model):
 
         if not result:
             raise exceptions.UserError("Todos los productos de esta factura ya"
-                                       "fueron devueltos.")
+                                       " fueron devueltos.")
 
         return result
 
