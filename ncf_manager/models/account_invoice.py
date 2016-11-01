@@ -516,19 +516,6 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
-    @api.one
-    def compute_tax_line(self):
-        currency = self.invoice_id and self.invoice_id.currency_id or None
-        price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
-        if self.invoice_line_tax_ids:
-            taxes = (
-                self.invoice_line_tax_ids.compute_all(
-                    price, currency, self.quantity, product=self.product_id,
-                    partner=self.invoice_id.partner_id))
-            self.tax_amount = sum([t["amount"] for t in taxes["taxes"]])
-        else:
-            self.tax_amount = 0.0
-
     qty_allow_refund = fields.Float(
         string='qty allow refund',
         digits=dp.get_precision('Product Unit of Measure'),
@@ -536,8 +523,3 @@ class AccountInvoiceLine(models.Model):
 
     refund_line_ref = fields.Many2one(
         "account.invoice.line", string="origin line refund", copy=False)
-
-    tax_amount = fields.Monetary(
-        string='tax_amount',
-        required=False, currency_field="company_currency_id",
-        compute=compute_tax_line)
