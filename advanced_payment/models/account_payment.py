@@ -498,36 +498,39 @@ class AccountPayment(models.Model):
     def onchange_amount_currency_rate(self):
         self.amount_total()
 
-    @api.onchange("currency_id")
-    def onchange_currency_id(self):
+    # This is commented as we changed all the currency thing in account_invoice
+    # affecting the view_id here, which I don't know what is it's purpose.
 
-        # if self.is_base_currency:
-        #     self.rate_currency_id = False
+    # @api.onchange("currency_id")
+    # def onchange_currency_id(self):
 
-        if self.move_type == "invoice":
-            self.payment_invoice_ids = self.update_invoice()
+    #     # if self.is_base_currency:
+    #     #     self.rate_currency_id = False
 
-        if not self.is_base_currency:
-            ctx = dict(self._context)
-            if self.payment_date:
-                ctx.update({"date": self.payment_date})
+    #     if self.move_type == "invoice":
+    #         self.payment_invoice_ids = self.update_invoice()
 
-            rate = self.currency_id.with_context(ctx).rate
-            if rate:
-                self.rate = 1 / self.currency_id.with_context(ctx).rate
-            else:
-                view_id = self.env.ref("currency_rates_control.update_rate_wizard_form", True)
-                return {
-                    'name': _('Fecha sin tasa, Actualizar tasa de la moneda'),
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'update.rate.wizard',
-                    'view_id': view_id.id,
-                    'target': 'new',
-                    'views': False,
-                    'type': 'ir.actions.act_window',
-                    'context': {"default_name": self.payment_date or fields.Date.today()}
-                }
+    #     if not self.is_base_currency:
+    #         ctx = dict(self._context)
+    #         if self.payment_date:
+    #             ctx.update({"date": self.payment_date})
+
+    #         rate = self.currency_id.with_context(ctx).rate
+    #         if rate:
+    #             self.rate = 1 / self.currency_id.with_context(ctx).rate
+    #         else:
+    #             view_id = self.env.ref("currency_rates_control.update_rate_wizard_form", True)
+    #             return {
+    #                 'name': _('Fecha sin tasa, Actualizar tasa de la moneda'),
+    #                 'view_type': 'form',
+    #                 'view_mode': 'form',
+    #                 'res_model': 'update.rate.wizard',
+    #                 'view_id': view_id.id,
+    #                 'target': 'new',
+    #                 'views': False,
+    #                 'type': 'ir.actions.act_window',
+    #                 'context': {"default_name": self.payment_date or fields.Date.today()}
+    #             }
 
     @api.onchange('payment_type')
     def _onchange_payment_type(self):

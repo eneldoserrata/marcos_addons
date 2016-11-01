@@ -36,4 +36,3 @@
 ###############################################################################
 
 import account_invoice_refund
-import invoice_currency_change_wizard

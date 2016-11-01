@@ -6,12 +6,6 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//sheet/label" position="before">
-                    <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" groups="base.group_multi_currency" icon="fa-money" name="update_currency_wizard" states="draft" string="Cambiar moneda de la factura" type="object"/>
-                        <button class="oe_stat_button" groups="base.group_multi_currency" icon="fa-usd" name="update_rate_wizard" states="draft" string="Actualizar Tasa" type="object"/>
-                    </div>
-                </xpath>
                 <field name="has_outstanding" position="before">
                     <field invisible="1" name="credit_out_invoice"/>
                     <field invisible="1" name="authorize"/>
@@ -61,12 +55,6 @@
                 <field name="amount_untaxed" position="after">
                     <field name="total_discount"/>
                 </field>
-                <xpath expr="//label[@groups='base.group_multi_currency']" position="replace"/>
-                <xpath expr="//div[@groups='base.group_multi_currency']" position="replace">
-                    <field invisible="1" name="company_currency_id"/>
-                    <field class="oe_inline" name="currency_id" options="{'no_create': True, 'no_open': True}"/>
-                    <field attrs="{'invisible': [('rate','in',(1,0))]}" groups="base.group_multi_currency" name="rate"/>
-                </xpath>
             </field>
         </record>
         <record id="ncf_manager_supplier_account_invoice_form" model="ir.ui.view">
@@ -74,11 +62,6 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//sheet/div" position="before">
-                    <div class="oe_button_box" name="button_box">
-                        <button attrs="{'invisible': [('rate','!=',0)]}" class="oe_stat_button" groups="base.group_multi_currency" icon="fa-money" name="update_rate_wizard" string="Actualizar Tasa" type="object"/>
-                    </div>
-                </xpath>
                 <field name="move_name" position="replace"/>
                 <xpath expr="//button[@name='invoice_open']" position="replace">
                     <button class="oe_highlight" groups="account.group_account_invoice" name="invoice_ncf_validation" states="draft,proforma2" string="Validate" type="object"/>
@@ -98,8 +81,7 @@
                     <field attrs="{'required': True}" name="expense_type"/>
                 </field>
                 <field name="journal_id" position="replace"/>
-                <field name="currency_id" position="after">
-                    <field attrs="{'invisible': [('rate','=',1)]}" groups="base.group_multi_currency" name="rate"/>
+                <field name="date_due" position="after">
                     <field name="journal_id"/>
                 </field>
             </field>

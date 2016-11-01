@@ -38,7 +38,7 @@ from openerp import exceptions
 import requests
 from tools import is_ncf, _internet_on
 import openerp.addons.decimal_precision as dp
-from openerp import api, fields, models, _
+from openerp import api, fields, models
 
 from datetime import datetime
 
@@ -78,66 +78,6 @@ class AccountInvoice(models.Model):
             self.overdue_type = "overdue"
         else:
             self.overdue_type = "none"
-
-    @api.one
-    @api.depends("currency_id")
-    def _get_rate(self):
-        if self.currency_id:
-            if self.currency_id.id != self.company_id.currency_id.id:
-                self._cr.execute
-                ("""SELECT rate FROM res_currency_rate
-                    WHERE currency_id = %s
-                    AND name = %s
-                    AND (company_id is null OR company_id = %s)
-                    ORDER BY company_id, name desc LIMIT 1""",
-                    (self.currency_id.id, self.date_invoice or
-                     fields.Date.today(), self.company_id.id))
-                if self._cr.rowcount > 0:
-                    self.rate = 1 / self._cr.fetchone()[0]
-                else:
-                    self.rate = 0
-            else:
-                self.rate = 1
-
-    @api.onchange("date_invoice", "currency_id")
-    def onchange_date_invoice(self):
-        self._get_rate()
-
-    @api.multi
-    def update_currency_wizard(self):
-        if not self.date_invoice:
-            self.date_invoice = fields.Date.today()
-
-        view_id = self.env.ref(
-            "ncf_manager.invoice_currency_change_wizard_form", True)
-        return {
-            'name': _('Cambiar moneda de la factura'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'invoice.currency.change.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {"currency_id": self.currency_id.id}
-            }
-
-    @api.multi
-    def update_rate_wizard(self):
-        view_id = self.env.ref
-        ("currency_rates_control.update_rate_wizard_form", True)
-        return {
-            'name': _('Fecha sin tasa. Actualizar tasa de la moneda'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'update.rate.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {"default_name": self.date_invoice or
-                        fields.Date.today()}
-            }
 
     overdue_type = (fields.Selection([
         ('overlimit_overdue',
@@ -206,8 +146,6 @@ class AccountInvoice(models.Model):
 
     authorize = fields.Boolean(
         u"Crédito autorizado", default=False, copy=False)
-
-    rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
 
     _sql_constraints = [
         ('number_uniq',
