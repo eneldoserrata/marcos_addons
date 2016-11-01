@@ -24,12 +24,14 @@
 from .currency_getter_interface import Currency_getter_interface
 import json
 
+
 class DO_BC_getter(Currency_getter_interface):
     """Implementation of Currency_getter_factory interface
     for Yahoo finance service
     """
 
-    def get_updated_currency(self, currency_array, main_currency,max_delta_days):
+    def get_updated_currency(self, currency_array, main_currency,
+                             max_delta_days):
         """implementation of abstract method of curreny_getter_interface"""
         self.validate_cur(main_currency)
         url = ('http://api.marcos.do/central_bank_rates')

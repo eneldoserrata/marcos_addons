@@ -178,7 +178,7 @@ class Currency_rate_update_service(models.Model):
 
     # List of webservicies the value sould be a class name
     service = fields.Selection(
-        [('DO_BC_getter', 'Banco Central de la Republica Dominicana'),
+        [('DO_BC_getter', 'Banco Central Dominicano'),
          ('CH_ADMIN_getter', 'Admin.ch'),
          ('ECB_getter', 'European Central Bank'),
          ('YAHOO_getter', 'Yahoo Finance'),
@@ -240,7 +240,9 @@ class Currency_rate_update_service(models.Model):
         rate_obj = self.env['res.currency.rate']
 
         # import pdb;pdb.set_trace()
-        company_conf = self.env['account.config.settings'].search([('company_id', '=', self.env.user.company_id.id)])
+        company_conf = self.env['account.config.settings'].search(
+                            [('company_id', '=', self.env.user.company_id.id)]
+                        )
         # The multi company currency can be set or no so we handle
         # The two case
         # if company_conf.group_multi_currency:
@@ -261,7 +263,9 @@ class Currency_rate_update_service(models.Model):
                 main_currency.name,
                 self.max_delta_days
             )
-            rate_name = fields.Datetime.to_string(datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0))
+            rate_name = fields.Datetime.to_string(datetime.utcnow().replace(
+                                                    hour=0, minute=0, second=0,
+                                                    microsecond=0))
             for curr in self.currency_to_update:
                 if curr.id == main_currency.id:
                     continue
