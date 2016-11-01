@@ -34,19 +34,17 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
-
 {
     'name': "Comprobantes fiscales RD",
 
     'summary': """
         Localizacion Para Republica Dominicana
-        Implementacin de numeros de comprobantes fiscales
+        Implementacion de numeros de comprobantes fiscales
         """,
 
     'description': """
-        Permite administrar y configurar comprobantes fiscales ademas de\
-        generara los reportes 606,607,608 y 609
+        Permite administrar y configurar comprobantes fiscales ademas de
+        generar los reportes 606,607,608 y 609
     """,
 
     'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
@@ -54,7 +52,6 @@
 
     'category': 'Localization',
     'version': '2.0',
-
 
     'depends': ['base', 'account', 'account_accountant', 'l10n_do',
                 'rnc_validation'],
@@ -73,7 +70,7 @@
         'views/account_invoice_state_view.xml',
         'views/account_move_view.xml',
         'wizard/account_invoice_refund_view.xml',
-        'wizard/invoice_currency_change_wizard_view.xml',
+        # 'wizard/invoice_currency_change_wizard_view.xml',
     ],
     "qweb": ['static/src/xml/base.xml'],
     'demo': [],
@@ -81,5 +78,4 @@
     "price": 2000,
     'currency': 'EUR',
     'license': "Other proprietary"
-
 }

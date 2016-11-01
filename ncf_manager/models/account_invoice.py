@@ -34,13 +34,11 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-import json
-
 from openerp import exceptions
 import requests
 from tools import is_ncf, _internet_on
 import openerp.addons.decimal_precision as dp
-from openerp import api, fields, models, _
+from openerp import api, fields, models
 
 from datetime import datetime
 
@@ -57,35 +55,6 @@ class AccountInvoice(models.Model):
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config["shop_ids"][0]
-
-    def _default_user_journal(self):
-        if (self._context.get("type", False)
-            in ("out_invoice", "out_refund") or
-                self._context.get("active_model", False) == "sale.order"):
-            shop_user_config = (
-                self.env["shop.ncf.config"].get_user_shop_config())
-            if not shop_user_config:
-                raise exceptions.ValidationError(
-                        u"Los diarios de ventas no están configurados"
-                        " corectamente.")
-            else:
-                return shop_user_config["sale_journal_ids"][0]
-        elif self._context.get("type", False) in ("in_invoice", "in_refund"):
-            res = False
-            journal = self.env[
-             "account.journal"].search([('type', '=', 'purchase'),
-                                       ('purchase_type', '=', 'normal')])
-            if not journal:
-                journal = self.env[
-                 "account.journal"].search([('type', '=', 'purchase')])
-
-            if journal:
-                res = journal[0].id
-            if not res:
-                raise exceptions.ValidationError(
-                    "Debe Configurar Diarios de Compra.")
-            else:
-                return res
 
     @api.one
     def _get_total_discount(self):
@@ -109,66 +78,6 @@ class AccountInvoice(models.Model):
             self.overdue_type = "overdue"
         else:
             self.overdue_type = "none"
-
-    @api.one
-    @api.depends("currency_id")
-    def _get_rate(self):
-        if self.currency_id:
-            if self.currency_id.id != self.company_id.currency_id.id:
-                self._cr.execute
-                ("""SELECT rate FROM res_currency_rate
-                    WHERE currency_id = %s
-                    AND name = %s
-                    AND (company_id is null OR company_id = %s)
-                    ORDER BY company_id, name desc LIMIT 1""",
-                    (self.currency_id.id, self.date_invoice or
-                     fields.Date.today(), self.company_id.id))
-                if self._cr.rowcount > 0:
-                    self.rate = 1 / self._cr.fetchone()[0]
-                else:
-                    self.rate = 0
-            else:
-                self.rate = 1
-
-    @api.onchange("date_invoice", "currency_id")
-    def onchange_date_invoice(self):
-        self._get_rate()
-
-    @api.multi
-    def update_currency_wizard(self):
-        if not self.date_invoice:
-            self.date_invoice = fields.Date.today()
-
-        view_id = self.env.ref(
-            "ncf_manager.invoice_currency_change_wizard_form", True)
-        return {
-            'name': _('Cambiar moneda de la factura'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'invoice.currency.change.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {"currency_id": self.currency_id.id}
-            }
-
-    @api.multi
-    def update_rate_wizard(self):
-        view_id = self.env.ref
-        ("currency_rates_control.update_rate_wizard_form", True)
-        return {
-            'name': _('Fecha sin tasa. Actualizar tasa de la moneda'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'update.rate.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {"default_name": self.date_invoice or
-                        fields.Date.today()}
-            }
 
     overdue_type = (fields.Selection([
         ('overlimit_overdue',
@@ -196,13 +105,7 @@ class AccountInvoice(models.Model):
 
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
                               required=False, default=_default_user_shop)
-    move_name = fields.Char(string='Journal Entry', default=False, copy=False,
-                            help="Technical field holding the number given to"
-                            " the invoice, automatically set when the invoice"
-                            " is validated then stored to set the same number"
-                            " again if the invoice is cancelled, set to draft"
-                            " and re-validated."
-                            )
+
     ncf_required = fields.Boolean(copy=True)
     client_fiscal_type = fields.Selection(
                             related="fiscal_position_id.client_fiscal_type")
@@ -220,16 +123,6 @@ class AccountInvoice(models.Model):
         ('10', u'10 - Adquisiciones de Activos'),
         ('11', u'11 - Gastos de Seguro'),
         ], string=u"Tipo de gasto")
-
-    # expense_type = fields.Selection(
-    #                         related="fiscal_position_id.expense_type")
-    journal_id = fields.Many2one(
-        'account.journal', string='Journal',
-        required=True, readonly=True,
-        states={'draft': [('readonly', False)]},
-        default=_default_user_journal,
-        domain="[('type', 'in', {'out_invoice':['sale'],'out_refund':['sale'],'in_refund':['purchase'], 'in_invoice': ['purchase']}.get(type, [])), ('company_id', '=', company_id)]"
-        )
 
     purchase_type = fields.Selection(
         [("normal", u"Requiere NCF"),
@@ -253,16 +146,6 @@ class AccountInvoice(models.Model):
 
     authorize = fields.Boolean(
         u"Crédito autorizado", default=False, copy=False)
-
-    rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
-
-    pay_to = fields.Many2one(
-        "res.partner", string="Pagar a", readonly=True, states={
-         'draft': [('readonly', False)]}, copy=False)
-
-    charge_to = fields.Many2one(
-        "res.partner", string="Facturar a", readonly=True, states={
-         'draft': [('readonly', False)]}, copy=False)
 
     _sql_constraints = [
         ('number_uniq',
@@ -343,13 +226,12 @@ class AccountInvoice(models.Model):
                 shop_user_config = (
                     self.env["shop.ncf.config"]. get_user_shop_config())
 
-                return {"domain": {
-                        "shop_id": [
-                         ('shop_id', 'in', shop_user_config["shop_ids"])
-                         ],
-                        "journal_id": [
-                         ('id', 'in', shop_user_config["sale_journal_ids"])]}
-                        }
+                return {
+                    "domain": {"shop_id": [('shop_id', 'in', shop_user_config[
+                                            "shop_ids"])],
+                               "journal_id": [('id', 'in', shop_user_config[
+                                               "sale_journal_ids"])]}
+                    }
 
             elif self.type in ('in_invoice', 'in_refund'):
                 if self.partner_id.journal_id:
@@ -499,7 +381,7 @@ class AccountInvoice(models.Model):
 
         if not result:
             raise exceptions.UserError("Todos los productos de esta factura ya"
-                                       "fueron devueltos.")
+                                       " fueron devueltos.")
 
         return result
 
@@ -634,19 +516,6 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
-    @api.one
-    def compute_tax_line(self):
-        currency = self.invoice_id and self.invoice_id.currency_id or None
-        price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
-        if self.invoice_line_tax_ids:
-            taxes = (
-                self.invoice_line_tax_ids.compute_all(
-                    price, currency, self.quantity, product=self.product_id,
-                    partner=self.invoice_id.partner_id))
-            self.tax_amount = sum([t["amount"] for t in taxes["taxes"]])
-        else:
-            self.tax_amount = 0.0
-
     qty_allow_refund = fields.Float(
         string='qty allow refund',
         digits=dp.get_precision('Product Unit of Measure'),
@@ -654,8 +523,3 @@ class AccountInvoiceLine(models.Model):
 
     refund_line_ref = fields.Many2one(
         "account.invoice.line", string="origin line refund", copy=False)
-
-    tax_amount = fields.Monetary(
-        string='tax_amount',
-        required=False, currency_field="company_currency_id",
-        compute=compute_tax_line)
