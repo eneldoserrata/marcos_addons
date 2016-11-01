@@ -25,7 +25,7 @@
 
     # always loaded
     'data': [
-        'data/service_cron_data.xml',
+        # 'data/service_cron_data.xml',
         'security/ir.model.access.csv',
         # 'security/security.xml',
         'views/base_view.xml',
