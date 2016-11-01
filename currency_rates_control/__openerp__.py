@@ -3,8 +3,7 @@
     'name': "currency_check",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Short summary of the module's purpose""",
 
     'description': """
         Long description of module's purpose
@@ -21,21 +20,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base', 'account'],
 
     # always loaded
     'data': [
-        # 'data/service_cron_data.xml',
         'security/ir.model.access.csv',
         # 'security/security.xml',
         'views/base_view.xml',
+        'views/account_invoice_view.xml',
         'views/currency_rate_update.xml',
-        'views/templates.xml',
         'wizard/rate_update_wizard_view.xml',
         'wizard/invoice_currency_change_wizard_view.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
     ],
 }
