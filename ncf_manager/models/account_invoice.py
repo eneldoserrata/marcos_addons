@@ -219,9 +219,9 @@ class AccountInvoice(models.Model):
                 if (self.partner_id and self.partner_id.
                    property_account_position_id.id !=
                    self.fiscal_position_id.id):
-                    self.partner_id.write
-                    ({"property_account_position_id":
-                     self.fiscal_position_id.id})
+                    self.partner_id.write(
+                        {"property_account_position_id":
+                         self.fiscal_position_id.id})
 
                 shop_user_config = (
                     self.env["shop.ncf.config"]. get_user_shop_config())
@@ -247,9 +247,11 @@ class AccountInvoice(models.Model):
                 if (self.partner_id and
                    self.partner_id.property_account_position_supplier_id.id !=
                    self.fiscal_position_id.id):
-                    self.partner_id.write
-                    ({"property_account_position_supplier_id":
-                     self.fiscal_position_id.id})
+                        self.journal_id = self.fiscal_position_id.journal_id.id
+                    # self.partner_id.write(
+                    #     {"property_account_position_supplier_id":
+                    #      self.fiscal_position_id.id}
+                    #      )
 
     def _check_ncf(self, rnc, ncf):
         if ncf and rnc:
