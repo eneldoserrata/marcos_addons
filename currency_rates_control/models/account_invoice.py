@@ -43,15 +43,21 @@ class AccountInvoice(models.Model):
     @api.multi
     @api.depends("currency_id")
     def _get_rate(self):
-        self.ensure_one()
         if self.currency_id:
-            ResCurrencyRate = self.env['res.currency.rate']
             if self.currency_id.id != self.company_id.currency_id.id:
-                currency_rate = ResCurrencyRate.browse(self.currency_id.id)
-                if currency_rate:
-                    self.rate = currency_rate.rate
+                self._cr.execute("""SELECT rate FROM res_currency_rate
+                                   WHERE currency_id = %s
+                                     AND name = %s
+                                     AND (company_id is null
+                                         OR company_id = %s)
+                                ORDER BY company_id, name desc LIMIT 1""",
+                               (self.currency_id.id, self.date_invoice or fields.Date.today(), self.company_id.id))
+                if self._cr.rowcount > 0:
+                    self.rate = 1 / self._cr.fetchone()[0]
+                else:
+                    self.rate = 0
             else:
-                self.rate = 0
+               self.rate = 1
 
     @api.onchange("date_invoice", "currency_id")
     def onchange_date_invoice(self):
@@ -63,12 +69,12 @@ class AccountInvoice(models.Model):
             self.date_invoice = fields.Date.today()
 
         view_id = self.env.ref(
-            "ncf_manager.invoice_currency_change_wizard_form", True)
+                    'currency_rates_control.update_currency_wizard_form', True)
         return {
-            'name': _('Cambiar moneda de la factura'),
+            'name': _('Cambiar Moneda de la Factura'),
             'view_type': 'form',
             'view_mode': 'form',
-            'res_model': 'invoice.currency.change.wizard',
+            'res_model': 'update.currency.wizard',
             'view_id': view_id.id,
             'target': 'new',
             'views': False,
@@ -78,8 +84,8 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def update_rate_wizard(self):
-        view_id = self.env.ref
-        ("currency_rates_control.update_rate_wizard_form", True)
+        view_id = self.env.ref(
+                        'currency_rates_control.update_rate_wizard_form', True)
         return {
             'name': _('Fecha sin tasa. Actualizar tasa de la moneda'),
             'view_type': 'form',
@@ -89,8 +95,8 @@ class AccountInvoice(models.Model):
             'target': 'new',
             'views': False,
             'type': 'ir.actions.act_window',
-            'context': {"default_name": self.date_invoice or fields.Date.today(
-                                                                            )}
+            'context': {
+                "default_name": self.date_invoice or fields.Date.today()}
             }
 
-    rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
+    rate = fields.Float("Tasa del dia", compute=_get_rate, digits=(12, 4))

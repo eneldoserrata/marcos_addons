@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record id="invoice_currency_change_wizard_form" model="ir.ui.view">
-            <field name="name">invoice_currency_change_wizard_form</field>
-            <field name="model">invoice.currency.change.wizard</field>
+        <record id="update_currency_wizard_form" model="ir.ui.view">
+            <field name="name">update_currency_wizard_form</field>
+            <field name="model">update.currency.wizard</field>
             <field name="arch" type="xml">
                 <form string="Cambiar Moneda de la Factura">
                     <group>
                         <field name="currency_id" widget="selection"/>
                     </group>
                     <footer>
-                        <button class="oe_highlight" name="update_invoice_currency" string="Cambiar moneda de la factura" type="object"/>
+                        <button class="oe_highlight" name="update_invoice_currency" string="Cambiar Moneda de la Factura" type="object"/>
                         <button special="cancel" string="Cancelar"/>
                     </footer>
                 </form>

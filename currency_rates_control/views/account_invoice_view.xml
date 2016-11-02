@@ -15,8 +15,8 @@
                 <xpath expr="//label[@groups='base.group_multi_currency']" position="replace"/>
                 <xpath expr="//div[@groups='base.group_multi_currency']" position="replace">
                     <field invisible="1" name="company_currency_id"/>
-                    <field class="oe_inline" name="currency_id" options="{'no_create': True, 'no_open': True}"/>
-                    <field attrs="{'invisible': [('rate','in',(1,0))]}" groups="base.group_multi_currency" name="rate"/>
+                    <field class="oe_inline" name="currency_id" readonly="1"/>
+                    <field attrs="{'invisible': [('rate','=',1)]}" groups="base.group_multi_currency" name="rate"/>
                 </xpath>
             </field>
         </record>
@@ -27,9 +27,18 @@
             <field name="arch" type="xml">
                 <xpath expr="//sheet/div" position="before">
                     <div class="oe_button_box" name="button_box">
-                        <button attrs="{'invisible': [('rate','!=',0)]}" class="oe_stat_button" groups="base.group_multi_currency" icon="fa-money" name="update_rate_wizard" string="Actualizar Tasa" type="object"/>
+                        <button class="oe_stat_button" groups="base.group_multi_currency" icon="fa-money" name="update_currency_wizard" states="draft" string="Cambiar moneda" type="object"/>
+                        <button class="oe_stat_button" groups="base.group_multi_currency" icon="fa-usd" name="update_rate_wizard" states="draft" string="Actualizar Tasa" type="object"/>
                     </div>
                 </xpath>
+                <field name="currency_id" position="replace"/>
+                <field name="currency_id" readonly="1"/>
+                <field name="reference" position="replace"/>
+                <field name="purchase_id" position="replace"/>
+                <field name="currency_id" position="before">
+                    <field name="reference"/>
+                    <field name="purchase_id"/>
+                </field>
                 <field name="currency_id" position="after">
                     <field attrs="{'invisible': [('rate','=',1)]}" groups="base.group_multi_currency" name="rate"/>
                 </field>

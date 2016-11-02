@@ -4,7 +4,7 @@ from openerp import models, fields, api, exceptions
 
 
 class InvoiceCurrecyChangeWizard(models.TransientModel):
-    _name = "invoice.currency.change.wizard"
+    _name = "update.currency.wizard"
 
     def _get_currency_domain(self):
         if self.env.context.get("currency_id", False):
