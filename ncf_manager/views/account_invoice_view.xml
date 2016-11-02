@@ -20,7 +20,7 @@
                     </div>
                 </field>
                 <xpath expr="//button[@name='invoice_cancel']" position="replace">
-                    <button groups="account.group_account_user" name="188" states="draft,proforma2,open" string="Cancel Invoice" type="action"/>
+                    <button groups="account.group_account_user" name="188" states="draft,proforma2,open" string="Cancelar Factura" type="action"/>
                 </xpath>
                 <field name="journal_id" position="replace">
                     <field groups="account.group_account_manager" name="move_name"/>
@@ -69,7 +69,7 @@
                 <field name="fiscal_position_id" position="replace"/>
                 <field name="partner_id" position="replace">
                     <field name="purchase_type" readonly="1"/>
-                    <field attrs="{'readonly': [('purchase_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Vendor"/>
+                    <field attrs="{'readonly': [('purchase_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Proveedor"/>
                     <field attrs="{'required': True}" name="fiscal_position_id"/>
                     <field invisible="1" name="ncf_required"/>
                     <field attrs="{'size': 19, 'invisible': [('ncf_required','=',False)], 'required': [('ncf_required','=',True)], 'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>
