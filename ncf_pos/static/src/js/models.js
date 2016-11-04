@@ -1,4 +1,4 @@
-odoo.define('ncf_pos.models', function (require) {
+odoo.define('ncf_pos.models', function(require) {
     'use strict';
 
     var models = require('point_of_sale.models');
@@ -14,10 +14,10 @@ odoo.define('ncf_pos.models', function (require) {
     var PosModelSuper = models.PosModel;
 
     models.PosModel = models.PosModel.extend({
-        initialize: function () {
+        initialize: function() {
             PosModelSuper.prototype.initialize.apply(this, arguments);
         },
-        set_cashier: function (user) {
+        set_cashier: function(user) {
             this.cashier = user;
             this.chrome.check_allow_delete_order();
         },
@@ -26,7 +26,7 @@ odoo.define('ncf_pos.models', function (require) {
         // - timeout: timeout for the rpc call in ms
         // returns a deferred that resolves with the list of
         // server generated ids for the sent orders
-        _save_to_server: function (orders, options) {
+        _save_to_server: function(orders, options) {
             if (!orders || !orders.length) {
                 var result = $.Deferred();
                 result.resolve([]);
@@ -41,24 +41,22 @@ odoo.define('ncf_pos.models', function (require) {
             // we try to send the order. shadow prevents a spinner if it takes too long. (unless we are sending an invoice,
             // then we want to notify the user that we are waiting on something )
             var posOrderModel = new Model('pos.order');
-            return posOrderModel.call('create_from_ui',
-                [_.map(orders, function (order) {
+            return posOrderModel.call('create_from_ui', [_.map(orders, function(order) {
                     order.to_invoice = options.to_invoice || false;
                     return order;
                 })],
-                undefined,
-                {
+                undefined, {
                     shadow: !options.to_invoice,
                     timeout: timeout
                 }
-            ).then(function (server_ids) {
-                _.each(orders, function (order) {
+            ).then(function(server_ids) {
+                _.each(orders, function(order) {
                     self.db.remove_order(order.id);
                 });
                 self.set('failed', false);
                 return server_ids;
-            }).fail(function (error, event) {
-                if (error.code === 200) {    // Business Logic Error, not a connection problem
+            }).fail(function(error, event) {
+                if (error.code === 200) { // Business Logic Error, not a connection problem
                     //if warning do not need to display traceback!!
                     if (error.data.exception_type == 'warning') {
                         delete error.data.debug;
@@ -83,13 +81,13 @@ odoo.define('ncf_pos.models', function (require) {
 
     var _order_line_super = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
-        initialize: function () {
+        initialize: function() {
             _order_line_super.initialize.apply(this, arguments);
             this.qty_allow_refund = this.qty_allow_refund || 0;
             this.refund_line_ref = this.refund_line_ref || false;
 
         },
-        set_discount: function (discount) {
+        set_discount: function(discount) {
             var self = this;
             var cashier = self.pos.get_cashier();
             var disc = Math.min(Math.max(parseFloat(discount) || 0, 0), 100);
@@ -99,35 +97,35 @@ odoo.define('ncf_pos.models', function (require) {
                 this.trigger('change', this);
             }
         },
-        set_qty_allow_refund: function (qty_allow_refund) {
+        set_qty_allow_refund: function(qty_allow_refund) {
             this.qty_allow_refund = qty_allow_refund;
             this.trigger('change', this);
         },
-        get_qty_allow_refund: function () {
+        get_qty_allow_refund: function() {
             return this.qty_allow_refund || 0;
         },
-        set_refund_line_ref: function (refund_line_ref) {
+        set_refund_line_ref: function(refund_line_ref) {
             this.refund_line_ref = refund_line_ref || false;
             this.trigger('change', this);
         },
-        get_refund_line_ref: function () {
+        get_refund_line_ref: function() {
             return this.refund_line_ref || false;
         },
-        set_prodlot_id: function (product_serial_lot) {
+        set_prodlot_id: function(product_serial_lot) {
             this.prodlot_id = product_serial_lot || false;
             this.trigger('change', this);
         },
-        get_prodlot_id: function (serial_lot) {
+        get_prodlot_id: function(serial_lot) {
             return this.prodlot_id || false;
         },
-        export_as_JSON: function () {
+        export_as_JSON: function() {
             var json = _order_line_super.export_as_JSON.apply(this, arguments);
             json.qty_allow_refund = this.get_qty_allow_refund();
             json.refund_line_ref = this.get_refund_line_ref();
             json.prodlot_id = this.get_prodlot_id();
             return json;
         },
-        export_for_printing: function () {
+        export_for_printing: function() {
             var json = _order_line_super.export_for_printing.apply(this, arguments);
             json.qty_allow_refund = this.get_qty_allow_refund();
             json.refund_line_ref = this.get_refund_line_ref();
@@ -138,24 +136,24 @@ odoo.define('ncf_pos.models', function (require) {
 
     var PaymentlineSuper = models.Paymentline.prototype;
     models.Paymentline = models.Paymentline.extend({
-        initialize: function () {
+        initialize: function() {
             PaymentlineSuper.initialize.apply(this, arguments);
             this.type = this.type || 'payment';
             return this;
         },
-        set_type: function (type) {
+        set_type: function(type) {
             this.type = type;
             this.trigger("change", this);
         },
-        get_type: function () {
+        get_type: function() {
             return this.type;
         },
-        export_as_JSON: function () {
+        export_as_JSON: function() {
             var res = PaymentlineSuper.export_as_JSON.apply(this, arguments);
             res.type = this.get_type();
             return res;
         },
-        export_for_printing: function () {
+        export_for_printing: function() {
             var res = PaymentlineSuper.export_for_printing.apply(this, arguments);
             res.type = this.get_type();
             return res;
@@ -164,7 +162,7 @@ odoo.define('ncf_pos.models', function (require) {
 
     var _super_order = models.Order.prototype;
     models.Order = models.Order.extend({
-        initialize: function () {
+        initialize: function() {
             _super_order.initialize.apply(this, arguments);
             var self = this;
             this.quotation_type = this.quotation_type || false;
@@ -182,11 +180,11 @@ odoo.define('ncf_pos.models', function (require) {
                 self.set_client(default_partner_id);
             }
         },
-        set_client: function (client) {
+        set_client: function(client) {
             var self = this;
 
             if (client) {
-                _.each(self.pos.fiscal_positions, function (fiscal_position) {
+                _.each(self.pos.fiscal_positions, function(fiscal_position) {
                     if (client.property_account_position_id) {
                         if (fiscal_position.id === client.property_account_position_id[0]) {
                             self.fiscal_position = fiscal_position;
@@ -199,7 +197,7 @@ odoo.define('ncf_pos.models', function (require) {
             this.assert_editable();
             this.set('client', client);
         },
-        init_from_JSON: function (json) {
+        init_from_JSON: function(json) {
             _super_order.init_from_JSON.apply(this, arguments);
             this.quotation_type = json.quotation_type;
             this.order_type = json.order_type;
@@ -207,73 +205,73 @@ odoo.define('ncf_pos.models', function (require) {
             this.origin_ncf = json.origin_ncf;
             return this;
         },
-        get_order_note: function () {
+        get_order_note: function() {
             return $("#wk_note_id").val();
         },
-        set_quotation_type: function (quotation_type) {
+        set_quotation_type: function(quotation_type) {
             this.quotation_type = quotation_type;
             this.trigger('change', this);
         },
-        get_quotation_type: function () {
+        get_quotation_type: function() {
             return this.quotation_type || false;
         },
-        set_order_type: function (order_type) {
+        set_order_type: function(order_type) {
             this.order_type = order_type;
             this.trigger('change', this);
         },
-        get_order_type: function () {
+        get_order_type: function() {
             return this.order_type || "order";
         },
-        set_origin: function (origin) {
+        set_origin: function(origin) {
             this.origin = origin;
             this.trigger('change', this);
         },
-        get_origin: function () {
+        get_origin: function() {
             return this.origin || false;
         },
-        set_ncf: function (ncf) {
+        set_ncf: function(ncf) {
             this.ncf = ncf;
             this.trigger('change', this);
         },
-        get_ncf: function () {
+        get_ncf: function() {
             return this.ncf || false;
         },
-        set_fiscal_type_name: function (fiscal_type_name) {
+        set_fiscal_type_name: function(fiscal_type_name) {
             this.fiscal_type_name = fiscal_type_name;
             this.trigger('change', this);
         },
-        get_fiscal_type_name: function () {
+        get_fiscal_type_name: function() {
             return this.fiscal_type_name || false;
         },
-        set_origin_ncf: function (origin_ncf) {
+        set_origin_ncf: function(origin_ncf) {
             this.origin_ncf = origin_ncf;
             this.trigger('change', this);
         },
-        get_origin_ncf: function () {
+        get_origin_ncf: function() {
             return this.origin_ncf || false;
         },
-        set_credit: function (credit) {
+        set_credit: function(credit) {
             this.credit = credit;
             this.trigger('change', this);
         },
-        get_credit: function () {
+        get_credit: function() {
             return this.credit || 0;
         },
-        set_credit_ncf: function (credit) {
+        set_credit_ncf: function(credit) {
             this.credit_ncf = credit;
             this.trigger('change', this);
         },
-        get_credit_ncf: function () {
+        get_credit_ncf: function() {
             return this.credit_ncf || 0;
         },
-        set_fiscal_type: function (credit) {
+        set_fiscal_type: function(credit) {
             this.fiscal_type = credit;
             this.trigger('change', this);
         },
-        get_fiscal_type: function () {
+        get_fiscal_type: function() {
             return this.fiscal_type || 0;
         },
-        add_product: function (product, options) {
+        add_product: function(product, options) {
             if (product.qty_allow_refund === 0 && this.get_order_type() == "refund") {
                 return;
             }
@@ -289,7 +287,11 @@ odoo.define('ncf_pos.models', function (require) {
             attr.order = this;
 
 
-            var line = new models.Orderline({}, {pos: this.pos, order: this, product: product});
+            var line = new models.Orderline({}, {
+                pos: this.pos,
+                order: this,
+                product: product
+            });
 
             if (this.get_order_type() == "refund") {
                 line.set_unit_price(product.refund_price);
@@ -328,7 +330,7 @@ odoo.define('ncf_pos.models', function (require) {
             }
             this.select_orderline(this.get_last_orderline());
         },
-        export_as_JSON: function () {
+        export_as_JSON: function() {
             var json = _super_order.export_as_JSON.apply(this, arguments);
             json.quotation_type = this.get_quotation_type();
             json.order_type = this.get_order_type();
@@ -342,7 +344,7 @@ odoo.define('ncf_pos.models', function (require) {
             json.order_note = this.get_order_note();
             return json;
         },
-        export_for_printing: function () {
+        export_for_printing: function() {
             var json = _super_order.export_for_printing.apply(this, arguments);
             json.quotation_type = this.get_quotation_type();
             json.order_type = this.get_order_type();
@@ -356,6 +358,4 @@ odoo.define('ncf_pos.models', function (require) {
             return json;
         }
     });
-
-
 });

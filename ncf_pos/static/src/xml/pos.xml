@@ -69,9 +69,6 @@
                 <div class="mb8" style="font-size:12px !important; padding-bottom:2px;">
                     <div t-if="widget.pos.company.street or  widget.pos.company.street2 or  widget.pos.company.zip">
                         <span class="fa fa-map-marker fa-lg"/>
-                         
-
-
                         <span t-esc="widget.pos.company.street"/>
                         <span t-if="widget.pos.company.street and  widget.pos.company.street2">,</span>
                         <span t-esc="widget.pos.company.street2"/>
@@ -80,18 +77,12 @@
                     </div>
                     <div t-if="widget.pos.company.city or  widget.pos.company.country_id">
                         <span class="fa fa-map-marker fa-lg"/>
-                         
-
-
                         <span t-esc="widget.pos.company.city"/>
                         <!--<span  t-if="widget.pos.company.city and  widget.pos.company.country_id">,</span>-->
                         <!--<span  t-esc="widget.pos.company.country_id"/>-->
                     </div>
                     <div t-if="widget.pos.company.phone or  widget.pos.company.fax">
                         <span class="fa fa-phone-square fa-lg"/>
-                         
-
-
                         <span t-esc="widget.pos.company.phone"/>
                         <span t-if="widget.pos.company.phone and  widget.pos.company.fax">,</span>
                         <span t-if="widget.pos.company.fax">Fax:</span>
@@ -99,39 +90,22 @@
                     </div>
                     <div t-if="widget.pos.company.email">
                         <span class="fa fa-envelope-square fa-lg"/>
-                         
-
-
                         <span t-esc="widget.pos.company.email"/>
                     </div>
                     <div t-if="widget.pos.company.website">
                         <span class="fa fa-globe fa-lg"/>
-                         
-
-
                         <span t-esc="widget.pos.company.website"/>
                     </div>
                     <div t-if="widget.pos.company.vat">
-                        <span class="fa fa-building fa-lg"/>RNC:
-
-
-                        <span t-esc="widget.pos.company.vat"/></div>
+                        <span class="fa fa-building fa-lg"/>RNC:<span t-esc="widget.pos.company.vat"/>
+                    </div>
                 </div>
                 <div t-attf-style="width:auto; float:left; padding-left:15px;        padding-right:15px; padding-top:2px; padding-bottom:2px;">
                     <span class="fa fa-twitter-square fa-lg" style="padding-left:0px;" t-if="widget.pos.company.twitter"/>
-                     
-
-
                     <span t-esc="widget.pos.company.twitter"/>
                     <span class="fa fa-facebook-square fa-lg" style="padding-left:13px;" t-if="widget.pos.company.facebook"/>
-                     
-
-
                     <span t-esc="widget.pos.company.facebook"/>
                     <span class="fa fa-google-plus-square fa-lg" style="padding-left:13px;" t-if="widget.pos.company.googleplus"/>
-                     
-
-
                     <span t-esc="widget.pos.company.googleplus"/>
                 </div>
             </div>
@@ -190,12 +164,10 @@
                         <t t-esc="orderline.get_product().display_name"/>
                         <t t-if="orderline.get_note()">
                             <div class="pos-disc-font">Nota:
-
                                 <t t-esc="orderline.get_note()"/></div>
                         </t>
                         <t t-if="orderline.get_discount() &gt;0">
                             <div class="pos-disc-font">With a
-
                                 <t t-esc="orderline.get_discount()"/>
                                 % discount</div>
                         </t>
@@ -219,13 +191,10 @@
         <div class="modal-dialog">
             <div class="popup popup-alert" style="height:200px">
                 <p class="title">Cotizar</p>Seleccione una opción?
-
-
                 <div class="footer">
                     <span class="button fa fa-print" id="print_pdf">Imprimir cotización</span>
                     <span class="button send fa fa-envelope-o" id="send_mail">Enviar cotización</span>
-                    <span class="button cancel fa fa-no-o" id="quotation_cancel">Cancelar
-                </span>
+                    <span class="button cancel fa fa-no-o" id="quotation_cancel">Cancelar</span>
                 </div>
             </div>
         </div>
