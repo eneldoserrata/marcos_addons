@@ -313,7 +313,8 @@ class PosOrder(models.Model):
 
         for order in orders:
             if order["data"].get("quotation_type", False):
-                return self.with_context(context).action_quotation(order["data"])
+                return self.with_context(context).action_quotation(
+                                                                order["data"])
 
         res = super(PosOrder, self).create_from_ui(orders)
 
@@ -341,7 +342,6 @@ class PosOrder(models.Model):
             order.action_paid_reconcile()
             _logger.info("PTV GENERO EL PICKING {}".format(
                                                     order.reserve_ncf_seq))
-
 
     @api.model
     def action_paid(self):

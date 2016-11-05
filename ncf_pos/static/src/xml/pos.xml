@@ -23,7 +23,7 @@
                         </select>
                     </div>
                     <div class="client-detail">
-                        <span class="label">Dirección</span>
+                        <span class="label">Calle</span>
                         <input class="detail client-address-street" name="street" placeholder="Street" t-att-value="partner.street"/>
                     </div>
                     <div class="client-detail">
@@ -31,13 +31,13 @@
                         <input class="detail client-address-city" name="city" placeholder="City" t-att-value="partner.city"/>
                     </div>
                     <div class="client-detail">
-                        <span class="label">Codigo</span>
+                        <span class="label">Código</span>
                         <input class="detail barcode" name="barcode" t-att-value="partner.barcode || &quot;&quot;"/>
                     </div>
                 </div>
                 <div class="client-details-right">
                     <div class="client-detail">
-                        <span class="label">Phone</span>
+                        <span class="label">Teléfono</span>
                         <input class="detail client-phone" name="phone" t-att-value="partner.phone || &quot;&quot;" type="tel"/>
                     </div>
                     <div class="client-detail">
@@ -97,10 +97,11 @@
                         <span t-esc="widget.pos.company.website"/>
                     </div>
                     <div t-if="widget.pos.company.vat">
-                        <span class="fa fa-building fa-lg"/>RNC:<span t-esc="widget.pos.company.vat"/>
+                        <span class="fa fa-building fa-lg">RNC:</span>
+                        <span t-esc="widget.pos.company.vat"/>
                     </div>
                 </div>
-                <div t-attf-style="width:auto; float:left; padding-left:15px;        padding-right:15px; padding-top:2px; padding-bottom:2px;">
+                <div t-attf-style="width:auto; float:left; padding-left:15px; padding-right:15px; padding-top:2px; padding-bottom:2px;">
                     <span class="fa fa-twitter-square fa-lg" style="padding-left:0px;" t-if="widget.pos.company.twitter"/>
                     <span t-esc="widget.pos.company.twitter"/>
                     <span class="fa fa-facebook-square fa-lg" style="padding-left:13px;" t-if="widget.pos.company.facebook"/>
@@ -163,13 +164,16 @@
                     <td>
                         <t t-esc="orderline.get_product().display_name"/>
                         <t t-if="orderline.get_note()">
-                            <div class="pos-disc-font">Nota:
-                                <t t-esc="orderline.get_note()"/></div>
+                            <div class="pos-disc-font">
+                                <span>Nota:</span>
+                                <t t-esc="orderline.get_note()"/>
+                            </div>
                         </t>
                         <t t-if="orderline.get_discount() &gt;0">
-                            <div class="pos-disc-font">With a
-                                <t t-esc="orderline.get_discount()"/>
-                                % discount</div>
+                            <div class="pos-disc-font">
+                                <span>With a</span>
+                                <t t-esc="orderline.get_discount()">% discount</t>
+                            </div>
                         </t>
                     </td>
                     <td class="pos-right-align">
@@ -190,7 +194,8 @@
     <t t-name="QuotationPopupWidget">
         <div class="modal-dialog">
             <div class="popup popup-alert" style="height:200px">
-                <p class="title">Cotizar</p>Seleccione una opción?
+                <p class="title">Cotizar</p>
+                <span>Seleccione una opción?</span>
                 <div class="footer">
                     <span class="button fa fa-print" id="print_pdf">Imprimir cotización</span>
                     <span class="button send fa fa-envelope-o" id="send_mail">Enviar cotización</span>
@@ -200,7 +205,8 @@
         </div>
     </t>
     <t t-name="QuotationActionWidget">
-        <div class="control-button">Cotización
+        <div class="control-button">
+            <span>Cotización</span>
         </div>
     </t>
     <t t-extend="ProductScreenWidget">
@@ -212,14 +218,14 @@
                     <i class="fa fa-pencil-square-o"/>Crear Nota de crédito</div>
                 <div class="control-button-refund refund-money-button">
                     <i class="fa fa-money"/>
-                    <i class="fa fa-pencil-square-o"/>Solcitar devolución de el pago</div>
+                    <i class="fa fa-pencil-square-o"/>Solicitar devolución del pago</div>
             </div>
         </t>
     </t>
     <t t-extend="PaymentScreenWidget">
         <t t-jquery=".payment-buttons" t-operation="append">
             <div class="button js_credit_note">
-                <i class="fa fa-pencil-square-o"/>Aplicar Nota de Créditos</div>
+                <i class="fa fa-pencil-square-o"/>Aplicar Nota de Crédito</div>
         </t>
         <t t-jquery=".left-content" t-operation="append">
             <center>
