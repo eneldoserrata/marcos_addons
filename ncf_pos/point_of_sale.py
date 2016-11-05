@@ -291,14 +291,6 @@ class PosOrder(models.Model):
             self.partner_id.write(
                 {"property_account_position_id": self.fiscal_position_id.id})
 
-    def check_if_real_stock_valuation(self, product_ids):
-        res = False
-        product = self.env["product.product"].browse(product_ids)
-        zero_cost = [(p.barcode, p.name) for p in product if p.standard_price == 0 and p.categ_id.property_valuation != 'manual_periodic']
-        if zero_cost:
-            res = [{"label": "{}-{}".format(name[0], name[1])} for name in zero_cost]
-        return res
-
     @api.model
     def create_from_ui(self, orders):
         for order in orders:
