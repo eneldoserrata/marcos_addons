@@ -85,7 +85,7 @@ class AccountInvoice(models.Model):
         ('overlimit', u'Cliente no tiene crédito disponible'),
         ('overdue', u'Cliente tiene facturas vencidas'),
         ('none', 'None'),
-        ], "Estado del credito", compute=_get_overdue_type, copy=False)
+        ], u"Estado del crédito", compute=_get_overdue_type, copy=False)
         )
 
     internal_number = fields.Char(u"Número de factura")
@@ -145,7 +145,7 @@ class AccountInvoice(models.Model):
         )
 
     authorize = fields.Boolean(
-        u"Crédito autorizado", default=False, copy=False)
+        u"Crédito Autorizado", default=False, copy=False)
 
     _sql_constraints = [
         ('number_uniq',
@@ -160,10 +160,10 @@ class AccountInvoice(models.Model):
                 self.move_name = False
                 return {
                     'warning': {
-                            'title': "NCF invalido",
-                            'message': "El numero de comprobante fiscal no"
-                            " es valido verifique de que no esta digitando"
-                            " un comprobante de consumidor final codigo 02"
+                            'title': u"NCF Inválido",
+                            'message': u"El número de comprobante fiscal no"
+                            u" es válido verifique que no está digitando un"
+                            u" comprobante de Consumidor Final (Código 02)"
                             " o revise si lo ha digitado incorrectamente"
                             }
                     }
@@ -294,9 +294,9 @@ class AccountInvoice(models.Model):
                             u" la validación en DGII. Verifique que el NCF y"
                             u" el RNC del proveedor estén correctamente"
                             " digitados."
-                            u"Si es un NCF de Proveedor Informal o de Gasto"
-                            " Menor vefifique si debe solicitar nuevos"
-                            u" números.")
+                            u" Si es un NCF de Proveedor Informal o de Gasto"
+                            " Menor vefifique si debe solicitar números"
+                            " nuevos.")
         self.signal_workflow("invoice_open")
 
     @api.model
@@ -443,8 +443,8 @@ class AccountInvoice(models.Model):
     @api.one
     def copy(self, default=None):
         if self.type in ("in_refund", "out_refund"):
-            raise exceptions.UserError(u"¡No está permitido duplicar notas de"
-                                       u" crédito!")
+            raise exceptions.UserError(u"¡No está permitido duplicar Notas de"
+                                       u" Crédito!")
         return super(AccountInvoice, self).copy(default=default)
 
     @api.multi
@@ -475,7 +475,7 @@ class AccountInvoice(models.Model):
             rec.authorize = False
             rec.message_post(body=u"<p>Crédito cancelado con {}</p>".
                              format(overdue_type[rec.overdue_type]),
-                             subject=u"factura a Crédito no autorizada",
+                             subject=u"Factura a Crédito no autorizada",
                              subtype="mail.mt_comment")
 
     @api.multi

@@ -41,11 +41,11 @@
                         <field attrs="{'invisible': [('ncf_control','!=',True)]}" name="gov_sequence_id"/>
                         <field attrs="{'invisible': [('ncf_control','!=',True)]}" name="special_sequence_id"/>
                         <field attrs="{'invisible': [('ncf_control','!=',True)]}" name="unique_sequence_id"/>
-                        <field attrs="{'invisible': ['|',('type', 'not in', ['sale', 'purchase']), ('refund_sequence', '!=', True)]}" name="refund_sequence_id" required="0" string="Secuencia para nota de crédito"/>
+                        <field attrs="{'invisible': ['|',('type', 'not in', ['sale', 'purchase']), ('refund_sequence', '!=', True)]}" name="refund_sequence_id" required="0" string="Secuencia para Notas de Crédito"/>
                     </group>
                 </xpath>
                 <field name="default_credit_account_id" position="after">
-                    <field domain="[('deprecated', '=', False)]" name="default_dicount_account_id"/>
+                    <field domain="[('deprecated', '=', False)]" name="default_discount_account_id"/>
                 </field>
             </field>
         </record>

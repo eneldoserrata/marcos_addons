@@ -35,11 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-import csv
-import cPickle
-import re
 import urllib2
-from openerp import models
 
 
 __author__ = 'eneldoserrata'

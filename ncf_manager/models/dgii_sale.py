@@ -91,8 +91,8 @@ class DgiiSaleReport(models.Model):
     ITBIS_TOTAL = fields.Float(u"OFV ITBIS")
     TOTAL_MONTO_FACTURADO = fields.Float(u"OFV Facturado",
                                          help=u"Suma de las facturas y las"
-                                         u"notas de crédito como se digitan en"
-                                         "el formulario de la DGII")
+                                         u" Notas de Crédito como se digitan"
+                                         " en el formulario de la DGII")
 
     TOTAL_MONTO_FACTURAS = fields.Float(u"Facturado", compute=_calc_total)
     TOTAL_MONTO_NC = fields.Float(u"Notas Crédito", compute=_calc_total)
@@ -153,7 +153,8 @@ class DgiiSaleReport(models.Model):
                 raise exceptions.ValidationError(u"¡El número de NCF o el RNC/"
                                                  u"Cédula del clienten para el"
                                                  " comprobante {} no es"
-                                                 u"válido!".format(inv.number))
+                                                 u" válido!".format(inv.number)
+                                                 )
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             if inv.type == "out_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number

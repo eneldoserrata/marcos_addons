@@ -151,8 +151,8 @@ class DgiiPurchaseReport(models.Model):
 
             if not inv.partner_id.vat:
                 raise exceptions.UserError(u"El número de RNC/Cédula del"
-                                           u"proveedor {} no es válido"
-                                           "para el NCF {}".format(
+                                           u" proveedor {} no es válido"
+                                           " para el NCF {}".format(
                                             inv.partner_id.name, inv.number))
 
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
@@ -161,11 +161,12 @@ class DgiiPurchaseReport(models.Model):
                 inv.expense_type)
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
-                raise exceptions.UserError("Debe definir el tipo de gasto"
-                                           u"para la posición fiscal {}! En la"
-                                           "factura {}".format(
+                raise exceptions.UserError(u"¡Debe definir el tipo de gasto"
+                                           u" para la posición fiscal {}!"
+                                           " En la factura {}".format(
                                              inv.fiscal_position_id.name,
-                                             inv.number))
+                                             inv.number)
+                                           )
 
             if not is_ncf(inv.number, inv.type):
                 raise exceptions.UserError(u"¡El número de NCF {} no es"
@@ -224,7 +225,7 @@ class DgiiPurchaseReport(models.Model):
         if not (company_fiscal_identificacion or not
                 is_identification(company_fiscal_identificacion)):
             raise exceptions.ValidationError("Debe configurar el RNC de su"
-                                             "empresa!")
+                                             " empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
         file = io.open(path, 'w', encoding="utf-8", newline='\r\n')
