@@ -76,12 +76,12 @@ class AccountPayment(models.Model):
 
             if self.rate_currency_id:
                 if self.is_base_currency:
-                    self.amount_currency = self.invoice_payment_amount_currency
+                    # self.amount_currency = self.invoice_payment_amount_currency
                     self.payment_amount = self.invoice_payment_amount_currency*self.rate
                     self.floatcurrency_diff = self.currency_diff = invoice_payment_amount_currency_local-self.payment_amount
 
                 else:
-                    self.amount_currency = sum([rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
+                    # self.amount_currency = sum([rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
                     self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (self.invoice_payment_amount_currency * self.rate)) / self.rate
 
 
@@ -155,7 +155,8 @@ class AccountPayment(models.Model):
         [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'), ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
          ("none", "SIN DIFERENCIA CAMBIARIA")], compute="_calc_payment_amount", string="Tipo de diferencia")
 
-    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id',compute="_calc_payment_amount")
+    # amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id',compute="_calc_payment_amount")
+    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id')
     rate_currency_id = fields.Many2one("res.currency", string="Divisa de cambio", compute="_calc_payment_amount")
     payment_amount = fields.Monetary("Pago calculado", compute="_calc_payment_amount")
     currency_diff = fields.Monetary("Diferencia cambiaria", compute="_calc_payment_amount")
