@@ -36,7 +36,7 @@
                             <field name="payment_amount"
                                    attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                             <field name="amount_currency"
-                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice')]}"/>
+                                   attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice')], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
                             <field name="currency_diff"
                                    attrs="{'invisible': ['|','|',('rate_currency_id','=',False),('move_type','!=','invoice'),('rate_currency_id','=', False)]}"/>
                             <field name="rate"
