@@ -290,12 +290,12 @@ class AccountInvoice(models.Model):
                     if not result.get("valid", False):
 
                         raise exceptions.UserError(
-                            u"¡El número de comprobante no es válido! No pasó"
+                            u"¡El mero de comprobante no es válido! No pasó"
                             u" la validación en DGII. Verifique que el NCF y"
                             u" el RNC del proveedor estén correctamente"
                             " digitados."
                             u" Si es un NCF de Proveedor Informal o de Gasto"
-                            " Menor vefifique si debe solicitar números"
+                            u" Menor vefifique si debe solicitar números"
                             " nuevos.")
         self.signal_workflow("invoice_open")
 
