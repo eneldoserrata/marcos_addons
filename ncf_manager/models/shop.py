@@ -56,7 +56,7 @@ class ShopJournalConfig(models.Model):
 
     _sql_constraints = [
      ('shop_ncf_config_name_uniq', 'unique(name)',
-      u'El nombre de la sucursal debe de ser unico!'),
+      u'El nombre de la sucursal debe de ser único!'),
     ]
 
     @api.model
@@ -71,7 +71,7 @@ class ShopJournalConfig(models.Model):
         user_shops = self.search([('user_ids', '=', self._uid)])
         if not user_shops:
             raise exceptions.UserError("Su usuario no tiene una sucursal"
-                                       "asignada.")
+                                       " asignada.")
 
         if self._context.get("module", False) == "ncf_manager":
             shop_ids = [rec for rec in user_shops]

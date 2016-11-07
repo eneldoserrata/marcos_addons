@@ -41,14 +41,15 @@ from openerp import models, fields, api
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    purchase_type = fields.Selection([
-        ("normal", u"Requiere NCF"),
-        ("minor", u"Gasto Menor"),
-        ("informal", u"Proveedores Informales"),
-        ("exterior", u"Pagos al Exterior"),
-        ("import", u"Importaciones"),
-        ("others", u"Otros"),
-        ], string=u"Tipo de compra", default="normal")
+    purchase_type = fields.Selection(
+        [("normal", u"Requiere NCF"),
+         ("minor", u"Gasto Menor"),
+         ("informal", u"Proveedores Informales"),
+         ("exterior", u"Pagos al Exterior"),
+         ("import", u"Importaciones"),
+         ("others", u"Otros"),
+         ], string=u"Tipo de compra", default="normal"
+         )
 
     ncf_control = fields.Boolean("Control de NCF")
     ncf_remote_validation = fields.Boolean(u"Validar con DGII", default=True)
@@ -64,9 +65,9 @@ class AccountJournal(models.Model):
     unique_sequence_id = fields.Many2one(
         "ir.sequence", string=u"Secuencia para único ingreso")
 
-    credit_out_invoice = fields.Boolean(u"Puede facturar a crédito")
-    default_dicount_account_id = fields.Many2one(
-        "account.account", string="Cuenta para descuentos")
+    credit_out_invoice = fields.Boolean(u"Puede Facturar a Crédito")
+    default_discount_account_id = fields.Many2one(
+        "account.account", string="Cuenta para Descuentos")
 
 
 class AccountFiscalPosition(models.Model):
@@ -79,11 +80,11 @@ class AccountFiscalPosition(models.Model):
         ("fiscal", u"Para Crédito Fiscal"),
         ("gov", u"Gubernamental"),
         ("special", u"Regímenes Especiales"),
-        ("unico", u"Unico Ingreso")
+        ("unico", u"Único Ingreso")
         ], string="Tipo de Comprobante")
 
     journal_id = fields.Many2one(
-        "account.journal", string="Diario de compra",
+        "account.journal", string="Diario de Compras",
         domain="[('type','=','purchase')]")
 
     @api.model
@@ -148,6 +149,6 @@ class AccountTax(models.Model):
         ('itbis', 'ITBIS Pagado'),
         ('ritbis', 'ITBIS Retenido'),
         ('isr', 'ISR Retenido'),
-        ('cost', 'Forma parte del gasto'),
-        ('none', 'No deducible')
-        ], default="itbis", string="Tipo de impuesto de compra")
+        ('cost', 'Forma Parte del Gasto'),
+        ('none', 'No Deducible')
+        ], default="itbis", string="Tipo de Impuesto de Compra")

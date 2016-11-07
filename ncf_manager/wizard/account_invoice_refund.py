@@ -89,7 +89,7 @@ class InheritedAccountInvoiceRefund(models.TransientModel):
     #
     #             if mode == "discount":
     #                 product_account_id =
-    #                 refund.journal_id.default_dicount_account_id.id
+    #                 refund.journal_id.default_discount_account_id.id
     #                 if not product_account_id:
     #                     raise exceptions.ValidationError("Para poder aplicar
     #                     descuentos debe de configurar la Cuenta para

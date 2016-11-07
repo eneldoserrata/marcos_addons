@@ -72,7 +72,7 @@ class account_payment(models.Model):
 
     @api.onchange('amount')
     def _onchange_amount(self):
-        self.check_amount_in_words = self.amont_in_word
+        self.check_amount_in_words = self.amount_in_words
 
     @api.multi
     def print_checks(self):

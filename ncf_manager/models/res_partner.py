@@ -51,18 +51,18 @@ class ResPartner(models.Model):
                                  )
     property_account_position_supplier_id = fields.Many2one(
         'account.fiscal.position', company_dependent=True,
-        string=_("Supplier Fiscal Position"),
+        string=_(u"Posición Fiscal de Proveedor"),
         help="The fiscal position will determine taxes and accounts used for"
-        "the supplier.",
+        " the supplier.",
         oldname="property_account_position",
         domain=[('supplier', '=', True)]
         )
 
     property_account_position_id = fields.Many2one(
         'account.fiscal.position', company_dependent=True,
-        string=_("Customer Fiscal Position"),
+        string=_(u"Posición Fiscal de Cliente"),
         help="The fiscal position will determine taxes and accounts used for"
-        "the Customer.",
+        " the Customer.",
         oldname="property_account_position",
         domain=[('supplier', '=', False)]
         )
