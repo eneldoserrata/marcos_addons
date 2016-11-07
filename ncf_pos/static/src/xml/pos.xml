@@ -163,12 +163,6 @@
                     </td>
                     <td>
                         <t t-esc="orderline.get_product().display_name"/>
-                        <t t-if="orderline.get_note()">
-                            <div class="pos-disc-font">
-                                <span>Nota:</span>
-                                <t t-esc="orderline.get_note()"/>
-                            </div>
-                        </t>
                         <t t-if="orderline.get_discount() &gt;0">
                             <div class="pos-disc-font">
                                 <span>With a</span>
