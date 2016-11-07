@@ -42,8 +42,8 @@ from openerp import api, fields, models, _
 
 from datetime import datetime
 
-
 import logging
+
 _logger = logging.getLogger(__name__)
 
 MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
@@ -109,18 +109,17 @@ class AccountInvoice(models.Model):
                                      AND (company_id is null
                                          OR company_id = %s)
                                 ORDER BY company_id, name desc LIMIT 1""",
-                               (self.currency_id.id, self.date_invoice or fields.Date.today(), self.company_id.id))
+                                 (self.currency_id.id, self.date_invoice or fields.Date.today(), self.company_id.id))
                 if self._cr.rowcount > 0:
                     self.rate = 1 / self._cr.fetchone()[0]
                 else:
                     self.rate = 0
             else:
-               self.rate = 1
+                self.rate = 1
 
     @api.onchange("date_invoice", "currency_id")
     def onchange_date_invoice(self):
         self._get_rate()
-
 
     @api.multi
     def update_currency_wizard(self):
@@ -140,7 +139,6 @@ class AccountInvoice(models.Model):
             'type': 'ir.actions.act_window',
             'context': {"currency_id": self.currency_id.id}
         }
-
 
     @api.multi
     def update_rate_wizard(self):
@@ -184,7 +182,7 @@ class AccountInvoice(models.Model):
                                  required=True, readonly=True, states={'draft': [('readonly', False)]},
                                  default=_default_user_journal,
                                  domain="[('type', 'in', {'out_invoice': ['sale'], 'out_refund': ['sale'], 'in_refund': ['purchase'], 'in_invoice': ['purchase']}.get(type, [])), ('company_id', '=', company_id)]")
-    purchase_type = fields.Selection([("normal",u"REQUIERE NCF"),
+    purchase_type = fields.Selection([("normal", u"REQUIERE NCF"),
                                       ("minor", u"GASTO MENOR NCF GENERADO POR EL SISTEMA"),
                                       ("informal", u"PROVEEDORES INFORMALES NCF GENERADO POR EL SISTEMA"),
                                       ("exterior", u"PAGOS AL EXTERIOR NO REQUIRE NCF"),
@@ -199,9 +197,11 @@ class AccountInvoice(models.Model):
     move_name = fields.Char(string='Journal Entry', readonly=False,
                             default=False, copy=False,
                             help="Technical field holding the number given to the invoice, automatically set when the invoice is validated then stored to set the same number again if the invoice is cancelled, set to draft and re-validated.")
-    rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12,4))
-    pay_to = fields.Many2one("res.partner", string="Pagar a", readonly=True, states={'draft': [('readonly', False)]}, copy=False)
-    charge_to = fields.Many2one("res.partner", string="Facturar a", readonly=True, states={'draft': [('readonly', False)]}, copy=False)
+    rate = fields.Float(u"Tasa del día", compute=_get_rate, digits=(12, 4))
+    pay_to = fields.Many2one("res.partner", string="Pagar a", readonly=True, states={'draft': [('readonly', False)]},
+                             copy=False)
+    charge_to = fields.Many2one("res.partner", string="Facturar a", readonly=True,
+                                states={'draft': [('readonly', False)]}, copy=False)
 
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type, partner_id)',
@@ -210,7 +210,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange("move_name")
     def onchange_ncf(self):
-        if self.move_name and self.type in ('in_invoice','in_refund'):
+        if self.move_name and self.type in ('in_invoice', 'in_refund'):
             if not is_ncf(self.move_name, self.type):
                 self.move_name = False
                 return {
@@ -220,7 +220,6 @@ class AccountInvoice(models.Model):
                                                                     "digitado incorrectamente"}
                 }
             self.invoice_ncf_validation()
-
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
@@ -252,7 +251,6 @@ class AccountInvoice(models.Model):
             if self.type == "out_invoice" and self.credit_out_invoice == False:
                 self.date_due = fields.Date.today()
                 self.payment_term_id = 1
-
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
@@ -309,12 +307,17 @@ class AccountInvoice(models.Model):
             if not invoice.journal_id.purchase_type in ['exterior', 'import',
                                                         'others'] and invoice.ncf_required == True:
 
-                inv_in_draft = self.search(
-                    [('id', '!=', invoice.id), ('partner_id', '=', invoice.partner_id.id),
-                     ('move_name', '=', invoice.move_name), ('state', 'in', ('draft', 'cancel'))])
+                if invoice.id:
+                    inv_in_draft = self.search([('id', '!=', invoice.id), ('partner_id', '=', invoice.partner_id.id),
+                                                    ('move_name', '=', invoice.move_name),
+                                                    ('state', 'in', ('draft', 'cancel'))])
+                else:
+                    inv_in_draft = self.search([('partner_id', '=', invoice.partner_id.id),
+                                                ('move_name', '=', invoice.move_name),
+                                                ('state', 'in', ('draft', 'cancel'))])
 
                 if inv_in_draft:
-                    raise exceptions.ValidationError(
+                    raise exceptions.UserError(
                         u"El número de comprobante fiscal digitado para este proveedor ya se encuentra en una factura en borrador o cancelada.")
 
                 inv_exist = self.search([('partner_id', '=', invoice.partner_id.id), ('number', '=', invoice.move_name),
@@ -339,14 +342,14 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).create(vals)
         return res
 
-
     @api.multi
     def write(self, vals):
         for rec in self:
             if rec.type in ("out_invoice", "out_refund"):
                 if not vals.get("fiscal_position_id", False):
                     if not rec.fiscal_position_id:
-                        fiscal_position_id = rec.env["account.fiscal.position"].search([('client_fiscal_type', '=', 'final')])
+                        fiscal_position_id = rec.env["account.fiscal.position"].search(
+                            [('client_fiscal_type', '=', 'final')])
                         if not fiscal_position_id:
                             raise exceptions.ValidationError(
                                 "Antes de generar una factura debe definir las posiciones fiscales.")
@@ -432,11 +435,13 @@ class AccountInvoice(models.Model):
                     origin = self.env["account.invoice.line"].browse(line.refund_line_ref.id)
                     origin.write({"qty_allow_refund": origin.qty_allow_refund - line.quantity})
 
-                refund_inv = self.env['account.invoice'].search([('origin', '=', rec.number), ('state', 'in', ('open', 'paid'))])
+                refund_inv = self.env['account.invoice'].search(
+                    [('origin', '=', rec.number), ('state', 'in', ('open', 'paid'))])
 
                 total_refund = sum([rec.amount_untaxed for rec in refund_inv]) + rec.amount_untaxed
 
-                afected_inv = self.env['account.invoice'].search([('number', '=', rec.origin), ('state', 'in', ('open', 'paid'))])
+                afected_inv = self.env['account.invoice'].search(
+                    [('number', '=', rec.origin), ('state', 'in', ('open', 'paid'))])
 
                 amount_untaxed = sum([r.amount_untaxed for r in afected_inv]) or 0.0
 
@@ -502,25 +507,26 @@ class AccountInvoice(models.Model):
     @api.multi
     def authorize_credit(self):
         for rec in self:
-            overdue_type = {'overlimit_overdue': u'Este cliente, tiene el limite de crédito agotado y facturas vencidas',
-                            'overlimit': u'Este cliente, no tiene crédito disponible',
-                            'overdue': 'Este cliente, tiene facturas vencidas',
-                            'none': 'None'}
+            overdue_type = {
+                'overlimit_overdue': u'Este cliente, tiene el limite de crédito agotado y facturas vencidas',
+                'overlimit': u'Este cliente, no tiene crédito disponible',
+                'overdue': 'Este cliente, tiene facturas vencidas',
+                'none': 'None'}
             rec.authorize = True
             rec.message_post(body=u"<p>Crédito autorizado con {}</p>".format(overdue_type[rec.overdue_type]),
-                              subject=u"factura a Crédito Autorizada", subtype="mail.mt_comment")
+                             subject=u"factura a Crédito Autorizada", subtype="mail.mt_comment")
 
     @api.multi
     def disallows_credit(self):
         for rec in self:
-            overdue_type = {'overlimit_overdue': u'Este cliente, tiene el limite de crédito agotado y facturas vencidas',
-                            'overlimit': u'Este cliente, no tiene crédito disponible',
-                            'overdue': 'Este cliente, tiene facturas vencidas',
-                            'none': 'None'}
+            overdue_type = {
+                'overlimit_overdue': u'Este cliente, tiene el limite de crédito agotado y facturas vencidas',
+                'overlimit': u'Este cliente, no tiene crédito disponible',
+                'overdue': 'Este cliente, tiene facturas vencidas',
+                'none': 'None'}
             rec.authorize = False
             rec.message_post(body=u"<p>Crédito cancelado con {}</p>".format(overdue_type[rec.overdue_type]),
-                              subject=u"factura a Crédito no autorizada", subtype="mail.mt_comment")
-
+                             subject=u"factura a Crédito no autorizada", subtype="mail.mt_comment")
 
     @api.multi
     def set_ncf(self):
@@ -544,7 +550,7 @@ class AccountInvoice(models.Model):
                 next_ncf = True
                 while next_ncf:
                     ncf_next = sequence.with_context(ir_sequence_date=inv.date_invoice).next_by_id()
-                    if not self.search_count([('number','=',ncf_next),('journal_id','=',self.journal_id.id)]):
+                    if not self.search_count([('number', '=', ncf_next), ('journal_id', '=', self.journal_id.id)]):
                         _logger.info(
                             "EL SISTEMA SALTO EL NUMERO {} DEL DIARIO {} PORQUE YA EXISTE DESDE CONTABILIDAD".format(
                                 ncf_next, self.journal_id.name))
