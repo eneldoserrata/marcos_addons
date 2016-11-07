@@ -275,11 +275,7 @@ odoo.define('ncf_pos.screens', function(require) {
                     }
                 });
             } else {
-                this(function(res) {
-                    if (res) {
-                        self.finish_validate_order(force_validation);
-                    }
-                });
+                self.finish_validate_order(force_validation);
             }
         },
         finish_validate_order: function(force_validation) {
