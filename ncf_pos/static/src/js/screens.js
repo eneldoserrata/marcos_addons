@@ -144,33 +144,7 @@ odoo.define('ncf_pos.screens', function(require) {
 
             };
         },
-        check_if_real_stock_valuation: function(order) {
-            var self = this;
-            var order = this.pos.get_order();
-            var product_ids = [];
 
-            _.each(order.orderlines.models, function(line) {
-                product_ids.push(line.product.id);
-            });
-
-            posOrderModel = new Model('pos.order');
-            return posOrderModel.call('check_if_real_stock_valuation', [product_ids])
-                .then(function(res) {
-                    if (res) {
-                        self.gui.show_popup('selection', {
-                            title: _t('No puede terminar la order productos sin costos definidos!'),
-                            list: res,
-                            confirm: function() {
-                                self.gui.close_popup();
-                            }
-                        });
-                        return false;
-                    } else {
-                        return true;
-                    }
-                });
-
-        },
         renderElement: function() {
             var self = this;
             this._super();
@@ -301,7 +275,7 @@ odoo.define('ncf_pos.screens', function(require) {
                     }
                 });
             } else {
-                this.check_if_real_stock_valuation().then(function(res) {
+                this(function(res) {
                     if (res) {
                         self.finish_validate_order(force_validation);
                     }
