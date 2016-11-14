@@ -134,17 +134,15 @@ class DgiiSaleReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-            MONTO_FACTURADO = 0.00
-            for line in inv.invoice_line_ids:
-                account_ids  = [l.account_id.id for l in line]
-                move_lines = self.env["account.move.line"].search([('move_id','=',inv.move_id.id),('account_id','in',account_ids)])
-                MONTO_FACTURADO = abs(sum([l.credit for l in move_lines])-sum([l.debit for l in move_lines]))
 
-                if inv.type == "out_refund":
-                    MONTO_FACTURADO = MONTO_FACTURADO
+            account_ids = list(set([l.account_id.id for l in inv.invoice_line_ids if l.account_id.user_type_id.name == 'Ingreso']))
 
+            move_lines = self.env["account.move.line"].search([('move_id','=',inv.move_id.id),('account_id','in',account_ids)])
+            MONTO_FACTURADO = abs(sum([l.credit for l in move_lines])-sum([l.debit for l in move_lines]))
 
-            MONTO_FACTURADO = MONTO_FACTURADO
+            if not MONTO_FACTURADO:
+                MONTO_FACTURADO = 0
+
 
             ITBIS_FACTURADO = 0
 
