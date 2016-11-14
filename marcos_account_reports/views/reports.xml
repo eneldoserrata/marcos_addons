@@ -47,7 +47,7 @@
                             <t t-set="display_analitic" t-value="any([l.analytic_account_id for l in o.line_ids])"/>
                             <t t-set="display_curr" t-value="any([l.amount_currency for l in o.line_ids])"/>
 
-                            <table class="table table-condensed" style="font-size:9px">
+                            <table class="table table-condensed" style="font-size:10px">
                                 <tr>
                                     <th t-if="display_contact" class="tg-amwm">Contacto</th>
                                     <th t-if="display_product" class="tg-amwm">Producto</th>
