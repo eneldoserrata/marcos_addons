@@ -49,12 +49,12 @@ from openerp.models import AbstractModel
 #         return msg
 
 
-class ir_config_parameter(osv.osv):
-    _inherit = "ir.config_parameter"
-
-    def get_param(self, cr, uid, key, default=False, context=None):
-        res = super(ir_config_parameter, self).get_param(cr, uid, key, default=default, context=context)
-        if key =="database.uuid":
-            return
-
-        return res
+# class ir_config_parameter(osv.osv):
+#     _inherit = "ir.config_parameter"
+#
+#     def get_param(self, cr, uid, key, default=False, context=None):
+#         res = super(ir_config_parameter, self).get_param(cr, uid, key, default=default, context=context)
+#         if key =="database.uuid":
+#             return
+#
+#         return res
