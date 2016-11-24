@@ -319,9 +319,9 @@ class AccountPayment(models.Model):
             if self.currency_diff:
                 if self.currency_diff > 0:
                     if self.payment_type == "inbound":
-                        amount_currency = self.amount+abs(self.floatcurrency_diff)
+                        amount_currency = self.amount
                     else:
-                        amount_currency = (self.amount-abs(self.floatcurrency_diff))*-1
+                        amount_currency = self.amount*-1
 
                     liquidity_aml_dict.update({"amount_currency": amount_currency,
                                                "currency_id": self.currency_id.id,
@@ -329,9 +329,9 @@ class AccountPayment(models.Model):
                                                "credit": debit_invoice_total-abs(self.currency_diff*self.rate) if self.payment_type == "outbound" else 0})
                 else:
                     if self.payment_type == "inbound":
-                        amount_currency = self.amount+abs(self.floatcurrency_diff)
+                        amount_currency = self.amount
                     else:
-                        amount_currency = self.amount+abs(self.currency_diff)*-1
+                        amount_currency = self.amount*-1
 
                     liquidity_aml_dict.update({"amount_currency": amount_currency,
                                                "debit": credit_invoice_total+abs(self.floatcurrency_diff*self.rate) if self.payment_type == "inbound" else 0,
@@ -382,8 +382,8 @@ class AccountPayment(models.Model):
             writeoff_line['account_id'] = writeoff_account_id
             writeoff_line['debit'] = debit_wo
             writeoff_line['credit'] = credit_wo
-            writeoff_line['amount_currency'] = amount_currency
-            writeoff_line['currency_id'] = self.rate_currency_id.id
+            writeoff_line['amount_currency'] = amount_currency if not self.is_base_currency else False
+            writeoff_line['currency_id'] = self.currency_id.id if not self.is_base_currency else False
             writeoff_line['payment_id'] = self.id
             aml_obj.create(writeoff_line)
 
