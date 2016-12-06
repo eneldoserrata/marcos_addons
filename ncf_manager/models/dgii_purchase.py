@@ -106,13 +106,19 @@ class DgiiPurchaseReport(models.Model):
             LINE_TAX_COST = 0
             CURRENCY_RATE = 1
 
-
             move_lines = [move_line for move_line in inv.move_id.line_ids if move_line.account_id.id in account_tax_ids]
+            cxp_move = [move_line for move_line in inv.move_id.line_ids if move_line.account_id.id == inv.account_id.id]
+
+            if cxp_move:
+                if cxp_move[0].amount_currency:
+                    CURRENCY_RATE = abs(cxp_move[0].credit+cxp_move[0].debit) / abs(cxp_move[0].amount_currency)
+
             for move_line in move_lines:
+
                 amount = move_line.debit if move_line.debit > 0 else move_line.credit
 
-                if move_line.amount_currency:
-                    CURRENCY_RATE = abs(amount)/abs(move_line.amount_currency)
+                # if move_line.amount_currency:
+                #     CURRENCY_RATE = abs(amount)/abs(move_line.amount_currency)
 
                 if tax_account[move_line.account_id.id] == "itbis":
                     ITBIS_TOTAL += amount
