@@ -10,7 +10,7 @@
                     <field invisible="1" name="credit_out_invoice"/>
                     <field invisible="1" name="authorize"/>
                     <field invisible="1" name="overdue_type"/>
-                    <div attrs="{'invisible': ['|','|','|','|','|',('overdue_type','=','none'), ('credit_out_invoice','=',False), ('state','in',('open','paid')), ('partner_id','=',False), ('authorize','=',True), ('type','!=','out_invoice')]}" class="alert alert-danger" role="alert" style="margin-bottom:0px;">
+                    <div attrs="{'invisible':['|','|','|','|','|', ('overdue_type', '=', 'none'),('credit_out_invoice', '=', False), ('state', 'in', ('open','paid')), ('partner_id','=', False), ('authorize', '=', True), ('type', '!=', 'out_invoice')]}" class="alert alert-danger" role="alert" style="margin-bottom:0px;">
                         <h2>Crédito bloqueado</h2>
                         <button name="authorize_credit" string="Autorizar crédito" type="object"/>
                     </div>
@@ -20,7 +20,7 @@
                     </div>
                 </field>
                 <xpath expr="//button[@name='invoice_cancel']" position="replace">
-                    <button groups="account.group_account_user" name="188" states="draft,proforma2,open" string="Cancelar Factura" type="action"/>
+                    <button groups="account.group_account_user" name="%(account.action_account_invoice_cancel)d" states="draft,proforma2,open" string="Cancelar Factura" type="action"/>
                 </xpath>
                 <field name="journal_id" position="replace">
                     <field groups="account.group_account_manager" name="move_name"/>
