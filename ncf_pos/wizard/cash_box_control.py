@@ -6,7 +6,6 @@ from openerp import models, api, fields
 class CheckCashBox(models.TransientModel):
     _name = "check.cash.box"
 
-
     dummy = fields.Boolean()
 
     @api.model

@@ -53,8 +53,8 @@ class PurchaseOrder(models.Model):
         picking_ids = [r.id for r in self.env["stock.picking.type"].search([('warehouse_id','in',wh_ids),('code','=','incoming')])]
         return picking_ids[0]
 
-    picking_type_id = fields.Many2one('stock.picking.type', 'Hello', states=READONLY_STATES, required=True, default=_default_picking_type,\
-    help="This will determine picking type of incoming shipment")
+    picking_type_id = fields.Many2one('stock.picking.type', 'Hello', states=READONLY_STATES, required=True, default=_default_picking_type,
+                                      help="This will determine picking type of incoming shipment")
 
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', oldname='fiscal_position',
                                          domain=[('supplier','=',True)])

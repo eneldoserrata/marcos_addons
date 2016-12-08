@@ -12,7 +12,6 @@ odoo.define('ncf_pos.gui', function(require) {
             var self = this;
             // console.log(self.pos.config.use_proxy);
 
-
             if (screen_name == "ncf") {
                 this._super("receipt", params, refresh);
             } else if (screen_name === "receipt" && self.pos.config.use_proxy !== true) {
@@ -32,6 +31,4 @@ odoo.define('ncf_pos.gui', function(require) {
             }
         }
     });
-
-
 });

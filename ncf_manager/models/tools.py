@@ -527,7 +527,7 @@ def is_identification(value):
 
 def is_ncf(value, type):
     u"""
-    Valida estructura del Número de Comprobante Ficasl (NCF)
+    Valida estructura del Número de Comprobante Fiscal (NCF)
     para República Dominicana.
 
     Caracter 1: Serie

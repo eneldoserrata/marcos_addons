@@ -276,27 +276,36 @@ class AccountInvoice(models.Model):
 
                 if inv_exist:
                     raise exceptions.Warning(
-                        u"Este número de comprobante fiscal ya se encuentra en"
-                        " una factura en borrador o cancelada este proveedor")
+                        u"El número de comprobante fiscal {} ya se encuentra"
+                        " registrado con este mismo proveedor en una factura"
+                        " en borrador o cancelada".format(invoice.move_name))
                 if (_internet_on() and
                         self.journal_id.ncf_remote_validation):
                     if invoice.journal_id.purchase_type == 'normal':
                         result = self._check_ncf(
-                                        invoice.partner_id.vat,
-                                        invoice.move_name)
-                    result = self._check_ncf(
+                                                 invoice.partner_id.vat,
+                                                 invoice.move_name)
+                        if result.get("valid", False) is False:
+                            raise exceptions.UserError(
+                                u"¡El número de comprobante {} del proveedor"
+                                u" {} no es válido! No pasó la validación en"
+                                u" DGII. Verifique que el NCF y el RNC del"
+                                u"proveedor estén correctamente"
+                                u"digitados.".format(
+                                                     invoice.move_name,
+                                                     invoice.partner_id.vat))
+                    else:
+                        result = self._check_ncf(
                                 self.env.user.company_id.vat,
                                 invoice.move_name)
-                    if not result.get("valid", False):
+                        if result.get("valid", False) is False:
+                            raise exceptions.UserError(
+                                u"¡El número de comprobante {} no es válido."
+                                u" No pasó la validación en DGII.\n\n"
+                                u" Si es un NCF de Proveedor Informal o de"
+                                u" Gasto Menor vefifique si debe solicitar"
+                                u" números nuevos.".format(invoice.move_name))
 
-                        raise exceptions.UserError(
-                            u"¡El mero de comprobante no es válido! No pasó"
-                            u" la validación en DGII. Verifique que el NCF y"
-                            u" el RNC del proveedor estén correctamente"
-                            " digitados."
-                            u" Si es un NCF de Proveedor Informal o de Gasto"
-                            u" Menor vefifique si debe solicitar números"
-                            " nuevos.")
         self.signal_workflow("invoice_open")
 
     @api.model
