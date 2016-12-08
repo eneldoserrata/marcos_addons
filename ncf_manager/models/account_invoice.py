@@ -57,14 +57,6 @@ class AccountInvoice(models.Model):
         return shop_user_config["shop_ids"][0]
 
     @api.one
-    def _get_total_discount(self):
-        total_discount = 0.0
-        for line in self.invoice_line_ids:
-            total_discount += line.price_unit * ((line.discount or 0.0) /
-                                                 100.0)
-        self.total_discount = total_discount
-
-    @api.one
     def _get_overdue_type(self):
         overdue = self.partner_id.issued_total - self.amount_total
         credit_available = (self.partner_id.credit_limit -
@@ -133,11 +125,6 @@ class AccountInvoice(models.Model):
          ("others", u"Otros. No requiere NCF"),
          ], string=u"Tipo de compra", default="normal",
         related="journal_id.purchase_type"
-        )
-
-    total_discount = fields.Monetary(
-        string='Descuento', currency_field="company_currency_id",
-        compute=_get_total_discount
         )
 
     credit_out_invoice = fields.Boolean(

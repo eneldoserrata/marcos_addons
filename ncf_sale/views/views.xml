@@ -26,9 +26,6 @@
                 <field name="partner_id" position="after">
                     <field name="fiscal_position_id" options="{'no_create': True}"/>
                 </field>
-                <field name="amount_untaxed" position="after">
-                    <field groups="sale.group_discount_per_so_line" name="total_discount"/>
-                </field>
             </field>
         </record>
     </data>

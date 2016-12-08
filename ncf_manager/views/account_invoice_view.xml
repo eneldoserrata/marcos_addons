@@ -52,9 +52,6 @@
                     <field attrs="{'invisible': [('state','!=','cancel')]}" name="anulation_type" readonly="1"/>
                     <field attrs="{'invisible': [('state','!=','cancel')]}" name="move_name" readonly="1"/>
                 </field>
-                <field name="amount_untaxed" position="after">
-                    <field name="total_discount"/>
-                </field>
             </field>
         </record>
         <record id="ncf_manager_supplier_account_invoice_form" model="ir.ui.view">
