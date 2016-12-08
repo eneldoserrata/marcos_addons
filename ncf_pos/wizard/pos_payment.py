@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) # Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,10 +30,10 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 
 from openerp import models, fields, api, exceptions
 from openerp.tools.translate import _
@@ -39,13 +41,6 @@ from openerp.tools.translate import _
 
 class PosMakePayment(models.TransientModel):
     _inherit = 'pos.make.payment'
-
-    def _default_journal(self):
-        current_session_id = self.env['pos.session'].search([('state', '!=', 'closed'), ('user_id', '=', self._uid)])
-
-        for journal in current_session_id.journal_ids:
-            if journal.type == "cash":
-                return journal.id
 
     def _get_payment_domain(self):
         current_session_id = self.env['pos.session'].search([('state', '!=', 'closed'), ('user_id', '=', self._uid)])
@@ -77,18 +72,15 @@ class PosMakePayment(models.TransientModel):
 
         return credit
 
-    def _default_amount(self):
-        order_obj = self.env['pos.order']
-        active_id = self._context and self._context.get('active_id', False)
+    def _default_amount(self, cr, uid, context=None):
+        order_obj = self.pool.get('pos.order')
+        active_id = context and context.get('active_id', False)
         if active_id:
-            order = order_obj.browse(active_id)
+            order = order_obj.browse(cr, uid, active_id, context=context)
             credit = self.get_credit(order)
-
             return order.amount_total - order.amount_paid - credit + order.credit
         return False
 
-    journal_id = fields.Many2one("account.journal", string="Formas de pago", default=_default_journal,
-                                 domain=_get_payment_domain)
     journal_type = fields.Selection([('sale', 'Sale'), ('purchase', 'Purchase'), ('cash', 'Cash'), ('bank', 'Bank'),
                                      ('general', 'Miscellaneous')], related="journal_id.type", store=False)
     credit = fields.Float(string=u"Crédito", readonly=True, digits=(16, 2), default=_default_credit)
@@ -150,7 +142,7 @@ class PosMakePayment(models.TransientModel):
             }
         else:
             return {
-                'name': "Devolucion de el pago",
+                'name': "Devolucion del pago",
                 'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'pos.make.payment.refund',
@@ -171,7 +163,9 @@ class PosMakePaymentRefund(models.TransientModel):
         order = order_obj.browse(self._context.get("active_id"))
         origin_order_id = order.origin
 
-        old_refund = order_obj.search([('origin', '=', origin_order_id.id), ('state', '=', 'refund_money')])
+        old_refund = order_obj.search(
+                        [('origin', '=', origin_order_id.id),
+                         ('state', '=', 'refund_money')])
 
         payment_in = {}
 
@@ -235,7 +229,8 @@ class PosMakePaymentRefundLine(models.TransientModel):
 
     refund_id = fields.Many2one("pos.make.payment.refund")
     check = fields.Boolean("Aplicar", default=False)
-    journal_id = fields.Many2one("account.journal", string="Forma de pago", readonly=True)
+    journal_id = fields.Many2one("account.journal", string="Forma de pago",
+                                 readonly=True)
     amount = fields.Float("Monto", readonly=True)
     refund = fields.Float("Devolver")
 
