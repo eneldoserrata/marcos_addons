@@ -42,8 +42,8 @@ from openerp import api, fields, models
 
 from datetime import datetime
 
-
 import logging
+
 _logger = logging.getLogger(__name__)
 
 MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
@@ -99,6 +99,7 @@ class AccountInvoice(models.Model):
                               required=False, default=_default_user_shop)
 
     ncf_required = fields.Boolean(copy=True)
+
     client_fiscal_type = fields.Selection(
                             related="fiscal_position_id.client_fiscal_type")
 
@@ -385,6 +386,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def invoice_validate(self):
+        res = super(AccountInvoice, self).invoice_validate()
         for rec in self:
             if rec.type in ["out_invoice", "in_invoice"]:
                 for line in rec.invoice_line_ids:
@@ -403,32 +405,29 @@ class AccountInvoice(models.Model):
                     origin.write({"qty_allow_refund": origin.qty_allow_refund -
                                  line.quantity})
 
-                # refund_inv = self.env['account.invoice'].search([
-                #     ('origin', '=', rec.number),
-                #     ('state', 'in', ('open''paid'))])
+                # refund_inv = self.env['account.invoice'].search(
+                #                         [('origin', '=', rec.number),
+                #                          ('state', 'in', ('open', 'paid'))]
+                #                          )
 
-                # afected_inv = self.env['account.invoice'].search([(
-                #     'number', '=', rec.origin),
-                #     ('state', 'in', ('open', 'paid'))])
+                # afected_inv = self.env['account.invoice'].search(
+                #                         [('number', '=', rec.origin),
+                #                          ('state', 'in', ('open', 'paid'))]
+                #                          )
 
-                # total_refund = sum([
-                #     rec.amount_untaxed for rec in refund_inv
-                #     ]) + rec.amount_untaxed
+                # total_refund = sum([rec.amount_untaxed for rec in refund_inv]
+                #                    ) + rec.amount_untaxed
 
-                # amount_untaxed = sum(
-                #                       [r.amount_untaxed for r in afected_inv]
+                # amount_untaxed = sum([r.amount_untaxed for r in afected_inv]
                 #                      ) or 0.0
 
                 # if total_refund > amount_untaxed:
-                #     raise exceptions.UserError
-                #     (u"No puede crear notas de credito por un valor mayor a\
-                #     la factura afectada.")
-
-        res = super(AccountInvoice, self).invoice_validate()
+                #     raise exceptions.UserError(
+                #         u"No puede crear notas de crédito por un valor mayor a"
+                #         " la factura afectada.")
         return res
 
     def get_days_between(self, joining_date):
-
         date_format = '%Y-%m-%d'
         current_date = datetime.strptime(
             datetime.today().strftime(date_format), date_format)

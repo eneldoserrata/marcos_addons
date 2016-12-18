@@ -85,16 +85,3 @@ class AccountMove(models.Model):
                             " debe de tener un RNC establecido!")
                 invoice.set_ncf()
         return super(AccountMove, self).post()
-
-
-class AccountMoveLine(models.Model):
-    _inherit = "account.move.line"
-
-    @api.one
-    @api.depends('debit', 'credit')
-    def _bal(self):
-        self.net = self.debit-self.credit
-
-    net = fields.Float(
-        "Balance", compute=_bal, digits=dp.get_precision('Account'), store=True
-        )
