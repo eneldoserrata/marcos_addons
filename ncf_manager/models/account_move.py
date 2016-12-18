@@ -45,9 +45,9 @@ class AccountMove(models.Model):
 
     @api.multi
     def post(self):
+        res = super(AccountMove, self).post()
         invoice = self._context.get('invoice', False)
         if invoice:
-
             if invoice.amount_total == 0:
                 raise ValidationError(
                     u"¡No puede grabar una factura con valor 0!")
@@ -69,14 +69,11 @@ class AccountMove(models.Model):
                           self.env.user.id != 1):
                         msg = (u"El cliente {} tiene facturas vencidas"
                                .format(invoice.partner_id.name))
-
                     if msg and invoice.authorize is False:
                         raise ValidationError(msg)
-
             if invoice.type in ('out_invoice', 'out_refund'):
                 fiscal_position = invoice.fiscal_position_id.client_fiscal_type
                 ncf_control = invoice.journal_id.ncf_control
-
                 if fiscal_position is not False and ncf_control is True:
                     if (fiscal_position != 'final' and
                        invoice.partner_id.vat is False):
@@ -84,4 +81,38 @@ class AccountMove(models.Model):
                             u"Para este tipo de posición fiscal el Contacto"
                             " debe de tener un RNC establecido!")
                 invoice.set_ncf()
-        return super(AccountMove, self).post()
+        return res
+
+    @api.model
+    def create(self, vals):
+        invoice = self._context.get("invoice", False)
+        res = super(AccountMove, self).create(vals)
+        if invoice and invoice.type in ('in_invoice', 'in_refund'):
+            pay_account = invoice.account_id.id
+            if invoice.pay_to:
+                for line in vals["line_ids"]:
+                    if line[2]["account_id"] == pay_account:
+                        line[2].update({"partner_id": invoice.pay_to.id})
+            if invoice.charge_to:
+                sale_journal = invoice.with_context(
+                            {"type": "out_invoice"})._default_user_journal()
+                out_invoice = invoice.copy(
+                            {"type": "out_invoice",
+                             "partner_id": invoice.charge_to.id,
+                             "journal_id": sale_journal,
+                             "account_id": invoice.charge_to.property_account_receivable_id.id,
+                             "origin": "Factura de compra {}".format(invoice.number),
+                             "tax_line_ids": False,
+                             "fiscal_position_id": False, }
+                             )
+                for line in out_invoice.invoice_line_ids:
+                    if line.product_id:
+                        line.invoice_line_tax_ids = line.product_id.taxes_id
+                        line._onchange_product_id()
+                    else:
+                        line.invoice_line_tax_ids = False
+
+                out_invoice.compute_taxes()
+                out_invoice._compute_amount()
+
+        return res
