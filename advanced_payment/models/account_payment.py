@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,13 +30,12 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 
-from openerp import models, fields, api, exceptions, _, release
-
+from openerp import models, fields, api, exceptions, _
 import textwrap
 
 
@@ -498,39 +499,36 @@ class AccountPayment(models.Model):
     def onchange_amount_currency_rate(self):
         self.amount_total()
 
-    # This is commented as we changed all the currency thing in account_invoice
-    # affecting the view_id here, which I don't know what is it's purpose.
+    @api.onchange("currency_id")
+    def onchange_currency_id(self):
 
-    # @api.onchange("currency_id")
-    # def onchange_currency_id(self):
+        # if self.is_base_currency:
+        #     self.rate_currency_id = False
 
-    #     # if self.is_base_currency:
-    #     #     self.rate_currency_id = False
+        if self.move_type == "invoice":
+            self.payment_invoice_ids = self.update_invoice()
 
-    #     if self.move_type == "invoice":
-    #         self.payment_invoice_ids = self.update_invoice()
+        if not self.is_base_currency:
+            ctx = dict(self._context)
+            if self.payment_date:
+                ctx.update({"date": self.payment_date})
 
-    #     if not self.is_base_currency:
-    #         ctx = dict(self._context)
-    #         if self.payment_date:
-    #             ctx.update({"date": self.payment_date})
-
-    #         rate = self.currency_id.with_context(ctx).rate
-    #         if rate:
-    #             self.rate = 1 / self.currency_id.with_context(ctx).rate
-    #         else:
-    #             view_id = self.env.ref("currency_rates_control.update_rate_wizard_form", True)
-    #             return {
-    #                 'name': _('Fecha sin tasa, Actualizar tasa de la moneda'),
-    #                 'view_type': 'form',
-    #                 'view_mode': 'form',
-    #                 'res_model': 'update.rate.wizard',
-    #                 'view_id': view_id.id,
-    #                 'target': 'new',
-    #                 'views': False,
-    #                 'type': 'ir.actions.act_window',
-    #                 'context': {"default_name": self.payment_date or fields.Date.today()}
-    #             }
+            rate = self.currency_id.with_context(ctx).rate
+            if rate:
+                self.rate = 1 / self.currency_id.with_context(ctx).rate
+            else:
+                view_id = self.env.ref("currency_rates_control.update_rate_wizard_form", True)
+                return {
+                    'name': _('Fecha sin tasa, Actualizar tasa de la moneda'),
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'update.rate.wizard',
+                    'view_id': view_id.id,
+                    'target': 'new',
+                    'views': False,
+                    'type': 'ir.actions.act_window',
+                    'context': {"default_name": self.payment_date or fields.Date.today()}
+                }
 
     @api.onchange('payment_type')
     def _onchange_payment_type(self):
@@ -590,16 +588,18 @@ class AccountPayment(models.Model):
             to_reconciled_move_lines = []
 
             open_invoice = self.env["account.invoice"].search(
-                [('state', '=', 'open'),
-                 ('journal_id.type', '=', journal_type),
-                 ('type', '=', invoice_type)])
+                                    [('state', '=', 'open'),
+                                     ('pay_to', '=', rec.partner_id.id),
+                                     ('journal_id.type', '=', journal_type),
+                                     ('type', '=', invoice_type)])
 
             if not open_invoice:
                 open_invoice += self.env["account.invoice"].search(
-                    [('state', '=', 'open'),
-                     ('partner_id', '=', rec.partner_id.id),
-                     ('journal_id.type', '=', journal_type),
-                     ('type', '=', invoice_type)])
+                                    [('state', '=', 'open'),
+                                     ('partner_id', '=', rec.partner_id.id),
+                                     ('journal_id.type', '=', journal_type),
+                                     ('pay_to', '=', False),
+                                     ('type', '=', invoice_type)])
 
             inv_ids = [inv.id for inv in open_invoice]
 
