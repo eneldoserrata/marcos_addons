@@ -34,6 +34,7 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
+
 from openerp import api, fields, models, _
 
 
@@ -43,21 +44,23 @@ class AccountInvoice(models.Model):
     @api.multi
     @api.depends("currency_id")
     def _get_rate(self):
-        if self.currency_id:
-            if self.currency_id.id != self.company_id.currency_id.id:
-                self._cr.execute("""SELECT rate FROM res_currency_rate
-                                   WHERE currency_id = %s
-                                     AND name = %s
-                                     AND (company_id is null
-                                         OR company_id = %s)
+        # if self.currency_id: <-- This decision might be causing troubles
+        if self.currency_id.id != self.company_id.currency_id.id:
+            self._cr.execute("""SELECT rate FROM res_currency_rate
+                                WHERE currency_id = %s
+                                AND name = %s
+                                AND (company_id is null
+                                OR company_id = %s)
                                 ORDER BY company_id, name desc LIMIT 1""",
-                               (self.currency_id.id, self.date_invoice or fields.Date.today(), self.company_id.id))
-                if self._cr.rowcount > 0:
-                    self.rate = 1 / self._cr.fetchone()[0]
-                else:
-                    self.rate = 0
+                             (self.currency_id.id,
+                              self.date_invoice or fields.Date.today(),
+                              self.company_id.id))
+            if self._cr.rowcount > 0:
+                self.rate = 1 / self._cr.fetchone()[0]
             else:
-               self.rate = 1
+                self.rate = 0
+        else:
+            self.rate = 1
 
     @api.onchange("date_invoice", "currency_id")
     def onchange_date_invoice(self):

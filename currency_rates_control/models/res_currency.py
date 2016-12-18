@@ -28,5 +28,4 @@ class ResCurrency(models.Model):
                             (self.id, rate_date, self.env.user.company_id.id))
             if self._cr.rowcount > 0:
                 return (1 / self._cr.fetchone()[0])
-
         return False
