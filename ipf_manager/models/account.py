@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 ########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
-#  Write by Eneldo Serrata (eneldo@marcos.do)
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -34,11 +33,20 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from . import shop
-from . import account
-from . import account_invoice
-from . import dgii_exterior
-from . import dgii_purchase
-from . import dgii_sale
-from . import dgii_cancel
-from . import res
+from odoo import models, fields
+
+
+class AccountJournal(models.Model):
+    _inherit = "account.journal"
+
+    ipf_payment_type = fields.Selection([(u'cash', u'Efectivo'),
+                                              (u'Check', u'Cheque'),
+                                              (u'credit_card', u'Tarjeta de crédito'),
+                                              (u'debit_card', u'Tarjeta de debito'),
+                                              (u'card', u'Tarjeta'),
+                                              (u'coupon', u'Cupón'),
+                                              (u'other', u'Otros'),
+                                              (u'credit_note', u'Nota de crédito')],
+                                             string=u'Formas de pago impresora fiscal', required=False, default="other",
+                                             help=u"Esta configuracion se encuantra internamente en la impresora fiscal y debe de especificar esta opecion. " \
+                                                  u"Esta es la forma en que la impresora fiscal registra el pago en los libros.")

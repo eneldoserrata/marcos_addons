@@ -537,11 +537,11 @@ def is_ncf(value, type):
         Valores Permitidos: 1 al 999
     Caracter 7-9: Area de Impresión
         Valores Permitidos: 1 al 999
-    Caracter 10-11: Tipo de Comprobante 
+    Caracter 10-11: Tipo de Comprobante
         Valores Permitidos: 01, 02, 03, 04, 11, 12, 13, 14, 15
     Caracter 12-19: Secuendial
         Valores Permitidos: 1 al 99,999,999 (sin comas)
-        
+
     Tamaño: 19 Caracteres
 
     :param value: string con NCF
@@ -553,11 +553,11 @@ def is_ncf(value, type):
 
     if len(value) == 19:
         try:
-            if type == "in_refund" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9])\
-                    and value[9:11] == '04' and int(value[11:20]):
+            if type in ("in_refund","out_refund") and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] == '04' and int(value[11:20]):
                 return True
-            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9])\
-                and value[9:11] == '01' and int(value[11:20]):
+            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','14','15','11','13') and int(value[11:20]):
+                return True
+            elif type == "out_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','02','14','15','11','13') and int(value[11:20]):
                 return True
         except:
             pass

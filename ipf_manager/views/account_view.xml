@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="ncf_manager_inherit_journal_from" model="ir.ui.view">
+            <field name="name">ncf_manager_inherit_journal_from</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="ncf_manager.ncf_manager_account_journal_form"/>
+            <field name="arch" type="xml">
+
+                <field name="ncf_remote_validation" position="after">
+                    <field name="ipf_payment_type" attrs="{'invisible': [('type','not in',('cash','bank'))]}"/>
+                </field>
+
+            </field>
+        </record>
+
+        <!-- Inherit Form View to Modify it -->
+        <!--<record id="ipf_manager_inherit_pos_order_form" model="ir.ui.view">-->
+            <!--<field name="name">ipf_manager_inherit_pos_order_form</field>-->
+            <!--<field name="model">pos.order</field>-->
+            <!--<field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>-->
+            <!--<field name="arch" type="xml">-->
+
+                <!--<xpath expr="//group[@name='order_fields']" position="before">-->
+                    <!--<div class="oe_button_box" name="button_box">-->
+                        <!--<widget type="ipf_button_post_invoice"/>-->
+                    <!--</div>-->
+                <!--</xpath>-->
+            <!--</field>-->
+        <!--</record>-->
+
+    </data>
+</openerp>

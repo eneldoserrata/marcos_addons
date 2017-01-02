@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 ########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
-#  Write by Eneldo Serrata (eneldo@marcos.do)
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -33,12 +32,39 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
+{
+    'name': "Controlador para impresoras fiscales Dominicana",
 
-from . import shop
-from . import account
-from . import account_invoice
-from . import dgii_exterior
-from . import dgii_purchase
-from . import dgii_sale
-from . import dgii_cancel
-from . import res
+    'summary': """
+        Localizacion Para Republica Dominicana
+        Controlador para impresoras fiscales EPSON TM-T88v.
+    """,
+
+    'description': """
+        Este modulo permite que odoo pueda imprimir desde el modulo de punto de venta y el modulo de contabilidad
+        en la impresora fiscal EPSON TM-T88v utilizando una interface fiscal desarrollada por nuestra empresa.
+    """,
+
+    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
+    'website': "http://marcos.do",
+    'category': 'Uncategorized',
+    'version': '9.0',
+    'depends': ['base', 'web', 'account', 'ncf_manager'],
+
+    # always loaded
+    'data': [
+        'security/ir.model.access.csv',
+        'views/templates.xml',
+        'views/ipf_view.xml',
+        'views/account_view.xml',
+        'views/account_invoice_view.xml',
+        # 'views/point_of_sale_view.xml'
+
+    ],
+    # only loaded in demonstration mode
+    'qweb': ['static/src/xml/ipf_manager.xml'],
+    'demo': [
+        'demo/demo.xml',
+    ],
+    'license': "Other proprietary"
+}

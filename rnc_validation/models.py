@@ -32,12 +32,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-from tools import is_identification, _internet_on
+from tools import is_identification, _internet_on, is_ncf
 import requests
-from openerp import models, api, exceptions
+from odoo import models, api, exceptions
 
 import logging
-
 
 _logger = logging.getLogger(__name__)
 
@@ -45,14 +44,20 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    def is_identification(self, value):
+        return is_identification(value)
+
+    def is_ncf(self, value, type):
+        return is_ncf(value, type)
+
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
         res = super(ResPartner, self).name_search(name, args=args, operator=operator, limit=100)
         if not res and name:
-            if len(name) in (9,11):
-                partners = self.search([('vat','=',name)])
+            if len(name) in (9, 11):
+                partners = self.search([('vat', '=', name)])
             else:
-                partners = self.search([('vat','ilike',name)])
+                partners = self.search([('vat', 'ilike', name)])
 
             if partners:
                 res = partners.name_get()
@@ -122,7 +127,8 @@ class ResPartner(models.Model):
     def onchange_vat(self):
         if self.vat and not self._context.get("install_mode", False):
             if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
-                raise exceptions.UserError("No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
+                raise exceptions.UserError(
+                    "No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
             self.check_vals(self.vat)
 
     @api.model
@@ -133,7 +139,7 @@ class ResPartner(models.Model):
             if name.isdigit():
                 partner = self.search([('vat', '=', name)])
                 if partner or not len(name) in [9, 11] or not self.get_rnc(name):
-                    return (0,"")
+                    return (0, "")
             record = self.create({self._rec_name: name})
             return record.name_get()[0]
         else:
