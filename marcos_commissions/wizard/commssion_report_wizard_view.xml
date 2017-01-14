@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!--<record id="commission_report_form_wizard" model="ir.ui.view">-->
+            <!--<field name="name">commission_report_form_wizard</field>-->
+            <!--<field name="model">commission.report.wizard</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<form string="Caja descuadrada">-->
+                    <!--<group>-->
+                        <!--<field name="start_date"/>-->
+                        <!--<field name="end_date"/>-->
+                        <!--<field name="employee_ids" widget="many2many_tags"/>-->
+                    <!--</group>-->
+                    <!--<footer>-->
+                        <!--<button name="create_commision_report" string="Generar reporte" type="object" class="oe_highlight"/>-->
+                        <!--or-->
+                        <!--<button special="cancel" string="Salir" class="oe_link"/>-->
+                    <!--</footer>-->
+                <!--</form>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <!--<act_window id="commission_report_form_wizard_action"-->
+                    <!--name="Reporte de comisiones"-->
+                    <!--res_model="commission.report.wizard"-->
+                    <!--view_type="form"-->
+                    <!--view_mode="form"-->
+                    <!--view_id="commission_report_form_wizard"-->
+                    <!--target="new"/>-->
+
+    <!-- This Menu Item must have a parent and an action -->
+
+
+    </data>
+</openerp>

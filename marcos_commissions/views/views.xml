@@ -1,0 +1,139 @@
+<openerp>
+    <data>
+
+        <record id="marcos_commissions_form" model="ir.ui.view">
+            <field name="name">Marcos commissions form</field>
+            <field name="model">commissions.config</field>
+            <field name="arch" type="xml">
+                <form string="Comisiones">
+                    <sheet>
+                        <group>
+                            <field name="name" require="1"/>
+                            <field name="max_days" require="1"/>
+                            <field name="employee_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Comisión por categoría de producto">
+                            <field name="commission_category_ids" nolabel="1">
+                                <tree editable="botton">
+                                    <field name="category_id"/>
+                                    <field name="sale_comission_percent"/>
+                                    <field name="payment_comission_percent"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Comisión por producto">
+                            <field name="commission_product_ids" nolabel="1">
+                                <tree editable="botton">
+                                    <field name="product_id" />
+                                    <field name="sale_comission_percent"/>
+                                    <field name="payment_comission_percent"/>
+                                </tree>
+                            </field>
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="marcos_commissions_actions" model="ir.actions.act_window">
+            <field name="name">Configuración de comisiones</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">commissions.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Comisiones
+                </p>
+                <p>
+                    <!-- More details about what a user can do with this object will be OK -->
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="marcos_commissions_menu" name="Comisiones" parent="base.menu_sale_config"
+                  action="marcos_commissions_actions" sequence=""/>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="marcos_commission_partner_inherit" model="ir.ui.view">
+            <field name="name">marcos_commission_partner_inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='website']" position="after">
+                    <field name="employee_id"/>
+                </xpath>
+
+            </field>
+        </record>
+
+
+        <record id="commission_report_form" model="ir.ui.view">
+            <field name="name">commission_report_form</field>
+            <field name="model">commission.report</field>
+            <field name="arch" type="xml">
+                <form string="Comisiones">
+                    <header>
+                        <button name="generate_report" type="object" string="Generar comisiones" states="draft"
+                                class="oe_highlight"/>
+                        <button name="confirm_report" type="object" string="Confirmar comisiones" states="draft"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,open,paid"
+                               statusbar_colors='{"draft":"blue","paid":"blue"}'/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="date"/>
+                            <field name="employee_id"/>
+                        </group>
+                        <group string="Detalle">
+                            <field name="commission_detail_ids" nolabel="1">
+                                <tree editable="top">
+                                    <field name="invoice_date" readonly="1"/>
+                                    <field name="partner_id" readonly="1"/>
+                                    <field name="invoice_id" readonly="1"/>
+                                    <field name="sale_commission_amount" sum="Total comisión por venta"/>
+                                    <field name="sale_payment_amount" sum="Total comisión por cobros"/>
+                                    <field name="amount" string="Total" sum="Total comisión total"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="commission_report_tree" model="ir.ui.view">
+            <field name="name">commission_report_tree</field>
+            <field name="model">commission.report</field>
+            <field name="arch" type="xml">
+                <tree string="Comisiones">
+                    <field name="date"/>
+                    <field name="employee_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="commission_report_action" model="ir.actions.act_window">
+            <field name="name">Comisiones</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">commission.report</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    <!-- Add Text Here -->
+                </p>
+                <p>
+                    <!-- More details about what a user can do with this object will be OK -->
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="commission_report_menu" name="Comisiones" parent="base.menu_sale_report"
+                  action="commission_report_action" sequence=""/>
+
+
+    </data>
+</openerp>

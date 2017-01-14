@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report
+                id="commission_report_qweb"
+                model="commission.report"
+                string="Comisiones"
+                report_type="qweb-pdf"
+                name="marcos_commissions.sale_commission_report"
+                file="comisiones"
+        />
+
+        <template id="sale_commission_report" name="Sale Commision">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="report.external_layout">
+                        <div class="page">
+                            <h3>Reporte comisiones</h3>
+
+
+                            <table class="table">
+                                <tr>
+                                    <th>
+                                        <h5>Fecha:
+                                            <span t-field="o.date"/>
+                                        </h5>
+                                    </th>
+                                    <th>
+                                        <h5>Vendedor:
+                                            <span t-field="o.employee_id"/>
+                                        </h5>
+                                    </th>
+                                </tr>
+                            </table>
+
+
+                            <t t-set="ventas" t-value="0"/>
+                            <t t-set="cobros" t-value="0"/>
+                            <t t-set="total" t-value="0"/>
+
+                            <table class="table table table-condensed table-striped" style="font-size:11px;">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Factura</th>
+                                    <th>Comisión por venta</th>
+                                    <th>Comisión por cobro</th>
+                                    <th>Monto</th>
+                                </tr>
+                                <tr t-foreach="o.commission_detail_ids" t-as="line">
+
+                                    <td>
+                                        <span t-field="line.invoice_date"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.partner_id"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.invoice_id"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.sale_commission_amount"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.sale_payment_amount"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.amount"/>
+                                    </td>
+                                    <t t-set="ventas" t-value="ventas+line.sale_commission_amount"/>
+                                    <t t-set="cobros" t-value="cobros+line.sale_payment_amount"/>
+                                    <t t-set="total" t-value="total+line.amount"/>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-right">TOTAL</td>
+                                    <td class="text-right">
+                                        <span t-esc="ventas" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</openerp>
