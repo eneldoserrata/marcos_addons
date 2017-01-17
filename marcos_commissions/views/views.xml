@@ -16,7 +16,7 @@
                             <field name="commission_category_ids" nolabel="1">
                                 <tree editable="botton">
                                     <field name="category_id"/>
-                                    <field name="sale_comission_percent"/>
+                                    <!--<field name="sale_comission_percent"/>-->
                                     <field name="payment_comission_percent"/>
                                 </tree>
                             </field>
@@ -25,7 +25,7 @@
                             <field name="commission_product_ids" nolabel="1">
                                 <tree editable="botton">
                                     <field name="product_id" />
-                                    <field name="sale_comission_percent"/>
+                                    <!--<field name="sale_comission_percent"/>-->
                                     <field name="payment_comission_percent"/>
                                 </tree>
                             </field>
@@ -94,9 +94,9 @@
                                     <field name="invoice_date" readonly="1"/>
                                     <field name="partner_id" readonly="1"/>
                                     <field name="invoice_id" readonly="1"/>
-                                    <field name="sale_commission_amount" sum="Total comisión por venta"/>
+                                    <!--<field name="sale_commission_amount" sum="Total comisión por venta"/>-->
                                     <field name="sale_payment_amount" sum="Total comisión por cobros"/>
-                                    <field name="amount" string="Total" sum="Total comisión total"/>
+                                    <!--<field name="amount" string="Total" sum="Total comisión total"/>-->
                                 </tree>
                             </field>
                         </group>

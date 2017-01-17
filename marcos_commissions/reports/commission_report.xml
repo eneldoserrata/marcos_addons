@@ -44,9 +44,9 @@
                                     <th>Fecha</th>
                                     <th>Cliente</th>
                                     <th>Factura</th>
-                                    <th>Comisión por venta</th>
+                                    <!--<th>Comisión por venta</th>-->
                                     <th>Comisión por cobro</th>
-                                    <th>Monto</th>
+                                    <!--<th>Monto</th>-->
                                 </tr>
                                 <tr t-foreach="o.commission_detail_ids" t-as="line">
 
@@ -59,30 +59,30 @@
                                     <td>
                                         <span t-field="line.invoice_id"/>
                                     </td>
-                                    <td class="text-right">
-                                        <span t-field="line.sale_commission_amount"/>
-                                    </td>
+                                    <!--<td class="text-right">-->
+                                        <!--<span t-field="line.sale_commission_amount"/>-->
+                                    <!--</td>-->
                                     <td class="text-right">
                                         <span t-field="line.sale_payment_amount"/>
                                     </td>
-                                    <td class="text-right">
-                                        <span t-field="line.amount"/>
-                                    </td>
+                                    <!--<td class="text-right">-->
+                                        <!--<span t-field="line.amount"/>-->
+                                    <!--</td>-->
                                     <t t-set="ventas" t-value="ventas+line.sale_commission_amount"/>
                                     <t t-set="cobros" t-value="cobros+line.sale_payment_amount"/>
                                     <t t-set="total" t-value="total+line.amount"/>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-right">TOTAL</td>
-                                    <td class="text-right">
-                                        <span t-esc="ventas" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                                    </td>
+                                    <!--<td class="text-right">-->
+                                        <!--<span t-esc="ventas" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>-->
+                                    <!--</td>-->
                                     <td class="text-right">
                                         <span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
                                     </td>
+                                    <!--<td class="text-right">-->
+                                        <!--<span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>-->
+                                    <!--</td>-->
                                 </tr>
                             </table>
                         </div>

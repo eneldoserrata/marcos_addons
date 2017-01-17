@@ -66,8 +66,6 @@ class CommissionReport(models.Model):
             paid_commission_paid = self.env["commission.report.detail"].search([('invoice_id', '=', invoice_id.id),
                                                                                 ('sale_payment_amount', '!=', 0)])
 
-            commission_sing = 1 if invoice_id.type == "out_invoice" else -1
-
             for invoice_line in invoice_id.invoice_line_ids:
 
                 if invoice_line.product_id.id in commission_product.keys():
