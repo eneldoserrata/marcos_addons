@@ -22,8 +22,11 @@
                             <table class="table">
                                 <tr>
                                     <th>
-                                        <h5>Fecha:
-                                            <span t-field="o.date"/>
+                                        <h5>
+                                            Desde
+                                            <span t-field="o.date_start"/>
+                                            hasta
+                                            <span t-field="o.date_end"/>
                                         </h5>
                                     </th>
                                     <th>
@@ -35,56 +38,62 @@
                             </table>
 
 
-                            <t t-set="ventas" t-value="0"/>
-                            <t t-set="cobros" t-value="0"/>
-                            <t t-set="total" t-value="0"/>
+                            <t t-set="gran_total" t-value="0"/>
+                            <t t-set="report_detail" t-value="o.get_report_data()"/>
 
-                            <table class="table table table-condensed table-striped" style="font-size:11px;">
+
+                            <table t-foreach="report_detail" t-as="client_line"
+                                   class="table table table-condensed table-striped" style="font-size:11px;">
+                                <t t-set="total" t-value="0"/>
                                 <tr>
-                                    <th>Fecha</th>
-                                    <th>Cliente</th>
+                                    <th colspan="6" class="text-center">Cliente:
+                                        <span t-esc="client_line[0]"/>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>Fecha del pago</th>
+                                    <th>Pago</th>
+                                    <th>Fecha de la factura</th>
                                     <th>Factura</th>
-                                    <!--<th>Comisión por venta</th>-->
+                                    <th>Monto sin impuesto</th>
                                     <th>Comisión por cobro</th>
-                                    <!--<th>Monto</th>-->
                                 </tr>
-                                <tr t-foreach="o.commission_detail_ids" t-as="line">
-
+                                <tr t-foreach="client_line[1]" t-as="line">
                                     <td>
-                                        <span t-field="line.invoice_date"/>
+                                        <span t-esc="line['payemnt_date']"/>
                                     </td>
                                     <td>
-                                        <span t-field="line.partner_id"/>
+                                        <span t-esc="line['payment_id']"/>
                                     </td>
                                     <td>
-                                        <span t-field="line.invoice_id"/>
+                                        <span t-esc="line['invoice_date']"/>
                                     </td>
-                                    <!--<td class="text-right">-->
-                                        <!--<span t-field="line.sale_commission_amount"/>-->
-                                    <!--</td>-->
+                                    <td>
+                                        <span t-esc="line['invoice_id']"/>
+                                    </td>
                                     <td class="text-right">
-                                        <span t-field="line.sale_payment_amount"/>
+                                        <span t-esc="line['amount_untaxed']"
+                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
                                     </td>
-                                    <!--<td class="text-right">-->
-                                        <!--<span t-field="line.amount"/>-->
-                                    <!--</td>-->
-                                    <t t-set="ventas" t-value="ventas+line.sale_commission_amount"/>
-                                    <t t-set="cobros" t-value="cobros+line.sale_payment_amount"/>
-                                    <t t-set="total" t-value="total+line.amount"/>
+                                    <td class="text-right">
+                                        <span t-esc="line['amount']"
+                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                                    </td>
+                                    <t t-set="total" t-value="total+line['amount']"/>
+                                    <t t-set="gran_total" t-value="gran_total+line['amount']"/>
                                 </tr>
                                 <tr>
-                                    <td colspan="3" class="text-right">TOTAL</td>
-                                    <!--<td class="text-right">-->
-                                        <!--<span t-esc="ventas" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>-->
-                                    <!--</td>-->
+                                    <td colspan="5" class="text-right">TOTAL</td>
                                     <td class="text-right">
-                                        <span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                                        <span t-esc="total"
+                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
                                     </td>
-                                    <!--<td class="text-right">-->
-                                        <!--<span t-esc="cobros" t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>-->
-                                    <!--</td>-->
                                 </tr>
                             </table>
+                            <h4>COMISION TOTAL:
+                            <span t-esc="gran_total"
+                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
+                            </h4>
                         </div>
                     </t>
                 </t>

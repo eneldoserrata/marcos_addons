@@ -9,7 +9,6 @@
                     <sheet>
                         <group>
                             <field name="name" require="1"/>
-                            <field name="max_days" require="1"/>
                             <field name="employee_ids" widget="many2many_tags"/>
                         </group>
                         <group string="Comisión por categoría de producto">
@@ -24,7 +23,7 @@
                         <group string="Comisión por producto">
                             <field name="commission_product_ids" nolabel="1">
                                 <tree editable="botton">
-                                    <field name="product_id" />
+                                    <field name="product_id"/>
                                     <!--<field name="sale_comission_percent"/>-->
                                     <field name="payment_comission_percent"/>
                                 </tree>
@@ -85,15 +84,19 @@
                     </header>
                     <sheet>
                         <group>
-                            <field name="date"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
                             <field name="employee_id"/>
                         </group>
                         <group string="Detalle">
                             <field name="commission_detail_ids" nolabel="1">
                                 <tree editable="top">
+                                    <field name="payemnt_date" readonly="1"/>
+                                    <field name="payment_id" readonly="1"/>
                                     <field name="invoice_date" readonly="1"/>
-                                    <field name="partner_id" readonly="1"/>
                                     <field name="invoice_id" readonly="1"/>
+                                    <field name="partner_id" readonly="1"/>
+                                    <field name="amount_untaxed" readonly="1"/>
                                     <!--<field name="sale_commission_amount" sum="Total comisión por venta"/>-->
                                     <field name="sale_payment_amount" sum="Total comisión por cobros"/>
                                     <!--<field name="amount" string="Total" sum="Total comisión total"/>-->
@@ -110,7 +113,8 @@
             <field name="model">commission.report</field>
             <field name="arch" type="xml">
                 <tree string="Comisiones">
-                    <field name="date"/>
+                    <field name="date_start"/>
+                    <field name="date_end"/>
                     <field name="employee_id"/>
                 </tree>
             </field>
