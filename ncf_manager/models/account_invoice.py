@@ -578,3 +578,9 @@ class AccountInvoiceLine(models.Model):
     refund_line_ref = fields.Many2one("account.invoice.line", string="origin line refund", copy=False)
     tax_amount = fields.Monetary(string='tax_amount', required=False, currency_field="company_currency_id",
                                  compute=compute_tax_line)
+
+
+class AccountInvoiceTax(models.Model):
+    _inherit = "account.invoice.tax"
+
+    amount = fields.Float(digits=(12,6))
