@@ -57,27 +57,27 @@ class ResPartner(models.Model):
 
     fiscal_info_required = fields.Boolean(compute=_fiscal_info_required)
 
-    sale_fiscal_type = fields.Selection([
-        ("final", u"Consumidor final"),
-        ("fiscal", u"Para credito fiscal"),
-        ("gov", u"Gubernamental"),
-        ("special", u"Regimenes especiales"),
-        ("unico", u"Unico ingreso")
-    ], string="Tipo de comprobante", default="final")
+    sale_fiscal_type = fields.Selection(
+        [("final", u"Consumidor final"),
+         ("fiscal", u"Para Crédito Fiscal"),
+         ("gov", u"Gubernamental"),
+         ("special", u"Regímenes Especiales"),
+         ("unico", u"Único Ingreso")],
+        string="Tipo de Comprobante", default="final")
 
-    purchase_fiscal_type = fields.Selection([
-        ('01', u'01 - Gastos de personal'),
-        ('02', u'02 - Gastos por trabajo, suministros y servicios'),
-        ('03', u'03 - Arrendamientos'),
-        ('04', u'04 - Gastos de Activos Fijos'),
-        ('05', u'05 - Gastos de Representación'),
-        ('06', u'06 - Otras Deducciones Admitidas'),
-        ('07', u'07 - Gastos Financieros'),
-        ('08', u'08 - Gastos Extraordinarios'),
-        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
-        ('10', u'10 - Adquisiciones de Activos'),
-        ('11', u'11 - Gastos de Seguro')
-    ], string=u"Tipo de gasto")
+    purchase_fiscal_type = fields.Selection(
+        [('01', u'01 - Gastos de Personal'),
+         ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
+         ('03', u'03 - Arrendamientos'),
+         ('04', u'04 - Gastos de Activos Fijos'),
+         ('05', u'05 - Gastos de Representación'),
+         ('06', u'06 - Otras Deducciones Admitidas'),
+         ('07', u'07 - Gastos Financieros'),
+         ('08', u'08 - Gastos Extraordinarios'),
+         ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
+         ('10', u'10 - Adquisiciones de Activos'),
+         ('11', u'11 - Gastos de Seguro')],
+        string=u"Tipo de gasto")
 
 
 class Currency(models.Model):

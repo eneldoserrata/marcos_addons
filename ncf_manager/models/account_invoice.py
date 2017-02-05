@@ -66,39 +66,39 @@ class AccountInvoice(models.Model):
     ncf_control = fields.Boolean(related="journal_id.ncf_control")
     purchase_type = fields.Selection(related="journal_id.purchase_type")
 
-    sale_fiscal_type = fields.Selection([
-        ("final", u"Consumidor final"),
-        ("fiscal", u"Para credito fiscal"),
-        ("gov", u"Gubernamental"),
-        ("special", u"Regimenes especiales"),
-        ("unico", u"Unico ingreso")
-    ], string="NCF para", default="final")
+    sale_fiscal_type = fields.Selection(
+        [("final", u"Consumidor final"),
+         ("fiscal", u"Para Crédito Fiscal"),
+         ("gov", u"Gubernamental"),
+         ("special", u"Regímenes Especiales"),
+         ("unico", u"Único Ingreso")],
+        string="NCF para", default="final")
 
-    purchase_fiscal_type = fields.Selection([
-        ('01', u'01 - Gastos de personal'),
-        ('02', u'02 - Gastos por trabajo, suministros y servicios'),
-        ('03', u'03 - Arrendamientos'),
-        ('04', u'04 - Gastos de Activos Fijos'),
-        ('05', u'05 - Gastos de Representación'),
-        ('06', u'06 - Otras Deducciones Admitidas'),
-        ('07', u'07 - Gastos Financieros'),
-        ('08', u'08 - Gastos Extraordinarios'),
-        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
-        ('10', u'10 - Adquisiciones de Activos'),
-        ('11', u'11 - Gastos de Seguro'),
-    ], string=u"Tipo de gasto")
+    purchase_fiscal_type = fields.Selection(
+        [('01', u'01 - Gastos de Personal'),
+         ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
+         ('03', u'03 - Arrendamientos'),
+         ('04', u'04 - Gastos de Activos Fijos'),
+         ('05', u'05 - Gastos de Representación'),
+         ('06', u'06 - Otras Deducciones Admitidas'),
+         ('07', u'07 - Gastos Financieros'),
+         ('08', u'08 - Gastos Extraordinarios'),
+         ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
+         ('10', u'10 - Adquisiciones de Activos'),
+         ('11', u'11 - Gastos de Seguro')],
+        string=u"Tipo de gasto")
 
-    anulation_type = fields.Selection([
-        ("01", u"DETERIORO DE FACTURA PRE-IMPRESA"),
-        ("02", u"ERRORES DE IMPRESIÓN (FACTURA PRE-IMPRESA)"),
-        ("03", u"IMPRESIÓN DEFECTUOSA"),
-        ("04", u"DUPLICIDAD DE FACTURA"),
-        ("05", u"CORRECCIÓN DE LA INFORMACIÓN"),
-        ("06", u"CAMBIO DE PRODUCTOS"),
-        ("07", u"DEVOLUCIÓN DE PRODUCTOS"),
-        ("08", u"OMISIÓN DE PRODUCTOS"),
-        ("09", u"ERRORES EN SECUENCIA DE NCF")
-    ], string=u"Tipo de anulación", copy=False)
+    anulation_type = fields.Selection(
+        [("01", u"Deterioro de Factura Pre-impresa"),
+         ("02", u"Errores de Impresión (Factura Pre-impresa)"),
+         ("03", u"Impresión Defectuosa"),
+         ("04", u"Duplicidad de Facturas"),
+         ("05", u"Corrección de la Información"),
+         ("06", u"Cambio de Productos"),
+         ("07", u"Devolución de Productos"),
+         ("08", u"Omisión de Productos"),
+         ("09", u"Errores en Secuencia de NCF")],
+        string=u"Tipo de anulación", copy=False)
 
     invoice_rate = fields.Monetary(string="Tasa", compute=_get_rate)
     is_company_currency = fields.Boolean(compute=_is_company_currency)

@@ -47,32 +47,33 @@ class ShopJournalConfig(models.Model):
     journal_id = fields.Many2one("account.journal", string="Diario")
 
     final_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
-    final_number_next_actual = fields.Integer(string=u"Próximo número", related="final_sequence_id.number_next_actual")
-    final_max = fields.Integer(string=u"Número máximo")
+    final_number_next_actual = fields.Integer(string=u"Próximo Número", related="final_sequence_id.number_next_actual")
+    final_max = fields.Integer(string=u"Número Máximo")
 
-    fiscal_sequence_id = fields.Many2one("ir.sequence", string=u"Credito fiscal")
-    fiscal_number_next_actual = fields.Integer(string=u"Próximo número",
+    fiscal_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
+    fiscal_number_next_actual = fields.Integer(string=u"Próximo Número",
                                                related="fiscal_sequence_id.number_next_actual")
-    fiscal_max = fields.Integer(string=u"Número máximo")
+    fiscal_max = fields.Integer(string=u"Número Máximo")
 
-    gov_sequence_id = fields.Many2one("ir.sequence", string=u"Gubernamental")
-    gov_number_next_actual = fields.Integer(string=u"Próximo número", related="gov_sequence_id.number_next_actual")
-    gov_max = fields.Integer(string=u"Número máximo")
+    gov_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
+    gov_number_next_actual = fields.Integer(string=u"Próximo Número",
+                                            related="gov_sequence_id.number_next_actual")
+    gov_max = fields.Integer(string=u"Número Máximo")
 
-    special_sequence_id = fields.Many2one("ir.sequence", string=u"Especiales")
-    special_number_next_actual = fields.Integer(string=u"Próximo número",
+    special_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
+    special_number_next_actual = fields.Integer(string=u"Próximo Número",
                                                 related="special_sequence_id.number_next_actual")
-    special_max = fields.Integer(string=u"Número máximo")
+    special_max = fields.Integer(string=u"Número Máximo")
 
-    nota_de_credito_sequence_id = fields.Many2one("ir.sequence", string=u"Nota de crédito")
-    nota_de_credito_number_next_actual = fields.Integer(string=u"Próximo número",
+    nota_de_credito_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
+    nota_de_credito_number_next_actual = fields.Integer(string=u"Próximo Número",
                                                         related="nota_de_credito_sequence_id.number_next_actual")
-    nc_max = fields.Integer(string=u"Número máximo")
+    nc_max = fields.Integer(string=u"Número Máximo")
 
-    nota_de_debito_sequence_id = fields.Many2one("ir.sequence", string=u"Nota de débito")
-    nota_de_debito_number_next_actual = fields.Integer(string=u"Próximo número",
+    nota_de_debito_sequence_id = fields.Many2one("ir.sequence", string=u"Secuencia")
+    nota_de_debito_number_next_actual = fields.Integer(string=u"Próximo Número",
                                                        related="nota_de_debito_sequence_id.number_next_actual")
-    nd_max = fields.Integer(string=u"Número máximo")
+    nd_max = fields.Integer(string=u"Número Máximo")
 
     user_ids = fields.Many2many("res.users", string=u"Usuarios que pueden usar esta sucursal")
 
@@ -92,12 +93,12 @@ class ShopJournalConfig(models.Model):
     def setup_ncf(self):
         self.env["account.fiscal.position"].search([]).unlink()
 
-        final_prefix = u"A0100100102"
         fiscal_prefix = u"A0100100101"
-        gov_prefix = u"A0100100114"
-        esp_prefix = u"A0100100115"
-        nc_prefix = u"A0100100104"
+        final_prefix = u"A0100100102"
         nd_prefix = u"A0100100103"
+        nc_prefix = u"A0100100104"
+        esp_prefix = u"A0100100114"
+        gov_prefix = u"A0100100115"
 
         if not self.search([]):
             shop = self.create({"name": "Principal",
@@ -132,32 +133,32 @@ class ShopJournalConfig(models.Model):
             sale_journal.ncf_control = True
 
             seq_values["prefix"] = final_prefix
-            seq_values["name"] = "Facturas de cliente final"
+            seq_values["name"] = "Facturas para Consumidores Finales"
             final_id = self.env["ir.sequence"].create(seq_values)
             shop.final_sequence_id = final_id.id
 
             seq_values["prefix"] = fiscal_prefix
-            seq_values["name"] = "Facturas de cliente fiscal"
+            seq_values["name"] = "Facturas con Valor Fiscal"
             fiscal_id = self.env["ir.sequence"].create(seq_values)
             shop.fiscal_sequence_id = fiscal_id.id
 
             seq_values["prefix"] = gov_prefix
-            seq_values["name"] = "Facturas de cliente gubernamental"
+            seq_values["name"] = "Facturas Gubernamentales"
             gov_id = self.env["ir.sequence"].create(seq_values)
             shop.gov_sequence_id = gov_id.id
 
             seq_values["prefix"] = esp_prefix
-            seq_values["name"] = "Facturas de cliente especiales"
+            seq_values["name"] = "Facturas de Regímenes Especiales"
             esp_id = self.env["ir.sequence"].create(seq_values)
             shop.special_sequence_id = esp_id.id
 
             seq_values["prefix"] = nc_prefix
-            seq_values["name"] = "Notas de credito"
+            seq_values["name"] = "Notas de Crédito"
             nc_id = self.env["ir.sequence"].create(seq_values)
             shop.nota_de_credito_sequence_id = nc_id.id
 
             seq_values["prefix"] = nd_prefix
-            seq_values["name"] = "Notas de debito"
+            seq_values["name"] = "Notas de Débito"
             nd_id = self.env["ir.sequence"].create(seq_values)
             shop.refund_sequence_id = nc_id.id
             shop.nota_de_debito_sequence_id = nd_id.id
@@ -185,7 +186,7 @@ class ShopJournalConfig(models.Model):
                       u"número maximo solicitado debe solicitar mas NCF para este punto de venta".format(self.name)
 
         if message:
-            mail_details = {'subject': "NCF agotados",
+            mail_details = {'subject': "NCF Agotados",
                             'body': message,
                             'partner_ids': [user.id for user in self.user_ids]
                             }
