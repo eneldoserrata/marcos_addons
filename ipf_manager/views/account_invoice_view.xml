@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="ncf_manager_account_invoice_inherit_form" model="ir.ui.view">
+            <field name="name">ncf_manager_account_invoice_inherit_form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='invoice_print']" position="attributes">
+                    <attribute name="string">Imprimir PDF</attribute>
+                </xpath>
+                <field name="move_id" position="after">
+                    <field name="fiscal_nif" attrs="{'invisible': [('fiscal_nif','=','false')]}"/>
+                </field>
+
+                <xpath expr="//sheet//label" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <widget type="ipf_button_post_invoice"/>
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>

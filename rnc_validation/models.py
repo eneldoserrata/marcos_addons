@@ -30,22 +30,29 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from tools import is_identification, _internet_on
+from tools import is_identification, _internet_on, is_ncf
+
 import requests
-from openerp import models, api, exceptions
+from odoo import models, api, exceptions
 
 import logging
-
 
 _logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
+
+    def is_identification(self, value):
+        return is_identification(value)
+
+    def is_ncf(self, value, type):
+        return is_ncf(value, type)
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
@@ -128,9 +135,8 @@ class ResPartner(models.Model):
     def onchange_vat(self):
         if self.vat and not self._context.get("install_mode", False):
             if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
-                raise exceptions.UserError("No puede cambiar el RNC/Cédula ya "
-                                           "que este cliente o proveedor tiene"
-                                           " facturas.")
+                raise exceptions.UserError(
+                    "No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
             self.check_vals(self.vat)
 
     @api.model
