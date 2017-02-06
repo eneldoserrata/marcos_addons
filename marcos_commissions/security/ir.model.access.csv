@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_commission_category,access_commission_category,model_commission_category,base.group_user,1,1,1,1
+access_commision_product,access_commision_product,model_commision_product,base.group_user,1,1,1,1
+access_commission_report,access_commission_report,model_commission_report,base.group_user,1,1,1,1
+access_commission_report_detail,access_commission_report_detail,model_commission_report_detail,base.group_user,1,1,1,1
+access_commissions_config,access_commissions_config,model_commissions_config,base.group_user,1,1,1,1
