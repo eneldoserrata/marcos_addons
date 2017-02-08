@@ -71,7 +71,12 @@ class ResPartner(models.Model):
         return False
 
     def get_rnc(self, fiscal_id):
-        res = requests.get('http://api.marcos.do/rnc/%s' % fiscal_id)
+        config_parameter = self.env['ir.config_parameter'].sudo()
+        api_marcos = config_parameter.get_param("api_marcos")
+        if not api_marcos:
+            raise exceptions.MissingError(u"Debe configurar la URL de validacón en línea")
+
+        res = requests.get('{}/rnc/{}'.format(api_marcos, fiscal_id))
         if res.status_code == 200:
             return res.json()
         else:

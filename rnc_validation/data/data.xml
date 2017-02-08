@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record id="api_marcos" model="ir.config_parameter">
+            <field name="key">api_marcos</field>
+            <field name="value">http://api.marcos.do</field>
+        </record>
+
+    </data>
+</openerp>
