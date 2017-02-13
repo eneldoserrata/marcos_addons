@@ -45,7 +45,6 @@ class AccountMove(models.Model):
 
     @api.multi
     def post(self):
-        res = super(AccountMove, self).post()
         invoice = self._context.get('invoice', False)
         if invoice:
             if invoice.amount_total == 0:
@@ -81,12 +80,12 @@ class AccountMove(models.Model):
                             u"Para este tipo de posición fiscal el Contacto"
                             " debe de tener un RNC establecido!")
                 invoice.set_ncf()
-        return res
+        return super(AccountMove, self).post()
 
     @api.model
     def create(self, vals):
         invoice = self._context.get("invoice", False)
-        res = super(AccountMove, self).create(vals)
+
         if invoice and invoice.type in ('in_invoice', 'in_refund'):
             pay_account = invoice.account_id.id
             if invoice.pay_to:
@@ -103,8 +102,8 @@ class AccountMove(models.Model):
                              "account_id": invoice.charge_to.property_account_receivable_id.id,
                              "origin": "Factura de compra {}".format(invoice.number),
                              "tax_line_ids": False,
-                             "fiscal_position_id": False, }
-                             )
+                             "fiscal_position_id": False}
+                            )
                 for line in out_invoice.invoice_line_ids:
                     if line.product_id:
                         line.invoice_line_tax_ids = line.product_id.taxes_id
@@ -115,4 +114,4 @@ class AccountMove(models.Model):
                 out_invoice.compute_taxes()
                 out_invoice._compute_amount()
 
-        return res
+        return super(AccountMove, self).create(vals)
