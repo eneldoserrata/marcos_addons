@@ -173,8 +173,9 @@ class DgiiPurchaseReport(models.Model):
                     raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_nvoice_id]))
                 elif not affected_nvoice_id:
                     raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_nvoice_id.number)
+                else:
+                    affected_nvoice_id = affected_nvoice_id.id
 
-                affected_nvoice_id = affected_nvoice_id.id
                 NUMERO_COMPROBANTE_FISCAL = inv.number
                 NUMERO_COMPROBANTE_MODIFICADO = inv.origin
 
