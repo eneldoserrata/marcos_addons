@@ -346,15 +346,18 @@ class AccountInvoice(models.Model):
     def write(self, vals):
         for rec in self:
             if rec.type in ("out_invoice", "out_refund"):
-                if not vals.get("fiscal_position_id", False):
-                    if not rec.fiscal_position_id:
-                        fiscal_position_id = rec.env["account.fiscal.position"].search(
-                            [('client_fiscal_type', '=', 'final')])
-                        if not fiscal_position_id:
-                            raise exceptions.ValidationError(
-                                "Antes de generar una factura debe definir las posiciones fiscales.")
-                        else:
-                            vals.update({"fiscal_position_id": fiscal_position_id.id})
+                if self._context.get("active_model", False) == "sale.order":
+                    vals.update({"fiscal_position_id": rec.partner_id.property_account_position_id.id})
+                else:
+                    if not vals.get("fiscal_position_id", False):
+                        if not rec.fiscal_position_id:
+                            fiscal_position_id = rec.env["account.fiscal.position"].search(
+                                [('client_fiscal_type', '=', 'final')])
+                            if not fiscal_position_id:
+                                raise exceptions.ValidationError(
+                                    "Antes de generar una factura debe definir las posiciones fiscales.")
+                            else:
+                                vals.update({"fiscal_position_id": fiscal_position_id.id})
 
             if rec.type in ("in_invoice", "in_refund"):
                 if vals.get("purchase_type", False) == "minor":
