@@ -50,9 +50,10 @@
                                 <tree>
                                     <field name="LINE"/>
                                     <field name="RNC_CEDULA"/>
+                                    <field name="inv_partner"/>
                                     <field name="TIPO_BIENES_SERVICIOS_COMPRADOS"/>
-                                    <field name="NUMERO_COMPROBANTE_FISCAL"/>
-                                    <field name="NUMERO_COMPROBANTE_MODIFICADO"/>
+                                    <field name="invoice_id"/>
+                                    <field name="affected_nvoice_id"/>
                                     <field name="FECHA_COMPROBANTE"/>
                                     <field name="FECHA_PAGO"/>
                                     <field name="ITBIS_FACTURADO"/>
