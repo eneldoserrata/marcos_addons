@@ -46,16 +46,32 @@
                 <t t-foreach="docs" t-as="doc">
                     <t t-call="report.internal_layout">
                         <div class="page" style="font-size:10px">
+                            <div class="row">
+                                <div class="col-xs-6 pull-left">
+                                    <t t-if="doc.state == 'draft'">
+                                        <h4>Solicitud de pago en borrador</h4>
+                                    </t>
+                                    <t t-if="doc.state == 'request'">
+                                        <h4>Solicitud de pago</h4>
+                                    </t>
+                                    <t t-if="doc.state in ('posted','sent')">
+                                        <h4>Solicitud pagada</h4>
+                                    </t>
+                                    <t t-if="doc.state in ('posted','reconciled')">
+                                        <h4>Solicitud pagada y conciliada</h4>
+                                    </t>
+                                </div>
+                                <div class="col-xs-6 pull-right">
+                                    <t t-if="doc.check_number">
+                                        <h4>
+                                            Cheque número:
+                                            <span t-esc="str(doc.check_number).replace(',', '')"/>
+                                        </h4>
+                                    </t>
+                                </div>
+                            </div>
 
-                            <t t-if="doc.state == 'draft'">
-                                <h4>Solicitud de pago en borrador</h4>
-                            </t>
-                            <t t-if="doc.state == 'request'">
-                                <h4>Solicitud de pago</h4>
-                            </t>
-                            <t t-if="doc.state in ('posted','sent')">
-                                <h4>Solicitud pagada</h4>
-                            </t>
+
                             <table class="table table-condensed">
                                 <tr>
                                     <th class="tg-yw4l">Tipo</th>

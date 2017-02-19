@@ -138,7 +138,10 @@ class DgiiPurchaseReport(models.Model):
                 #     move_line.amount_currency)
 
                 if tax_account[move_line.account_id.id] == "itbis":
-                    ITBIS_TOTAL += amount
+                    if inv.type == "in_invoice":
+                        ITBIS_TOTAL += amount
+                    else:
+                        ITBIS_TOTAL -= amount
                     LINE_ITBIS_TOTAL += amount
                 elif tax_account[
                  move_line.account_id.id] == "ritbis" and inv.state == 'paid':
@@ -153,16 +156,21 @@ class DgiiPurchaseReport(models.Model):
                 elif tax_account[
                  move_line.account_id.id] == "cost" and move_line.tax_line_id:
                     LINE_TAX_COST += amount
-                    TOTAL_MONTO_FACTURADO += amount
+                    if inv.type == "in_invoice":
+                        TOTAL_MONTO_FACTURADO += amount
+                    else:
+                        TOTAL_MONTO_FACTURADO -= amount
 
-            TOTAL_MONTO_FACTURADO += inv.amount_untaxed*CURRENCY_RATE
+            if inv.type == "in_invoice":
+                TOTAL_MONTO_FACTURADO += inv.amount_untaxed * CURRENCY_RATE
+            else:
+                TOTAL_MONTO_FACTURADO -= inv.amount_untaxed * CURRENCY_RATE
 
             if not inv.partner_id.vat:
                 raise exceptions.UserError(u"El número de RNC/Cédula del"
                                            u" proveedor {} no es válido"
                                            " para el NCF {}".format(
                                             inv.partner_id.name, inv.number))
-
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
@@ -175,16 +183,24 @@ class DgiiPurchaseReport(models.Model):
                                              inv.fiscal_position_id.name,
                                              inv.number)
                                            )
-
             if not is_ncf(inv.number, inv.type):
                 raise exceptions.UserError(u"¡El número de NCF {} no es"
                                            u"válido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
+            affected_invoice_id = False
 
             if inv.type == "in_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "in_refund":
+                affected_invoice_id = self.env["account.invoice"].search([('number', '=', inv.origin),('partner_id','=',inv.partner_id.id)])
+                if not len(affected_invoice_id) == 1 and affected_invoice_id:
+                    raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_invoice_id]))
+                elif not affected_invoice_id:
+                    raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_invoice_id.number)
+                else:
+                    affected_invoice_id = affected_invoice_id.id
+
                 NUMERO_COMPROBANTE_FISCAL = inv.number
                 NUMERO_COMPROBANTE_MODIFICADO = inv.origin
 
@@ -264,7 +280,7 @@ class DgiiPurchaseReport(models.Model):
             lines.append(ln)
 
         for line in lines:
-            file.write(line+"\n")
+            file.write(line + "\n")
 
         file.close()
         file = open(path, 'rb')
@@ -310,12 +326,14 @@ class DgiiPurchaseReport(models.Model):
                  ('reconciled', '=', True),
                  ('type', 'in', ('in_invoice', 'in_refund'))]
                  )
+
             for inv_paid in paid_in_period_with_retention_invoices:
                 account_ids = [move_id.account_id.id for move_id in inv_paid.move_id.line_ids]
                 for account in account_ids:
                     if tax_account.get(account, "") in ('ritbis', 'isr'):
                         invoices += inv_paid
                         continue
+
         invoice_ids = [rec.id for rec in invoices]
         invoice_ids = list(set(invoice_ids))
         invoices = self.env["account.invoice"].browse(invoice_ids)
@@ -329,11 +347,16 @@ class DgiiPurchaseReportline(models.Model):
 
     purchase_report_id = fields.Many2one("dgii.purchase.report")
     LINE = fields.Integer(u"Línea")
+    invoice_id = fields.Many2one("account.invoice", "NCF")
+    inv_partner = fields.Many2one("res.partner",
+                                  related="invoice_id.partner_id",
+                                  string="Relacionado")
     RNC_CEDULA = fields.Char(u"RNC", size=11)
     TIPO_IDENTIFICACION = fields.Char("Tipo ID", size=1)
     TIPO_BIENES_SERVICIOS_COMPRADOS = fields.Char("Tipo", size=2)
-    NUMERO_COMPROBANTE_FISCAL = fields.Char("NCF", size=19)
+    NUMERO_COMPROBANTE_FISCAL = fields.Char("NCF STRING", size=19)
     NUMERO_COMPROBANTE_MODIFICADO = fields.Char("Afecta", size=19)
+    affected_invoice_id = fields.Many2one("account.invoice", "Afecta")
     FECHA_COMPROBANTE = fields.Date("Fecha")
     FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")

@@ -47,60 +47,45 @@ import io
 class DgiiSaleReport(models.Model):
     _name = "dgii.sale.report"
 
-    @api.one
-    @api.depends("ITBIS_TOTAL", "TOTAL_MONTO_FACTURADO")
-    def _calc_total(self):
-
-        self.TOTAL_MONTO_FACTURAS = sum(
-            [line.MONTO_FACTURADO for line in
-                self.report_lines
-                if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
-                )
-        self.TOTAL_MONTO_NC = sum(
-            [line.MONTO_FACTURADO for line in
-                self.report_lines
-                if line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
-                )
-        self.ITBIS_TOTAL_FACTURAS = sum(
-            [line.ITBIS_FACTURADO for line in
-                self.report_lines
-                if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
-                )
-        self.ITBIS_TOTAL_NC = sum(
-            [line.ITBIS_FACTURADO for line in
-                self.report_lines
-                if line.NUMERO_COMPROBANTE_MODIFICADO.strip()]
-                )
-        self.TOTAL_VENTA = self.TOTAL_MONTO_FACTURAS-self.TOTAL_MONTO_NC
-        self.TOTAL_VENTA_ITBIS = self.ITBIS_TOTAL_FACTURAS-self.ITBIS_TOTAL_NC
+    # @api.one
+    # @api.depends("ITBIS_TOTAL", "TOTAL_MONTO_FACTURADO")
+    # def _calc_total(self):
+    #
+    #     self.TOTAL_MONTO_FACTURAS = sum(
+    #         [line.MONTO_FACTURADO for line in self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+    #     self.TOTAL_MONTO_NC = sum(
+    #         [line.MONTO_FACTURADO for line in self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+    #     self.ITBIS_TOTAL_FACTURAS = sum(
+    #         [line.ITBIS_FACTURADO for line in self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+    #     self.ITBIS_TOTAL_NC = sum(
+    #         [line.ITBIS_FACTURADO for line in self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+    #     self.TOTAL_VENTA = self.TOTAL_MONTO_FACTURAS - self.TOTAL_MONTO_NC
+    #     self.TOTAL_VENTA_ITBIS = self.ITBIS_TOTAL_FACTURAS - self.ITBIS_TOTAL_NC
 
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
 
-    company_id = fields.Many2one('res.company', string='Company',
-                                 required=True, default=lambda self:
-                                 self.env['res.company']._company_default_get(
-                                                    'dgii.sale.report'))
+    company_id = fields.Many2one(
+            'res.company', string='Company', required=True,
+            default=lambda self: self.env['res.company']._company_default_get(
+                                                        'dgii.sale.report')
+            )
     name = fields.Char("Nombre")
-    year = fields.Integer(u"Año", size=4, default=lambda
-                          s: int(time.strftime("%Y")))
-    month = fields.Integer("Mes", size=2, default=lambda
-                           s: int(time.strftime("%m")))
+    year = fields.Integer(u"Año", size=4,
+                          default=lambda s: int(time.strftime("%Y")))
+    month = fields.Integer(u"Mes", size=2,
+                           default=lambda s: int(time.strftime("%m")))
+    CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
+    ITBIS_TOTAL = fields.Float(u"ITBIS FACTURADO")
+    TOTAL_MONTO_FACTURADO = fields.Float(u"TOTAL FACTURADO",
+                                         help=u"Suma de las facturas y las notas de crédito como se digitan en el formulario de la DGII")
 
-    CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
-    ITBIS_TOTAL = fields.Float(u"OFV ITBIS")
-    TOTAL_MONTO_FACTURADO = fields.Float(u"OFV Facturado",
-                                         help=u"Suma de las facturas y las"
-                                         u" Notas de Crédito como se digitan"
-                                         " en el formulario de la DGII")
-
-    TOTAL_MONTO_FACTURAS = fields.Float(u"Facturado", compute=_calc_total)
-    TOTAL_MONTO_NC = fields.Float(u"Notas Crédito", compute=_calc_total)
-    ITBIS_TOTAL_FACTURAS = fields.Float(u"ITBIS Facturado", compute=_calc_total
-                                        )
-    ITBIS_TOTAL_NC = fields.Float(u"ITBIS Notas Crédito", compute=_calc_total)
-    TOTAL_VENTA = fields.Float(u"Venta", compute=_calc_total)
-    TOTAL_VENTA_ITBIS = fields.Float(u"ITBIS", compute=_calc_total)
+    # TOTAL_MONTO_FACTURAS = fields.Float(u"FACTURADO", compute=_calc_total)
+    # TOTAL_MONTO_NC = fields.Float(u"NOTAS CRÉDITO", compute=_calc_total)
+    # ITBIS_TOTAL_FACTURAS = fields.Float(u"ITBIS FACTURADO", compute=_calc_total)
+    # ITBIS_TOTAL_NC = fields.Float(u"ITBIS NOTAS CRÉDITO", compute=_calc_total)
+    # TOTAL_VENTA = fields.Float(u"VENTA", compute=_calc_total)
+    # TOTAL_VENTA_ITBIS = fields.Float(u"ITBIS", compute=_calc_total)
 
     report_lines = fields.One2many("dgii.sale.report.line",
                                    "sale_report_id")
@@ -155,10 +140,20 @@ class DgiiSaleReport(models.Model):
                                                  " comprobante {} no es"
                                                  u" válido!".format(inv.number)
                                                  )
+
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
+            affected_invoice_id = False
             if inv.type == "out_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "out_refund":
+                affected_invoice_id = self.env["account.invoice"].search([('number', '=', inv.origin),('partner_id','=',inv.partner_id.id)])
+                if not len(affected_invoice_id) == 1 and affected_invoice_id:
+                    raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_invoice_id]))
+                elif not affected_invoice_id:
+                    raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_invoice_id.number)
+                else:
+                    affected_invoice_id = affected_invoice_id.id
+
                 NUMERO_COMPROBANTE_FISCAL = inv.number
                 NUMERO_COMPROBANTE_MODIFICADO = inv.origin
 
@@ -168,18 +163,13 @@ class DgiiSaleReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-            account_ids = list(set(
-                            [l.account_id.id for l in inv.invoice_line_ids
-                             if l.account_id.user_type_id.name == 'Ingreso']
-                             ))
+            account_ids = list(
+                set([l.account_id.id for l in inv.invoice_line_ids if l.account_id.user_type_id.name == 'Ingreso']))
 
             move_lines = self.env["account.move.line"].search(
-                                    [('move_id', '=', inv.move_id.id),
-                                     ('account_id', 'in', account_ids)])
-            MONTO_FACTURADO = abs(
-                            sum([l.credit for l in move_lines]) -
-                            sum([l.debit for l in move_lines])
-                            )
+                                        [('move_id', '=', inv.move_id.id),
+                                         ('account_id', 'in', account_ids)])
+            MONTO_FACTURADO = abs(sum([l.credit for l in move_lines]) - sum([l.debit for l in move_lines]))
 
             if not MONTO_FACTURADO:
                 MONTO_FACTURADO = 0
@@ -189,31 +179,26 @@ class DgiiSaleReport(models.Model):
             for tax in inv.tax_line_ids:
                 account_ids = [t.account_id.id for t in tax]
                 move_lines = self.env["account.move.line"].search(
-                    [('move_id', '=', inv.move_id.id),
-                     ('account_id', 'in', account_ids)]
-                     )
-                ITBIS_FACTURADO += (sum([l.debit for l in move_lines]) -
-                                    sum([l.credit for l in move_lines]) * -1)
+                                        [('move_id', '=', inv.move_id.id),
+                                         ('account_id', 'in', account_ids)])
+                ITBIS_FACTURADO += sum([l.debit for l in move_lines]) - sum([l.credit for l in move_lines]) * -1
                 if inv.type == "out_refund":
                     ITBIS_FACTURADO = ITBIS_FACTURADO
 
-            lines.append((0, False, {
-                          "LINE": LINE,
-                          "RNC_CEDULA": RNC_CEDULA,
-                          "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
-                          "NUMERO_COMPROBANTE_FISCAL":
-                          NUMERO_COMPROBANTE_FISCAL,
-                          "NUMERO_COMPROBANTE_MODIFICADO":
-                          NUMERO_COMPROBANTE_MODIFICADO,
-                          "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
-                          "FECHA_PAGO": FECHA_PAGO,
-                          "ITBIS_FACTURADO": ITBIS_FACTURADO,
-                          "MONTO_FACTURADO": MONTO_FACTURADO})
-                         )
-
-            line_number += 1
-
-        CANTIDAD_REGISTRO = len(lines)
+            lines.append(
+             (0, False,
+              {"LINE": LINE,
+               "invoice_id": inv.id,
+               "affected_invoice_id": affected_invoice_id,
+               "RNC_CEDULA": RNC_CEDULA,
+               "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
+               "NUMERO_COMPROBANTE_FISCAL": NUMERO_COMPROBANTE_FISCAL,
+               "NUMERO_COMPROBANTE_MODIFICADO": NUMERO_COMPROBANTE_MODIFICADO,
+               "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
+               "FECHA_PAGO": FECHA_PAGO,
+               "ITBIS_FACTURADO": ITBIS_FACTURADO,
+               "MONTO_FACTURADO": MONTO_FACTURADO})
+            )
         ITBIS_TOTAL = sum([line[2]["ITBIS_FACTURADO"] for line in lines])
         TOTAL_MONTO_FACTURADO = sum([line[2]["MONTO_FACTURADO"] for
                                     line in lines]
@@ -226,6 +211,24 @@ class DgiiSaleReport(models.Model):
                          "TOTAL_MONTO_FACTURADO": TOTAL_MONTO_FACTURADO,
                          "state": "done"}
                          )
+
+        FAC_ITBIS_TOTAL = sum(
+            [line[2]["ITBIS_FACTURADO"] for line in lines if line[2]["NUMERO_COMPROBANTE_FISCAL"][9:-8] != "04"])
+        NC_ITBIS_TOTAL = sum(
+            [line[2]["ITBIS_FACTURADO"] for line in lines if line[2]["NUMERO_COMPROBANTE_FISCAL"][9:-8] == "04"])
+        FAC_TOTAL_MONTO_FACTURADO = sum(
+            [line[2]["MONTO_FACTURADO"] for line in lines if line[2]["NUMERO_COMPROBANTE_FISCAL"][9:-8] != "04"])
+        NC_TOTAL_MONTO_FACTURADO = sum(
+            [line[2]["MONTO_FACTURADO"] for line in lines if line[2]["NUMERO_COMPROBANTE_FISCAL"][9:-8] == "04"])
+
+        ITBIS_TOTAL = FAC_ITBIS_TOTAL - NC_ITBIS_TOTAL
+        TOTAL_MONTO_FACTURADO = FAC_TOTAL_MONTO_FACTURADO - NC_TOTAL_MONTO_FACTURADO
+
+        res = self.write({"report_lines": lines,
+                          "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
+                          "ITBIS_TOTAL": ITBIS_TOTAL,
+                          "TOTAL_MONTO_FACTURADO": TOTAL_MONTO_FACTURADO,
+                          "state": "done"})
         return res
 
     def generate_txt(self):
@@ -306,3 +309,8 @@ class DgiiSaleReportline(models.Model):
     FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
+    invoice_id = fields.Many2one("account.invoice", "NCF")
+    inv_partner = fields.Many2one("res.partner",
+                                  related="invoice_id.partner_id",
+                                  string="Relacionado")
+    affected_invoice_id = fields.Many2one("account.invoice", "Afecta")
