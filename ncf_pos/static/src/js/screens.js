@@ -146,8 +146,12 @@ odoo.define('ncf_pos.screens', function(require) {
                         self.gui.close_popup();
                     }
                 });
-            } else if (self.order_is_valid(force_validation)) {
-                self.finalize_validation();
+            } else {
+                this.order_is_valid(force_validation).then(function (res) {
+                    if (res) {
+                        this.finalize_validation();
+                        }
+                });
             }
         },
     });
