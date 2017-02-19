@@ -34,10 +34,6 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
-import csv
-import cPickle
-import re
 import urllib2
 
 __author__ = 'eneldoserrata'
@@ -555,11 +551,11 @@ def is_ncf(value, type):
 
     if len(value) == 19:
         try:
-            if type == "in_refund" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9])\
-                    and value[9:11] == '04' and int(value[11:20]):
+            if type in ("in_refund","out_refund") and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] == '04' and int(value[11:20]):
                 return True
-            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9])\
-                and value[9:11] == '01' and int(value[11:20]):
+            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','14','15','11','13') and int(value[11:20]):
+                return True
+            elif type == "out_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','02','14','15','11','13') and int(value[11:20]):
                 return True
         except:
             pass

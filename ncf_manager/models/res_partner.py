@@ -35,7 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import models, fields, api, _
+from openerp import models, fields, _
 
 
 class ResPartner(models.Model):

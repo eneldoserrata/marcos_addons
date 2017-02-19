@@ -72,7 +72,6 @@
         'wizard/account_invoice_refund_view.xml',
         # 'wizard/invoice_currency_change_wizard_view.xml',
     ],
-    "qweb": ['static/src/xml/base.xml'],
     'demo': [],
     'images': 'static/description/main.png',
     "price": 2000,
