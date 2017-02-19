@@ -1,103 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-        <!-- Inherit Form View to Modify it -->
-        <record id="ncf_pos_pos_config_form" model="ir.ui.view">
-            <field name="name">ncf_pos_pos_config_form</field>
-            <field name="model">pos.config</field>
-            <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
-            <field name="arch" type="xml">
-                <field name="journal_id" position="after">
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="ncf_pos_pos_config_form" model="ir.ui.view">
+        <field name="name">ncf_pos_pos_config_form</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
+        <field name="arch" type="xml">
+            <field name="journal_id" position="after">
                     <field name="default_partner_id"/>
-                    <field name="create_picking_from_cron"/>
-                </field>
-                <field name="code" position="before">
-                    <field name="sequence" widget="handle"/>
-                </field>
-                <field name="cash_control" position="before">
-                    <field name="print_note"/>
-                </field>
-                <field name="picking_type_id" position="replace">
-                    <field groups="stock.group_locations" name="picking_type_id" on_change="onchange_picking_type_id(picking_type_id)" required="1" widget="selection"/>
-                </field>
             </field>
-        </record>
-        <!-- Inherit Form View to Modify it -->
-        <record id="ncf_pos.view_pos_pos_form" model="ir.ui.view">
-            <field name="name">ncf_pos.view_pos_pos_form</field>
-            <field name="model">pos.order</field>
-            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//form" position="inside">
-                    <div class="oe_chatter">
-                        <field groups="base.group_user" name="message_follower_ids" widget="mail_followers"/>
-                        <field name="message_ids" widget="mail_thread"/>
-                    </div>
-                </xpath>
-                <xpath expr="//form//header" position="replace">
-                    <header>
-                        <button attrs="{'invisible': [('state','in',('invoiced','cancel','refund','refund_money', 'draft_refund'))]}" class="oe_highlight" context="{'pos_session_id' : session_id}" name="payment_wizard" string="Pagar" type="object"/>
-                        <button attrs="{'readonly': [('partner_id','=',False)]}" name="action_invoice" states="paid" string="Invoice" type="object"/>
-                        <button attrs="{'invisible':[('state','in',('draft','cancel','refund','refund_money','draft_refund_money','draft_refund'))]}" name="%(pos_order_refund_action_wizard)d" string="Devolver Productos" type="action"/>
-                        <button attrs="{'invisible': ['|',('origin','=',False),('state','in',('invoiced','cancel','refund','refund_money','draft_refund_money'))]}" class="oe_highlight" name="%(pos_order_credito_note_action)d" string="Generar Nota de Crédito" type="action"/>
-                        <button name="%(pos_order_cancel_action)d" states="draft,draft_refund_money,draft_refund" string="Cancelar Order" type="action"/>
-                        <button name="%(point_of_sale.action_report_pos_receipt)d" states="paid,done,invoiced" string="Reprint" type="action"/>
-                        <field name="state" statusbar_colors="{&quot;cancel&quot;:&quot;red&quot;}" statusbar_visible="draft,invoiced" widget="statusbar"/>
-                    </header>
-                </xpath>
-                <field name="session_id" position="replace"/>
-                <field name="partner_id" position="replace"/>
-                <field name="fiscal_position_id" position="replace"/>
-                <field name="invoice_id" position="replace"/>
-                <field name="note" position="after">
-                    <group>
-                        <field attrs="{'invisible':[('cancel_refund_info','=',False)]}" name="cancel_refund_info" readonly="1" widget="many2many_tags"/>
-                    </group>
-                </field>
-                <field name="date_order" position="after">
-                    <field attrs="{'readonly': [('state','=','invoiced')]}" context="{'search_default_customer':1}" domain="[('customer', '=', True)]" name="partner_id"/>
-                    <field name="session_id" readonly="1"/>
-                    <field name="fiscal_position_id" options="{'no_create': True}"/>
-                    <field attrs="{'invisible':[('invoice_id','=',False)]}" name="invoice_id" readonly="1"/>
-                    <field attrs="{'invisible':[('origin','=',False)]}" name="origin" readonly="1"/>
-                </field>
-                <xpath expr="//page[2]" position="inside">
-                    <group>
-                        <field attrs="{'invisible': [('credit','&lt;',0)]}" name="credit"/>
-                    </group>
-                </xpath>
-                <field name="product_id" position="after">
-                    <field name="note"/>
-                </field>
-                <field name="discount" position="after">
-                    <field invisible="1" name="tax_ids"/>
-                </field>
+            <field name="code" position="before">
+                <field name="sequence" widget="handle"/>
             </field>
-        </record>
-        <!-- Inherit Form View to Modify it -->
-        <record id="ncf_pos.res_users_form_preference_view" model="ir.ui.view">
-            <field name="name">ncf_pos.res_users_form_preference_view</field>
-            <field name="model">res.users</field>
-            <field name="inherit_id" ref="point_of_sale.res_users_form_preference_view"/>
-            <field name="arch" type="xml">
-                <field name="pos_config" position="after">
-                    <field name="pos_security_pin" password="True" readonly="0"/>
-                </field>
+            <field name="cash_control" position="before">
+                <field name="print_note"/>
             </field>
-        </record>
-        <!-- Inherit Form View to Modify it -->
-        <record id="ncf_pos.view_pos_session_form" model="ir.ui.view">
-            <field name="name">ncf_pos.view_pos_session_form</field>
-            <field name="model">pos.session</field>
-            <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//form" position="inside">
-                    <div class="oe_chatter">
-                        <field groups="base.group_user" name="message_follower_ids" widget="mail_followers"/>
-                        <field name="message_ids" widget="mail_thread"/>
-                    </div>
-                </xpath>
+        </field>
+    </record>
+    <!-- Inherit Form View to Modify it -->
+    <record id="ncf_pos.view_pos_pos_form" model="ir.ui.view">
+        <field name="name">ncf_pos.view_pos_pos_form</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form//header" position="replace">
+                <header>
+                    <button name="action_invoice" string="Invoice" type="object" states="paid"
+                            attrs="{'readonly': [('partner_id','=',False)]}"/>
+                    <button name="%(point_of_sale.action_report_pos_receipt)d" string="Reprint" type="action"
+                            states="paid,done,invoiced"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,invoiced"
+                           statusbar_colors='{"cancel":"red"}'/>
+                </header>
+            </xpath>
+
+            <field name="session_id" position="replace"/>
+            <field name="partner_id" position="replace"/>
+            <field name="fiscal_position_id" position="replace"/>
+            <field name="invoice_id" position="replace"/>
+
+            <field name="date_order" position="after">
+                <field name="partner_id" domain="[('customer', '=', True)]" context="{'search_default_customer':1}"
+                       attrs="{'readonly': [('state','=','invoiced')]}"/>
+                <field name="session_id" readonly="1"/>
+                <field name="fiscal_position_id" options="{'no_create': True}"/>
+                <field name="invoice_id" readonly="1" attrs="{'invisible':[('invoice_id','=',False)]}"/>
             </field>
-        </record>
-    </data>
-</openerp>
+        </field>
+    </record>
+    <!-- Inherit Form View to Modify it -->
+    <record id="ncf_pos.res_users_form_preference_view" model="ir.ui.view">
+        <field name="name">ncf_pos.res_users_form_preference_view</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="point_of_sale.res_users_form_preference_view"/>
+        <field name="arch" type="xml">
+            <field name="pos_config" position="after">
+                <field name="pos_security_pin" password="True" readonly="0"/>
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -35,4 +35,3 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 import point_of_sale
-import wizard

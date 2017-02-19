@@ -43,9 +43,7 @@
 
     'description': """
         Permite la integracion de los numeros de comprbantes fiscales y ajusta
-        la imprecion de ticket para estos fines, ademas cuanta con muchas
-        otras funcionalidades que optimizan fa funcionalidad del punto de
-        ventas.
+        la imprecion de ticket para estos fines`.
     """,
 
     'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
@@ -55,19 +53,13 @@
     'version': '9.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'point_of_sale', 'ncf_manager', 'sale', 'web_editor',
-                'sale_control', 'mrp'],
+    'depends': ['base', 'point_of_sale', 'ncf_manager'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'wizard/pos_order_cancel_view.xml',
-        'wizard/pos_order_refund_view.xml',
-        'wizard/pos_payment.xml',
-        'wizard/cash_box_control_view.xml',
         'views.xml',
         'templates.xml',
-        'data/cron.xml'
     ],
     # only loaded in demonstration mode
     'demo': [],

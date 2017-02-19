@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
+    <t t-name="SetFiscalPositionButton">
+        <div class="control-button">
+            <i class="fa fa-book"/>Comprobante</div>
+    </t>
     <t t-extend="ClientDetailsEdit">
         <t t-jquery=".detail.client-name" t-operation="replace">
             <div class="client-detail">
@@ -12,7 +16,7 @@
         <t t-jquery=".client-details-box" t-operation="replace">
             <div class="client-details-box clearfix">
                 <div class="client-details-left">
-                    <div class="client-detail" t-if="!partner.vat">
+                    <div class="client-detail">
                         <span class="label">Comprob.</span>
                         <select class="detail client-fiscal_position" name="property_account_position_id">
                             <t t-as="fiscal_position" t-foreach="widget.pos.fiscal_positions">
@@ -27,7 +31,7 @@
                         <input class="detail client-address-street" name="street" placeholder="Street" t-att-value="partner.street"/>
                     </div>
                     <div class="client-detail">
-                        <span class="label">City</span>
+                        <span class="label">Ciudad</span>
                         <input class="detail client-address-city" name="city" placeholder="City" t-att-value="partner.city"/>
                     </div>
                     <div class="client-detail">
@@ -54,7 +58,7 @@
     </t>
     <t t-extend="ClientDetails">
         <t t-jquery="span.label:contains('Tax ID')" t-operation="replace">
-            <span class="label">RNC</span>
+            <span class="label">RNC/Céd</span>
         </t>
     </t>
     <t t-extend="PosTicket">
@@ -67,24 +71,20 @@
             </div>
             <div class="header col-xs-12 company-info" t-attf-style="padding-bottom:0px; padding-left:0px; padding-right:0px;text-align: left;">
                 <div class="mb8" style="font-size:12px !important; padding-bottom:2px;">
-                    <div t-if="widget.pos.company.street or  widget.pos.company.street2 or  widget.pos.company.zip">
+                    <div t-if="widget.pos.company.street or widget.pos.company.street2 or widget.pos.company.zip">
                         <span class="fa fa-map-marker fa-lg"/>
                         <span t-esc="widget.pos.company.street"/>
-                        <span t-if="widget.pos.company.street and  widget.pos.company.street2">,</span>
+                        <span t-if="widget.pos.company.street and widget.pos.company.street2">,</span>
                         <span t-esc="widget.pos.company.street2"/>
-                        <!--<span  t-if="widget.pos.company.zip and (widget.pos.company.street or  widget.pos.company.street2)">,</span>-->
-                        <!--<span  t-esc="widget.pos.company.zip"/>-->
                     </div>
-                    <div t-if="widget.pos.company.city or  widget.pos.company.country_id">
+                    <div t-if="widget.pos.company.city or widget.pos.company.country_id">
                         <span class="fa fa-map-marker fa-lg"/>
                         <span t-esc="widget.pos.company.city"/>
-                        <!--<span  t-if="widget.pos.company.city and  widget.pos.company.country_id">,</span>-->
-                        <!--<span  t-esc="widget.pos.company.country_id"/>-->
                     </div>
-                    <div t-if="widget.pos.company.phone or  widget.pos.company.fax">
+                    <div t-if="widget.pos.company.phone or widget.pos.company.fax">
                         <span class="fa fa-phone-square fa-lg"/>
                         <span t-esc="widget.pos.company.phone"/>
-                        <span t-if="widget.pos.company.phone and  widget.pos.company.fax">,</span>
+                        <span t-if="widget.pos.company.phone and widget.pos.company.fax">,</span>
                         <span t-if="widget.pos.company.fax">Fax:</span>
                         <span t-esc="widget.pos.company.fax"/>
                     </div>
@@ -163,7 +163,7 @@
                     </td>
                     <td>
                         <t t-esc="orderline.get_product().display_name"/>
-                        <t t-if="orderline.get_discount() &gt;0">
+                        <t t-if="orderline.get_discount() > 0">
                             <div class="pos-disc-font">
                                 <span>With a</span>
                                 <t t-esc="orderline.get_discount()">% discount</t>
@@ -176,60 +176,5 @@
                 </tr>
             </table>
         </t>
-        <t t-jquery=".pos-sale-ticket" t-operation="append">
-            <t t-if="widget.pos.config.print_note">
-                <p>
-                    <strong>Nota: </strong>
-                    <t t-esc="order.get_order_note()"/>
-                </p>
-            </t>
-        </t>
     </t>
-    <t t-name="QuotationPopupWidget">
-        <div class="modal-dialog">
-            <div class="popup popup-alert" style="height:200px">
-                <p class="title">Cotizar</p>
-                <span>Seleccione una opción?</span>
-                <div class="footer">
-                    <span class="button fa fa-print" id="print_pdf">Imprimir cotización</span>
-                    <span class="button send fa fa-envelope-o" id="send_mail">Enviar cotización</span>
-                    <span class="button cancel fa fa-no-o" id="quotation_cancel">Cancelar</span>
-                </div>
-            </div>
-        </div>
-    </t>
-    <t t-name="QuotationActionWidget">
-        <div class="control-button">
-            <span>Cotización</span>
-        </div>
-    </t>
-    <t t-extend="ProductScreenWidget">
-        <t t-jquery=".subwindow-container-fix.pads" t-operation="append">
-            <div class="control-buttons-refund">
-                <div class="control-button-refund refund-cancel-button">
-                    <i class="fa fa-ban"/>Cancelar</div>
-                <div class="control-button-refund refund-button">
-                    <i class="fa fa-pencil-square-o"/>Crear Nota de crédito</div>
-                <div class="control-button-refund refund-money-button">
-                    <i class="fa fa-money"/>
-                    <i class="fa fa-pencil-square-o"/>Solicitar devolución del pago</div>
-            </div>
-        </t>
-    </t>
-    <t t-extend="PaymentScreenWidget">
-        <t t-jquery=".payment-buttons" t-operation="append">
-            <div class="button js_credit_note">
-                <i class="fa fa-pencil-square-o"/>Aplicar Nota de Crédito</div>
-        </t>
-        <t t-jquery=".left-content" t-operation="append">
-            <center>
-                <textarea id="wk_note_id" placeholder="Notas" style=""/>
-            </center>
-        </t>
-    </t>
-    <!--<t t-name="OrderlineChangeNameButton">-->
-    <!--<div class='control-button'>-->
-    <!--<i class='fa fa-pencil-square-o' />Descripción-->
-    <!--</div>-->
-    <!--</t>-->
 </templates>
