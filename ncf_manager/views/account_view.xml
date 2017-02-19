@@ -26,7 +26,6 @@
             <field name="arch" type="xml">
                 <field name="type" position="after">
                     <field attrs="{'invisible': [('type','!=','sale')]}" name="ncf_control"/>
-                    <field attrs="{'invisible': [('type','!=','sale')]}" name="credit_out_invoice"/>
                     <field attrs="{'invisible': [('type','!=','purchase')]}" name="purchase_type" widget="radio"/>
                     <field attrs="{'invisible': [('type','!=','purchase')]}" name="ncf_remote_validation"/>
                 </field>
@@ -44,9 +43,6 @@
                         <field attrs="{'invisible': ['|',('type', 'not in', ['sale', 'purchase']), ('refund_sequence', '!=', True)]}" name="refund_sequence_id" required="0" string="Secuencia para Notas de Crédito"/>
                     </group>
                 </xpath>
-                <field name="default_credit_account_id" position="after">
-                    <field domain="[('deprecated', '=', False)]" name="default_discount_account_id"/>
-                </field>
             </field>
         </record>
         <record id="ncf_manager_account_tax_form" model="ir.ui.view">

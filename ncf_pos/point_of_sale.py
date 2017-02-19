@@ -50,6 +50,7 @@ class PosSession(osv.osv):
     _name = "pos.session"
 
     def _confirm_orders(self, cr, uid, ids, context=None):
+
         pos_order_obj = self.pool.get('pos.order')
         for session in self.browse(cr, uid, ids, context=context):
             if session.config_id.create_picking_from_cron:
@@ -60,7 +61,9 @@ class PosSession(osv.osv):
             local_context = dict(context or {}, force_company=company_id)
             order_ids = [order.id for order in session.order_ids if order.state == 'paid']
 
-            move_id = pos_order_obj._create_account_move(cr, uid, session.start_at, session.name, session.config_id.journal_id.id, company_id, context=context)
+            move_id = pos_order_obj._create_account_move(
+                cr, uid, session.start_at, session.name,
+                session.config_id.journal_id.id, company_id, context=context)
             pos_order_obj._create_account_move_line(cr, uid, order_ids, session, move_id, context=local_context)
             for order in session.order_ids:
                 if order.state == 'done':

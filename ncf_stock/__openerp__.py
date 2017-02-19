@@ -54,22 +54,17 @@
     'version': '9.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'web', 'product', 'sale', 'stock','ncf_manager', 'stock_account','purchase'],
+    'depends': ['base', 'web', 'product', 'sale', 'stock', 'ncf_manager',
+                'stock_account', 'purchase'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/shop_view.xml',
         'views/stock_view.xml',
-        'views/templates.xml',
         'views/res_partner_view.xml',
         'wizard/stock_return_picking_view.xml',
         'wizard/stock_backorder_confirmation.xml',
-        'wizard/inventory_import_view.xml'
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
     ],
     'license': "Other proprietary"
 }

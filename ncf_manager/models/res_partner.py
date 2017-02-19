@@ -41,11 +41,6 @@ from openerp import models, fields, api, _
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    @api.one
-    @api.depends('debit', 'credit')
-    def _get_balance(self):
-        self.balance = self.credit - self.debit
-
     journal_id = fields.Many2one("account.journal", "Diario de compra",
                                  domain=[('type', '=', 'purchase')]
                                  )
@@ -66,5 +61,3 @@ class ResPartner(models.Model):
         oldname="property_account_position",
         domain=[('supplier', '=', False)]
         )
-
-    balance = fields.Float(compute=_get_balance, string=_('Balance'))

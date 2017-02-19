@@ -37,16 +37,10 @@
 from openerp import exceptions
 import requests
 from tools import is_ncf, _internet_on
-import openerp.addons.decimal_precision as dp
 from openerp import api, fields, models
 
-from datetime import datetime
-
 import logging
-
 _logger = logging.getLogger(__name__)
-
-MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 
 
 class AccountInvoice(models.Model):
@@ -55,45 +49,6 @@ class AccountInvoice(models.Model):
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config["shop_ids"][0]
-
-    @api.one
-    def _get_overdue_type(self):
-        overdue = self.partner_id.issued_total - self.amount_total
-        credit_available = (self.partner_id.credit_limit -
-                            (self.partner_id.balance - self.amount_total))
-
-        if self.amount_total > credit_available and overdue > 0:
-            self.overdue_type = "overlimit_overdue"
-        elif self.amount_total > credit_available:
-            self.overdue_type = "overlimit"
-        elif overdue > 0:
-            self.overdue_type = "overdue"
-        else:
-            self.overdue_type = "none"
-
-    overdue_type = (fields.Selection([
-        ('overlimit_overdue',
-         u'Cliente no tiene crédito disponible y tiene facturas vencidas'),
-        ('overlimit', u'Cliente no tiene crédito disponible'),
-        ('overdue', u'Cliente tiene facturas vencidas'),
-        ('none', 'None'),
-        ], u"Estado del crédito", compute=_get_overdue_type, copy=False)
-        )
-
-    internal_number = fields.Char(u"Número de factura")
-    anulation_type = fields.Selection([
-
-        ("01", u"Deterioro de Factura Pre-impresa"),
-        ("02", u"Errores de Impresión (Factura Pre-impresa)"),
-        ("03", u"Impresión Defectuosa"),
-        ("04", u"Duplicidad de Facturas"),
-        ("05", u"Corrección de la Información"),
-        ("06", u"Cambio de Productos"),
-        ("07", u"Devolución de Productos"),
-        ("08", u"Omisión de Productos"),
-        ("09", u"Errores en Secuencia de NCF")
-        ], string=u"Tipo de anulación", copy=False
-        )
 
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
                               required=False, default=_default_user_shop)
@@ -127,13 +82,6 @@ class AccountInvoice(models.Model):
          ], string=u"Tipo de compra", default="normal",
         related="journal_id.purchase_type"
         )
-
-    credit_out_invoice = fields.Boolean(
-        related="journal_id.credit_out_invoice"
-        )
-
-    authorize = fields.Boolean(
-        u"Crédito Autorizado", default=False, copy=False)
 
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,
@@ -188,10 +136,6 @@ class AccountInvoice(models.Model):
                         self.env['res.company']._company_default_get(
                                  'account.invoice').partner_id.id)
                     self.ncf_required = False
-
-            if self.type == "out_invoice" and self.credit_out_invoice is False:
-                self.date_due = fields.Date.today()
-                self.payment_term_id = 1
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
@@ -337,151 +281,12 @@ class AccountInvoice(models.Model):
 
         return super(AccountInvoice, self).write(vals)
 
-    @api.model
-    def _refund_cleanup_lines(self, lines):
-        """ Convert records to dict of values suitable for one2many line creation
-            :param recordset lines: records to convert
-            :return: list of command tuple for one2many line creation
-             [(0, 0, dict of values), ...]
-        """
-        if not lines:
-            return []
-
-        refund_type = self._context.get("refund_type", False)
-
-        days = 0
-        if lines:
-            days = self.get_days_between(lines[0].invoice_id.date_invoice)
-
-        result = []
-        for line in lines:
-            values = {}
-            for name, field in line._fields.iteritems():
-                if name in MAGIC_COLUMNS:
-                    continue
-                elif field.type == 'many2one':
-                    values[name] = line[name].id
-                elif field.type not in ['many2many', 'one2many']:
-                    if name == "quantity":
-                        if not refund_type:
-                            values[name] = line.qty_allow_refund
-                        else:
-                            values["quantity"] = line[name]
-                    elif name == "qty_allow_refund":
-                        if not refund_type:
-                            values[name] = line.qty_allow_refund
-                        else:
-                            values["qty_allow_refund"] = line["quantity"]
-                    else:
-                        values[name] = line[name]
-                elif name == 'invoice_line_tax_ids':
-                    if days > 30:
-                        continue
-                    values[name] = [(6, 0, line[name].ids)]
-
-                values["refund_line_ref"] = line.id
-
-            if not values:
-                return []
-            if lines._model == "account.invoice.line":
-                if values.get("quantity", False) == 0.00:
-                    continue
-            result.append((0, 0, values))
-
-        if not result:
-            raise exceptions.UserError("Todos los productos de esta factura ya"
-                                       " fueron devueltos.")
-
-        return result
-
-    @api.multi
-    def invoice_validate(self):
-        res = super(AccountInvoice, self).invoice_validate()
-        for rec in self:
-            if rec.type in ["out_invoice", "in_invoice"]:
-                for line in rec.invoice_line_ids:
-                    line.qty_allow_refund = line.quantity
-            elif rec.type in ["out_refund", "in_refund"]:
-                for line in rec.invoice_line_ids:
-                    if line.product_id:
-                        if line.quantity > line.qty_allow_refund:
-                            pass
-                            # raise exceptions.UserError
-                            # ("No puede devolver mas productos de que los\
-                            # facturados.")
-
-                    origin = self.env["account.invoice.line"].browse(
-                        line.refund_line_ref.id)
-                    origin.write({"qty_allow_refund": origin.qty_allow_refund -
-                                 line.quantity})
-
-                # refund_inv = self.env['account.invoice'].search(
-                #                         [('origin', '=', rec.number),
-                #                          ('state', 'in', ('open', 'paid'))]
-                #                          )
-
-                # afected_inv = self.env['account.invoice'].search(
-                #                         [('number', '=', rec.origin),
-                #                          ('state', 'in', ('open', 'paid'))]
-                #                          )
-
-                # total_refund = sum([rec.amount_untaxed for rec in refund_inv]
-                #                    ) + rec.amount_untaxed
-
-                # amount_untaxed = sum([r.amount_untaxed for r in afected_inv]
-                #                      ) or 0.0
-
-                # if total_refund > amount_untaxed:
-                #     raise exceptions.UserError(
-                #         u"No puede crear notas de crédito por un valor mayor a"
-                #         " la factura afectada.")
-        return res
-
-    def get_days_between(self, joining_date):
-        date_format = '%Y-%m-%d'
-        current_date = datetime.strptime(
-            datetime.today().strftime(date_format), date_format)
-        doc_date = datetime.strptime(joining_date, date_format)
-        delta = current_date - doc_date
-        return delta.days
-
     @api.one
     def copy(self, default=None):
         if self.type in ("in_refund", "out_refund"):
             raise exceptions.UserError(u"¡No está permitido duplicar Notas de"
                                        u" Crédito!")
         return super(AccountInvoice, self).copy(default=default)
-
-    @api.multi
-    def authorize_credit(self):
-        for rec in self:
-            overdue_type = {
-                'overlimit_overdue': u"Este cliente tiene el límite de"
-                                     u"crédito agotado y facturas vencidas",
-                'overlimit': u'Este cliente no tiene crédito disponible',
-                'overdue': u'Este cliente tiene facturas vencidas',
-                'none': 'None'
-                }
-            rec.authorize = True
-            rec.message_post(body=u"<p>Crédito Autorizado con {}</p>".format
-                             (overdue_type[rec.overdue_type]),
-                             subject=u"Factura a Crédito Autorizada",
-                             subtype="mail.mt_comment")
-
-    @api.multi
-    def disallows_credit(self):
-        for rec in self:
-            overdue_type = {
-                'overlimit_overdue': u"Este cliente tiene el límite de"
-                                     u"crédito agotado y facturas vencidas",
-                'overlimit': u'Este cliente no tiene crédito disponible',
-                'overdue': 'Este cliente tiene facturas vencidas',
-                'none': 'None'}
-            rec.authorize = False
-            rec.message_post(body=u"<p>Crédito cancelado con {}</p>".
-                             format(overdue_type[rec.overdue_type]),
-                             subject=u"Factura a Crédito no autorizada",
-                             subtype="mail.mt_comment")
 
     @api.multi
     def set_ncf(self):
@@ -518,18 +323,6 @@ class AccountInvoice(models.Model):
                              ncf_next, self.journal_id.name))
                         next_ncf = False
                 inv.move_name = ncf_next
-
-
-class AccountInvoiceLine(models.Model):
-    _inherit = "account.invoice.line"
-
-    qty_allow_refund = fields.Float(
-        string='qty allow refund',
-        digits=dp.get_precision('Product Unit of Measure'),
-        required=False, copy=False)
-
-    refund_line_ref = fields.Many2one(
-        "account.invoice.line", string="origin line refund", copy=False)
 
 
 class AccountInvoiceTax(models.Model):

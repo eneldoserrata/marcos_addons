@@ -36,3 +36,4 @@
 ###############################################################################
 
 import account_invoice_refund
+import account_invoice_cancel
