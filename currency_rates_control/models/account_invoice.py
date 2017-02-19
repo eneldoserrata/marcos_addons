@@ -35,71 +35,31 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import api, fields, models, _
+from openerp import api, models
 
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     @api.multi
-    @api.depends("currency_id")
+    @api.depends('currency_id', "invoice_rate", "date_invoice")
     def _get_rate(self):
-        # if self.currency_id: <-- This decision might be causing troubles
-        if self.currency_id.id != self.company_id.currency_id.id:
-            self._cr.execute("""SELECT rate FROM res_currency_rate
-                                WHERE currency_id = %s
-                                AND name = %s
-                                AND (company_id is null
-                                OR company_id = %s)
-                                ORDER BY company_id, name desc LIMIT 1""",
-                             (self.currency_id.id,
-                              self.date_invoice or fields.Date.today(),
-                              self.company_id.id))
-            if self._cr.rowcount > 0:
-                self.rate = 1 / self._cr.fetchone()[0]
-            else:
-                self.rate = 0
-        else:
-            self.rate = 1
+        for rec in self:
+            try:
+                rec.invoice_rate = 1 / rec.currency_id.with_context(
+                                            dict(self._context or {},
+                                                 date=rec.date_invoice)).rate
+            except:
+                pass
 
     @api.onchange("date_invoice", "currency_id")
     def onchange_date_invoice(self):
         self._get_rate()
 
-    @api.multi
-    def update_currency_wizard(self):
-        if not self.date_invoice:
-            self.date_invoice = fields.Date.today()
-
-        view_id = self.env.ref(
-                    'currency_rates_control.update_currency_wizard_form', True)
-        return {
-            'name': _('Cambiar Moneda de la Factura'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'update.currency.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {"currency_id": self.currency_id.id}
-            }
-
-    @api.multi
-    def update_rate_wizard(self):
-        view_id = self.env.ref(
-                        'currency_rates_control.update_rate_wizard_form', True)
-        return {
-            'name': _('Fecha sin tasa. Actualizar tasa de la moneda'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'update.rate.wizard',
-            'view_id': view_id.id,
-            'target': 'new',
-            'views': False,
-            'type': 'ir.actions.act_window',
-            'context': {
-                "default_name": self.date_invoice or fields.Date.today()}
-            }
-
-    rate = fields.Float("Tasa del dia", compute=_get_rate, digits=(12, 4))
+    @api.depends("currency_id")
+    def _is_company_currency(self):
+        for rec in self:
+            if rec.currency_id == rec.company_id.currency_id:
+                rec.is_company_currency = True
+            else:
+                rec.is_company_currency = False

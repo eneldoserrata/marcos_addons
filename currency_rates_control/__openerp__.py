@@ -20,16 +20,11 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account'],
+    'depends': ['base', 'account', 'ncf_manager'],
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
-        # 'security/security.xml',
-        'views/base_view.xml',
         'views/account_invoice_view.xml',
-        'views/currency_rate_update.xml',
-        'wizard/rate_update_wizard_view.xml',
-        'wizard/invoice_currency_change_wizard_view.xml',
+        'wizard/update_rate_wizard_view.xml',
     ],
 }
