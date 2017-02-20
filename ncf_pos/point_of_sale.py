@@ -57,6 +57,46 @@ class PosConfig(models.Model):
                                            domain=[('supplier', '=', False)])
 
 
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    @api.model
+    def create_from_ui(self, partner):
+        """ create or modify a partner from the point of sale ui.
+            partner contains the partner's fields. """
+        try:
+            name = partner.get("name", False)
+            if isinstance(int(name), (int,)):
+                partner_exist = self.search([('vat', '=', name)])
+                if partner_exist:
+                    if partner.get("property_account_position_id", False):
+                        partner.pop("property_account_position_id", None)
+                    partner.update({"id": partner_exist[0].id,
+                                    "name": partner_exist.name})
+        except:
+            pass
+
+        if partner.get('image', False):
+            img = partner['image'].split(',')[1]
+            partner['image'] = img
+
+        property_account_position_id = partner.get(
+            "property_account_position_id", False)
+        if property_account_position_id:
+            partner.update({
+                "property_account_position_id": int(
+                    property_account_position_id)})
+
+        if partner.get('id', False):
+            partner_id = partner['id']
+            del partner['id']
+            self.browse(partner_id).write(partner)
+        else:
+            partner_id = self.create(partner)
+            return partner_id.id
+
+        return partner_id
+
 class PosOrder(models.Model):
     _inherit = ["pos.order", 'mail.thread', 'ir.needaction_mixin']
     _name = 'pos.order'
