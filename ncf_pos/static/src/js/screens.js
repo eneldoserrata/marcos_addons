@@ -8,67 +8,6 @@ odoo.define('ncf_pos.screens', function(require) {
     var QWeb = core.qweb;
     var _t = core._t;
 
-    var set_fiscal_position_button = ActionButtonWidget.extend({
-        template: 'SetFiscalPositionButton',
-        init: function (parent, options) {
-            this._super(parent, options);
-
-            this.pos.get('orders').bind('add remove change', function () {
-                this.renderElement();
-            }, this);
-
-            this.pos.bind('change:selectedOrder', function () {
-                this.renderElement();
-            }, this);
-        },
-        button_click: function () {
-            var self = this;
-
-            var no_fiscal_position = [{
-                label: _t("None"),
-            }];
-            var fiscal_positions = _.map(self.pos.fiscal_positions, function (fiscal_position) {
-                return {
-                    label: fiscal_position.name,
-                    item: fiscal_position
-                };
-            });
-
-            var selection_list = no_fiscal_position.concat(fiscal_positions);
-            self.gui.show_popup('selection',{
-                title: _t('Select tax'),
-                list: selection_list,
-                confirm: function (fiscal_position) {
-                    var order = self.pos.get_order();
-                    order.fiscal_position = fiscal_position;
-                    order.trigger('change');
-                }
-            });
-        },
-        get_current_fiscal_position_name: function () {
-            var name = _t('Tax');
-            var order = this.pos.get_order();
-
-            if (order) {
-                var fiscal_position = order.fiscal_position;
-
-                if (fiscal_position) {
-                    name = fiscal_position.display_name;
-                }
-            }
-
-            return name;
-        }
-    });
-
-    define_action_button({
-        'name': 'set_fiscal_position',
-        'widget': set_fiscal_position_button,
-        'condition': function(){
-            return this.pos.fiscal_positions.length > 0;
-        },
-    });
-
     screens.ProductScreenWidget.include({
         start: function() {
             this._super();
