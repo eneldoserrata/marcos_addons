@@ -94,7 +94,7 @@ class ResPartner(models.Model):
                     vals['vat'] = data['rnc'].strip()
                     vals['name'] = data['name'].strip()
                     vals["comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
-                        data['comercial_name'], data['payment_regimen'], data['status'], data['category'])
+                        data['comercial_name'], data.get('payment_regimen', ""), data['status'], data['category'])
                     vals.update({"company_type": "company"})
                     if len(fiscal_id) == 9:
                         vals.update({"company_type": "company"})
@@ -125,7 +125,7 @@ class ResPartner(models.Model):
             if validation:
                 vals.update(validation)
             else:
-                raise exceptions.UserError(u"El número de RNC/Cédula no es vEalido en la DGII.")
+                raise exceptions.UserError(u"El número de RNC/Cédula no es valido en la DGII.")
             return super(ResPartner, self).create(vals)
 
     @api.onchange("vat")
