@@ -96,10 +96,11 @@ class PosOrder(models.Model):
     _inherit = ["pos.order"]
     _name = 'pos.order'
 
-    fiscal_position_id = fields.Many2one('account.fiscal.position',
-                                         'Fiscal Position',
-                                         domain=[('supplier', '=', False)])
-    reserve_ncf_seq = fields.Char(size=19, copy=False)
+    @api.onchange("partner_id")
+    def _onchange_partner_id(self, part=False):
+        if self.partner_id:
+            self.pricelist_id = self.partner_id.property_product_pricelist.id
+            self.fiscal_position_id = self.partner_id.property_account_position_id.id
 
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
@@ -133,7 +134,6 @@ class PosOrder(models.Model):
 
             self.action_invoice(cr, uid, [order_id], context)
             order_obj = self.browse(cr, uid, order_id, context)
-            # self.invoice_id.move_name = self.reserve_ncf_seq
             self.pool['account.invoice'].signal_workflow(cr, SUPERUSER_ID, [order_obj.invoice_id.id], 'invoice_open')
 
         return order_ids
