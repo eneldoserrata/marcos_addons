@@ -34,24 +34,18 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, tools, SUPERUSER_ID
+import psycopg2
 import time
 import logging
 _logger = logging.getLogger(__name__)
-
-
-class PosOrderLine(models.Model):
-    _inherit = "pos.order.line"
-
-    note = fields.Char("Nota")
 
 
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     default_partner_id = fields.Many2one("res.partner",
-                                         string="Cliente de contado")
-    print_note = fields.Boolean('Imprimir nota en recibo', default=True)
+                                         string="Cliente de Contado")
     fiscal_position_ids = fields.Many2many('account.fiscal.position',
                                            string='Fiscal Positions',
                                            domain=[('supplier', '=', False)])
@@ -97,51 +91,15 @@ class ResPartner(models.Model):
 
         return partner_id
 
+
 class PosOrder(models.Model):
-    _inherit = ["pos.order", 'mail.thread', 'ir.needaction_mixin']
+    _inherit = ["pos.order"]
     _name = 'pos.order'
 
-    partner_id = fields.Many2one('res.partner', 'Customer', select=1,
-                                 states={'draft': [('readonly', False)],
-                                         'paid': [('readonly', False)]},
-                                 domain=[('supplier', '=', False)])
     fiscal_position_id = fields.Many2one('account.fiscal.position',
                                          'Fiscal Position',
                                          domain=[('supplier', '=', False)])
-    session_id = fields.Many2one('pos.session', 'Session',
-                                 required=True,
-                                 select=1,
-                                 domain="[('state', '=', 'opened')]",
-                                 states={'draft': [('readonly', False)]},
-                                 readonly=True)
     reserve_ncf_seq = fields.Char(size=19, copy=False)
-    origin = fields.Many2one("pos.order", string="Afecta")
-    state = fields.Selection([('draft', 'New'),
-                              ('cancel', 'Cancelled'),
-                              ('paid', 'Paid'),
-                              ('done', 'Posted'),
-                              ('invoiced', 'Invoiced'),
-                              ],
-                             'Status', readonly=True, copy=False,
-                             default="draft")
-    lines = fields.One2many('pos.order.line', 'order_id', 'Order Lines',
-                            states={'draft': [('readonly', False)],
-                                    'draft_refund': [('readonly', False)]},
-                            readonly=True, copy=True)
-    date_order = fields.Datetime('Order Date', readonly=True, select=False,
-                                 default=fields.datetime.now())
-
-    @api.onchange("session_id")
-    def onchange_session_id(self):
-        self.partner_id = self.session_id.config_id.default_partner_id.id
-        self.pricelist_id = self.partner_id.property_product_pricelist.id
-        self.fiscal_position_id = self.partner_id.property_account_position_id.id
-
-    @api.onchange("partner_id")
-    def _onchange_partner_id(self, part=False):
-        if self.partner_id:
-            self.pricelist_id = self.partner_id.property_product_pricelist.id
-            self.fiscal_position_id = self.partner_id.property_account_position_id.id
 
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
@@ -149,121 +107,57 @@ class PosOrder(models.Model):
             self.partner_id.write(
                 {"property_account_position_id": self.fiscal_position_id.id})
 
-    @api.model
-    def _order_fields(self, ui_order):
-        res = super(PosOrder, self)._order_fields(ui_order)
+    def create_from_ui(self, cr, uid, orders, context=None):
+        # Keep only new orders
+        submitted_references = [o['data']['name'] for o in orders]
+        existing_order_ids = self.search(cr, uid, [('pos_reference', 'in', submitted_references)], context=context)
+        existing_orders = self.read(cr, uid, existing_order_ids, ['pos_reference'], context=context)
+        existing_references = set([o['pos_reference'] for o in existing_orders])
+        orders_to_save = [o for o in orders if o['data']['name'] not in existing_references]
 
-        if ui_order.get("origin", False):
-            res.update({"origin": ui_order["origin"],
-                        "state": ui_order.get("order_type", False)})
-        return res
+        order_ids = []
 
-    @api.model
-    def create_from_ui(self, orders):
-        context = {u'lang': u'es_DO', u'tz': u'America/Santo_Domingo',
-                   u'uid': 1, "from_ui": True}
+        for tmp_order in orders_to_save:
+            order = tmp_order['data']
+            self._match_payment_to_invoice(cr, uid, order, context=context)
+            order_id = self._process_order(cr, uid, order, context=context)
+            order_ids.append(order_id)
 
-        res = super(PosOrder, self).create_from_ui(orders)
+            try:
+                self.signal_workflow(cr, uid, [order_id], 'paid')
+            except psycopg2.OperationalError:
+                # do not hide transactional errors, the order(s) won't be saved!
+                raise
+            except Exception as e:
+                _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
 
-        for order_id in res:
-            new_order = self.browse(order_id)
-            new_order.set_reserve_ncf_seq()
+            self.action_invoice(cr, uid, [order_id], context)
+            order_obj = self.browse(cr, uid, order_id, context)
+            # self.invoice_id.move_name = self.reserve_ncf_seq
+            self.pool['account.invoice'].signal_workflow(cr, SUPERUSER_ID, [order_obj.invoice_id.id], 'invoice_open')
 
-            # self.env.cr.commit()
-            order = self.browse(order_id)
-            order.with_context(context).generate_ncf_invoice()
-        return res
-
-    @api.model
-    def action_paid(self):
-        if not self.pos_reference:
-            self.set_reserve_ncf_seq()
-            self.generate_ncf_invoice()
-
-    @api.model
-    def set_reserve_ncf_seq(self):
-        if not self.partner_id:
-            self.partner_id = self.session_id.config_id.default_partner_id.id
-
-        fiscal_type = self.fiscal_position_id.client_fiscal_type
-        sequence = self.sale_journal.sequence_id
-
-        if self.sale_journal.ncf_control:
-            if fiscal_type == 'fiscal':
-                sequence = self.sale_journal.fiscal_sequence_id
-            elif fiscal_type == 'gov':
-                sequence = self.sale_journal.gov_sequence_id
-            elif fiscal_type == 'special':
-                sequence = self.sale_journal.special_sequence_id
-            else:
-                sequence = self.sale_journal.final_sequence_id
-
-        date_order = self.date_order.split(" ")[0]
-
-        next_ncf = True
-        while next_ncf:
-            ncf_next = sequence.with_context(
-                                    ir_sequence_date=date_order).next_by_id()
-            _logger.info(
-                u"EL SISTEMA SALTO EL NÚMERO {} DEL DIARIO {} PORQUE YA EXISTE DESDE EL PUNTO DE VENTA".format(ncf_next, self.sale_journal.name))
-
-            if not self.search_count([('reserve_ncf_seq', '=', ncf_next), ('sale_journal', '=', self.sale_journal.id)]):
-                next_ncf = False
-
-        self.reserve_ncf_seq = ncf_next
-
-    @api.model
-    def generate_ncf_invoice(self):
-        self.write({'state': 'paid'})
-        self.action_invoice()
-        self.invoice_id.move_name = self.reserve_ncf_seq
-        self.invoice_id.signal_workflow("invoice_open")
+        return order_ids
 
     @api.model
     def get_fiscal_data(self, name):
-        if name:
-            res = {"origin": False}
-            ncf = False
+        res = {}
 
-            while not ncf:
-                time.sleep(1)
-                order = self.search([('pos_reference', '=', name)])
-                if order:
-                    ncf = order.reserve_ncf_seq
-                    res.update({"ncf": ncf, "id": order.id})
-                self._cr.commit()
+        order_state = False
+        while not order_state == 'invoiced':
+            time.sleep(1)
+            order_id = self.search([('pos_reference', '=', name)])
+            if order_id:
+                order_state = order_id.state
+            self._cr.commit()
 
-            fiscal_code = ncf[9:11]
-            if not order.origin:
-                if fiscal_code == "01":
-                    res.update(
-                        {"fiscal_type": "fiscal",
-                         "fiscal_type_name": "FACTURA CON VALOR FISCAL"}
-                         )
-                elif fiscal_code == "02":
-                    res.update(
-                        {"fiscal_type": "final",
-                         "fiscal_type_name": "FACTURA PARA CONSUMIDOR FINAL"}
-                         )
-                if fiscal_code == "14":
-                    res.update(
-                        {"fiscal_type": "fiscal",
-                         "fiscal_type_name": "FACTURA GUBERNAMENTAL"}
-                         )
-                elif fiscal_code == "15":
-                    res.update(
-                        {"fiscal_type": "special",
-                         "fiscal_type_name": "FACTURA REGIMENES ESPECIALES"}
-                         )
-            else:
-                reference_ncf = order.origin.invoice_id.number
-                reference_ncf_type = reference_ncf[9:11]
-                res.update({"fiscal_type_name": "NOTA DE CREDITO"})
-                if reference_ncf_type in ("01", "14"):
-                    res.update({"fiscal_type": "fiscal_note"})
-                elif reference_ncf_type == "02":
-                    res.update({"fiscal_type": "final_note"})
-                elif reference_ncf_type == "15":
-                    res.update({"fiscal_type": "special_note"})
-                res.update({"origin": reference_ncf})
-            return res
+        res.update({"ncf": order_id.invoice_id.number})
+        if order_id.invoice_id.fiscal_position_id.client_fiscal_type == "fiscal":
+            res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA CON VALOR FISCAL"})
+        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "final":
+            res.update({"fiscal_type": "final", "fiscal_type_name": "FACTURA PARA CONSUMIDOR FINAL"})
+        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "gov":
+            res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA GUBERNAMENTAL"})
+        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "special":
+            res.update({"fiscal_type": "special", "fiscal_type_name": "FACTURA PARA REGIMENES ESPECIALES"})
+
+        return res
