@@ -12,9 +12,6 @@
             <field name="code" position="before">
                 <field name="sequence" widget="handle"/>
             </field>
-            <field name="cash_control" position="before">
-                <field name="print_note"/>
-            </field>
         </field>
     </record>
     <!-- Inherit Form View to Modify it -->
