@@ -3,60 +3,29 @@ odoo.define('ncf_pos.screens', function(require) {
     var core = require('web.core');
     var Model = require('web.DataModel');
     var gui = require('point_of_sale.gui');
-    var form_common = require('web.form_common');
 
     var QWeb = core.qweb;
     var _t = core._t;
 
     screens.PaymentScreenWidget.include({
-        init: function(parent, options) {
-            var self = this;
-            this._super(parent, options);
-            this.keyboard_keydown_handler = function(event) {
-                if (event.keyCode === 8 || event.keyCode === 46) {
-                    self.keyboard_handler(event);
-                }
-            };
-            this.keyboard_handler = function(event) {
-                var key = '';
-                if (event.type === "keypress") {
-                    if (event.keyCode === 13) { // Enter
-                        self.validate_order();
-                    } else if (event.keyCode === 190 || // Dot
-                        event.keyCode === 110 || // Decimal point (numpad)
-                        event.keyCode === 188) { // Comma
-                        key = '.';
-                    } else if (event.keyCode >= 48 && event.keyCode <= 57) { // Numbers
-                        key = '' + (event.keyCode - 48);
-                    } else if (event.keyCode === 45) { // Minus
-                        key = '-';
-                    } else if (event.keyCode === 43) { // Plus
-                        key = '+';
-                    }
-                } else { // keyup/keydown
-                    if (event.keyCode === 46) { // Delete
-                        key = 'CLEAR';
-                    } else if (event.keyCode === 8) { // Backspace
-                        key = 'BACKSPACE';
-                    }
-                }
-                self.payment_input(key);
-            };
-        },
         validate_client: function() {
             var order = this.pos.get_order();
             var client = order.get_client();
 
-            if (order.fiscal_position === undefined) {
-                return alert("El cliente no tiene posicion fiscal asignada.");
+            if (!client) {
+                return "¡Debe seleccionar un cliente para validar la factura!";
             }
 
-            if (client === undefined) {
-                return "Debe de seleccionar cliente para validar la factura!";
-            } else if (order.fiscal_position.client_fiscal_type != 'final' && client.vat === false) {
-                return "La posicion fiscal del cliente seleccionado requiere RNC/Cédula.";
+            if (!order.fiscal_position) {
+                return "La orden no tiene tipo de comprobante asignada.";
             }
+
+            if (order.fiscal_position.client_fiscal_type != 'final' && !client.vat) {
+                return "La posicion fiscal del cliente seleccionado requiere RNC/Cédula. Acceda al cliente y agregue esta informacion";
+
+            } else {
             return true;
+            }
         },
         validate_order: function(force_validation) {
             var self = this;
@@ -64,15 +33,15 @@ odoo.define('ncf_pos.screens', function(require) {
 
             if (res !== true) {
                 self.gui.show_popup('confirm', {
-                    title: _t('Cliente no seleccionado!'),
-                    body: res,
+                    title: _t('Por favor corrija los datos'),
+                    body:  _t(res),
                     confirm: function() {
                         self.gui.close_popup();
                     }
                 });
             } else {
-                this.order_is_valid(force_validation); {
-                    if (res) {
+                if (res) {
+                    if (this.order_is_valid(force_validation)) {
                         this.finalize_validation();
                         }
                 }
