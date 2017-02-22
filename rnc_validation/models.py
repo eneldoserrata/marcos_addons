@@ -80,10 +80,10 @@ class ResPartner(models.Model):
         https_proxy = config_parameter.get_param("https_proxy")
 
         proxies = {}
-        if http_proxy:
+        if http_proxy != "False":
             proxies.update({"http": http_proxy})
 
-        if http_proxy:
+        if http_proxy != "False":
             proxies.update({"https": https_proxy})
 
         res = requests.get('{}/rnc/{}'.format(api_marcos, fiscal_id), proxies=proxies)
