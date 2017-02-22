@@ -76,7 +76,17 @@ class ResPartner(models.Model):
         if not api_marcos:
             raise exceptions.MissingError(u"Debe configurar la URL de validacón en línea")
 
-        res = requests.get('{}/rnc/{}'.format(api_marcos, fiscal_id))
+        http_proxy = config_parameter.get_param("http_proxy")
+        https_proxy = config_parameter.get_param("https_proxy")
+
+        proxies = {}
+        if http_proxy:
+            proxies.update({"http": http_proxy})
+
+        if http_proxy:
+            proxies.update({"https": https_proxy})
+
+        res = requests.get('{}/rnc/{}'.format(api_marcos, fiscal_id), proxies=proxies)
         if res.status_code == 200:
             return res.json()
         else:
