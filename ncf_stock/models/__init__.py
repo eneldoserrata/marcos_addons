@@ -34,7 +34,7 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-import shop
-import stock
-import account_invoice
-import res_partner
+from . import shop
+from . import stock
+from . import account_invoice
+from . import res_partner

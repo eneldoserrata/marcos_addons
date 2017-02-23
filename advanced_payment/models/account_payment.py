@@ -195,8 +195,7 @@ class AccountPayment(models.Model):
         manual_lines = [line for line in self.payment_move_ids if line.account_id.id not in account_id]
         rate = False
         if counterpart_aml_dict.get("amount_currency", False):
-            rate = counterpart_aml_dict["debit"] / counterpart_aml_dict["amount_currency"] if counterpart_aml_dict[
-                                                                                                  "debit"] > 0 else \
+            rate = counterpart_aml_dict["debit"] / counterpart_aml_dict["amount_currency"] if counterpart_aml_dict["debit"] > 0 else \
                 counterpart_aml_dict["credit"] / counterpart_aml_dict["amount_currency"]
         for line in manual_lines:
 

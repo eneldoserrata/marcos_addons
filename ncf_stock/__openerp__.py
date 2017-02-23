@@ -62,7 +62,6 @@
         # 'security/ir.model.access.csv',
         'views/shop_view.xml',
         'views/stock_view.xml',
-        'views/res_partner_view.xml',
         'wizard/stock_return_picking_view.xml',
         'wizard/stock_backorder_confirmation.xml',
     ],
