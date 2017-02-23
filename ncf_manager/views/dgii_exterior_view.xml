@@ -67,6 +67,6 @@
             </field>
         </record>
         <!-- This Menu Item must have a parent and an action -->
-        <menuitem action="ncf_manager_dgii_exterior_report_action" id="ncf_manager_dgii_exterior_report_menu" name="Reporte 609" parent="marcos_account_dgii_flies_menu" sequence="4"/>
+        <menuitem action="ncf_manager_dgii_exterior_report_action" id="ncf_manager_dgii_exterior_report_menu" name="Reporte 609" parent="marcos_account_dgii_file_menu" sequence="4"/>
     </data>
 </openerp>

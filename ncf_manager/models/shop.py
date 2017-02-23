@@ -46,10 +46,9 @@ class ShopJournalConfig(models.Model):
                                  default=lambda s: s.env.user.company_id.id,
                                  string=u"Compañia")
     name = fields.Char("Nombre", size=40, required=True)
-    sale_journal_ids = fields.Many2many("account.journal",
-                                        string=u"Diarios de ventas",
-                                        required=False,
-                                        domain="[('type','=','sale')]")
+
+    journal_id = fields.Many2one("account.journal", string="Diario")
+
     user_ids = fields.Many2many("res.users",
                                 string=u"Usuarios que pueden usar esta sucursal")
 

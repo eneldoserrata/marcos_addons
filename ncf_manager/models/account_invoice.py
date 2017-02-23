@@ -146,18 +146,6 @@ class AccountInvoice(models.Model):
                         {"property_account_position_id":
                          self.fiscal_position_id.id})
 
-                shop_user_config = (
-                    self.env["shop.ncf.config"]. get_user_shop_config())
-
-                return {
-                    "domain":
-                        {"shop_id": [('shop_id', 'in',
-                                      shop_user_config["shop_ids"])],
-                         "journal_id": [('id', 'in',
-                                         shop_user_config["sale_journal_ids"])]
-                         }
-                    }
-
             elif self.type in ('in_invoice', 'in_refund'):
                 if self.partner_id.journal_id:
                     self.journal_id = self.partner_id.journal_id.id
