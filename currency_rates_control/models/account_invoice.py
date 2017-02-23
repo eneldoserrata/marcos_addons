@@ -35,7 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import api, models
+from openerp import api, models, fields
 
 
 class AccountInvoice(models.Model):
@@ -63,3 +63,6 @@ class AccountInvoice(models.Model):
                 rec.is_company_currency = True
             else:
                 rec.is_company_currency = False
+
+    invoice_rate = fields.Monetary(string="Tasa", compute=_get_rate)
+    is_company_currency = fields.Boolean(compute=_is_company_currency)

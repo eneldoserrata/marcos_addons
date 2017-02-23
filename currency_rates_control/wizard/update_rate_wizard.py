@@ -35,7 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from odoo import models, fields, api, exceptions
+from openerp import models, fields, api, exceptions
 
 import requests
 

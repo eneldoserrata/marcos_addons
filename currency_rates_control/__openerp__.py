@@ -24,7 +24,7 @@
 
     # always loaded
     'data': [
-        'views/account_invoice_view.xml',
         'wizard/update_rate_wizard_view.xml',
+        'views/account_invoice_view.xml',
     ],
 }
