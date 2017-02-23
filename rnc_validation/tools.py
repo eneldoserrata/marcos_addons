@@ -503,7 +503,7 @@ def is_identification(value):
         return False
     if len(value) > 0:
         value = value.strip()
-    if (len(value) == 9 or len(value) == 11) and value.isdigit():  # Valida logitud y Valida que solo sean numeros
+    if (len(value) == 9 or len(value) == 11) and value.isdigit():
         num = list(map(int, value))  # convierte string en lista de string
         if len(value) == 11:  # si tiene 11 digitos es una cedula
             if value in excepcionesCedulas:  # valida en el listado
@@ -551,15 +551,16 @@ def is_ncf(value, type):
 
     if len(value) == 19:
         try:
-            if type in ("in_refund","out_refund") and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] == '04' and int(value[11:20]):
+            if type in ("in_refund", "out_refund") and value[0] in ('A', 'P')and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] == '04' and int(value[11:20]):
                 return True
-            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','14','15','11','13') and int(value[11:20]):
+            elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01', '14', '15', '11', '13') and int(value[11:20]):
                 return True
-            elif type == "out_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01','02','14','15','11','13') and int(value[11:20]):
+            elif type == "out_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(value[6:9]) and value[9:11] in ('01', '02', '14', '15', '11', '13') and int(value[11:20]):
                 return True
         except:
             pass
     return False
+
 
 def _internet_on():
     """TODO: fix this check"""

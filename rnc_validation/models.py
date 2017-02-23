@@ -55,9 +55,10 @@ class ResPartner(models.Model):
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
-        res = super(ResPartner, self).name_search(name, args=args, operator=operator, limit=100)
+        res = super(ResPartner, self).name_search(name, args=args,
+                                                  operator=operator, limit=100)
         if not res and name:
-            if len(name) in (9,11):
+            if len(name) in (9, 11):
                 partners = self.search([('vat', '=', name)])
             else:
                 partners = self.search([('vat', 'ilike', name)])
@@ -70,7 +71,8 @@ class ResPartner(models.Model):
     def vat_is_unique(self, fiscal_id):
         partner = self.search([('vat', '=', fiscal_id)])
         if partner:
-            raise exceptions.UserError(u"Ya fue registrada una empresa con este numero de RNC/Cédula")
+            raise exceptions.UserError(
+                u"Ya fue registrada una empresa con este número de RNC/Cédula")
         return False
 
     def get_rnc(self, fiscal_id):
@@ -84,7 +86,8 @@ class ResPartner(models.Model):
         vals = {}
 
         if not len(fiscal_id) in [9, 11]:
-            raise exceptions.ValidationError(u"Debe colocar un numero de RNC/Cedula valido!")
+            raise exceptions.ValidationError(
+                            u"¡Debe colocar un número de RNC/Cédula válido!")
         else:
             if _internet_on():
                 data = self.get_rnc(fiscal_id)
@@ -123,7 +126,8 @@ class ResPartner(models.Model):
             if validation:
                 vals.update(validation)
             else:
-                raise exceptions.UserError(u"El número de RNC/Cédula no es vEalido en la DGII.")
+                raise exceptions.UserError(
+                        u"El número de RNC/Cédula no es válido en la DGII.")
             return super(ResPartner, self).create(vals)
 
     @api.onchange("vat")
@@ -131,7 +135,9 @@ class ResPartner(models.Model):
         if self.vat and not self._context.get("install_mode", False):
             if self.env["account.invoice"].search_count(
                                             [('partner_id', '=', 'self.id')]):
-                raise exceptions.UserError("No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
+                raise exceptions.UserError(
+                        "No puede cambiar el RNC/Cédula ya que este cliente o"
+                        " proveedor tiene facturas.")
             self.check_vals(self.vat)
 
     @api.model
