@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record id="inherit_view_company_inherit_form" model="ir.ui.view">
-            <field name="name">inherit_view_company_inherit_form</field>
-            <field name="model">res.company</field>
-            <field name="inherit_id" ref="account.view_company_inherit_form"/>
-            <field name="arch" type="xml">
-                <field name="tax_calculation_rounding_method" position="after">
-                    <field name="payment_tax_on_606"/>
-                </field>
-            </field>
-        </record>
         <record id="ncf_manager_dgii_purchase_report_form" model="ir.ui.view">
             <field name="name">ncf manager dgii purchase report form</field>
             <field name="model">dgii.purchase.report</field>
@@ -23,8 +13,8 @@
                     <group>
                         <group>
                             <field name="company_id" readonly="[('state','=','done')]"/>
-                            <field name="year" placeholder="2018" required="1"/>
-                            <field name="month" placeholder="12" required="1"/>
+                            <field attrs="{'readonly': [('state','=','done')]}" name="year" placeholder="2018" required="1"/>
+                            <field attrs="{'readonly': [('state','=','done')]}" name="month" placeholder="12" required="1"/>
                             <field filename="txt_name" name="txt"/>
                         </group>
                         <group>

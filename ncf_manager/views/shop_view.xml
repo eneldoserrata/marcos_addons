@@ -1,52 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-
-        <record id="invoice_journal_config_form" model="ir.ui.view">
-            <field name="name">invoice.journal.config.form</field>
-            <field name="model">shop.ncf.config</field>
-            <field name="arch" type="xml">
-                <form string="Manual Invoice Taxes">
-                    <sheet>
-                        <group col="1">
-                            <field name="company_id"/>
-                            <field name="name"/>
-                        </group>
-                        <group col="2">
-                            <field name="sale_journal_ids" widget="many2many_tags"/>
-                            <field name="user_ids"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
-
-        <record id="invoice_journal_config_tree" model="ir.ui.view">
-            <field name="name">invoice.journal.config.tree</field>
-            <field name="model">shop.ncf.config</field>
-            <field name="arch" type="xml">
-                <tree string="Manual Invoice Taxes">
-                    <field name="name"/>
-                </tree>
-            </field>
-        </record>
-
-        <record id="invoice_journal_config_action" model="ir.actions.act_window">
-            <field name="name">Sucursales</field>
-            <field name="res_model">shop.ncf.config</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="invoice_journal_config_tree"/>
-        </record>
-
-        <menuitem id="marcos_account_dgii_menu" name="DGII" parent="account.menu_finance" sequence="5"
-                  groups="account.group_account_user"/>
-
-        <menuitem id="marcos_account_dgii_flies_menu" name="Archivos" parent="marcos_account_dgii_menu" sequence="5"/>
-
-        <menuitem action="invoice_journal_config_action" id="invoice_journal_config_menu"
-                  parent="account.account_management_menu"
-                  groups="account.group_account_user,account.group_account_manager,account.group_account_invoice"/>
-
-    </data>
-</openerp>
+<odoo>
+    <record id="invoice_journal_config_form" model="ir.ui.view">
+        <field name="name">invoice.journal.config.form</field>
+        <field name="model">shop.ncf.config</field>
+        <field name="arch" type="xml">
+            <form string="Comprobantes fiscales">
+                <sheet>
+                    <group col="2">
+                        <field name="company_id"/>
+                        <field name="name"/>
+                        <field name="journal_id"/>
+                    </group>
+                    <group col="6" string="Configuración NCF Consumidor Final">
+                        <field name="final_sequence_id"/>
+                        <field name="final_number_next_actual"/>
+                        <field name="final_max"/>
+                    </group>
+                    <group col="6" string="Configuración NCF para Crédito Fiscal">
+                        <field name="fiscal_sequence_id"/>
+                        <field name="fiscal_number_next_actual"/>
+                        <field name="fiscal_max"/>
+                    </group>
+                    <group col="6" string="Configuración NCF Gubernamentales">
+                        <field name="gov_sequence_id"/>
+                        <field name="gov_number_next_actual"/>
+                        <field name="gov_max"/>
+                    </group>
+                    <group col="6" string="Configuración NCF Regímenes Especiales">
+                        <field name="special_sequence_id"/>
+                        <field name="special_number_next_actual"/>
+                        <field name="special_max"/>
+                    </group>
+                    <group col="6" string="Configuración NCF NC / ND">
+                        <field name="nc_sequence_id"/>
+                        <field name="nc_number_next_actual"/>
+                        <field name="nc_max"/>
+                        <field name="nd_sequence_id"/>
+                        <field name="nd_number_next_actual"/>
+                        <field name="nd_max"/>
+                    </group>
+                    <group string="Usuarios">
+                        <field name="user_ids"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="invoice_journal_config_tree" model="ir.ui.view">
+        <field name="name">invoice.journal.config.tree</field>
+        <field name="model">shop.ncf.config</field>
+        <field name="arch" type="xml">
+            <tree string="Comprobantes Fiscales">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="shop_ncf_config_action" model="ir.actions.act_window">
+        <field name="name">Comprobantes fiscales</field>
+        <field name="res_model">shop.ncf.config</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="invoice_journal_config_tree"/>
+    </record>
+    <menuitem action="shop_ncf_config_action" groups="account.group_account_user,account.group_account_manager,account.group_account_invoice" id="invoice_journal_config_menu" parent="account.account_management_menu"/>
+</odoo>

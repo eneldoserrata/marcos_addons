@@ -38,6 +38,13 @@
 from openerp import models, fields, _
 
 
+class ResCompany(models.Model):
+    _inherit = "res.company"
+
+    payment_tax_on_606 = fields.Boolean("Reportar retenciones del 606 en la"
+                                        " fecha que se reciba el pago")
+
+
 class ResPartner(models.Model):
     _inherit = "res.partner"
 

@@ -10,24 +10,25 @@
                         <button class="oe_highlight" context="{'recreate':True}" name="create_report" states="done" string="Regenerar reporte" type="object"/>
                         <field name="state" widget="statusbar"/>
                     </header>
-                    <!--<group col="2">-->
+                    <group col="3">
                         <group>
-                            <field name="company_id" readonly="[('state','=','done')]"/>
+                            <field groups="base.group_multi_company" name="company_id" readonly="[('state','=','done')]"/>
                             <field name="year" placeholder="2018" required="1"/>
                             <field name="month" placeholder="12" required="1"/>
+                            <field name="CANTIDAD_REGISTRO" readonly="1"/>
                             <field name="ITBIS_TOTAL" readonly="1"/>
                             <field name="TOTAL_MONTO_FACTURADO" readonly="1"/>
                             <field filename="txt_name" name="txt"/>
                         </group>
-                        <!--<group>-->
-                            <!--<field name="TOTAL_MONTO_FACTURAS"/>-->
-                            <!--<field name="ITBIS_TOTAL_FACTURAS"/>-->
-                            <!--<field name="TOTAL_MONTO_NC"/>-->
-                            <!--<field name="ITBIS_TOTAL_NC"/>-->
-                            <!--<field name="TOTAL_VENTA"/>-->
-                            <!--<field name="TOTAL_VENTA_ITBIS"/>-->
-                        <!--</group>-->
-                    <!--</group>-->
+                        <group>
+                            <field name="TOTAL_MONTO_FACTURAS"/>
+                            <field name="ITBIS_TOTAL_FACTURAS"/>
+                            <field name="TOTAL_MONTO_NC"/>
+                            <field name="ITBIS_TOTAL_NC"/>
+                            <field name="TOTAL_VENTA"/>
+                            <field name="TOTAL_VENTA_ITBIS"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page string="Detalle">
                             <field name="report_lines" readonly="1">

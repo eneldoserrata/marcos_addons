@@ -43,27 +43,16 @@ class AccountJournal(models.Model):
 
     purchase_type = fields.Selection(
         [("normal", u"Requiere NCF"),
-         ("minor", u"Gasto Menor"),
-         ("informal", u"Proveedores Informales"),
-         ("exterior", u"Pagos al Exterior"),
-         ("import", u"Importaciones"),
-         ("others", u"Otros"),
-         ], string=u"Tipo de compra", default="normal"
+         ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
+         ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),
+         ("exterior", u"Pagos al Exterior. NCF Generado por el Sistema"),
+         ("import", u"Importaciones. NCF Generado por el Sistema"),
+         ("others", u"Otros. No requiere NCF")],
+        string=u"Tipo de Compra", default="normal",
          )
 
     ncf_control = fields.Boolean("Control de NCF")
     ncf_remote_validation = fields.Boolean(u"Validar con DGII", default=True)
-
-    final_sequence_id = fields.Many2one(
-        "ir.sequence", string=u"Secuencia para consumidor final")
-    fiscal_sequence_id = fields.Many2one(
-        "ir.sequence", string=u"Secuencia para crédito fiscal")
-    gov_sequence_id = fields.Many2one(
-        "ir.sequence", string=u"Secuencia gubernamental")
-    special_sequence_id = fields.Many2one(
-        "ir.sequence", string=u"Secuencia para regímenes especiales")
-    unique_sequence_id = fields.Many2one(
-        "ir.sequence", string=u"Secuencia para único ingreso")
 
 
 class AccountFiscalPosition(models.Model):
@@ -71,13 +60,14 @@ class AccountFiscalPosition(models.Model):
 
     supplier = fields.Boolean("Para proveedores")
 
-    client_fiscal_type = fields.Selection([
-        ("final", u"Consumidor final"),
-        ("fiscal", u"Para Crédito Fiscal"),
-        ("gov", u"Gubernamental"),
-        ("special", u"Regímenes Especiales"),
-        ("unico", u"Único Ingreso")
-        ], string="Tipo de Comprobante")
+    sale_fiscal_type = fields.Selection(
+        [("final", u"Consumidor final"),
+         ("fiscal", u"Para Crédito Fiscal"),
+         ("gov", u"Gubernamental"),
+         ("special", u"Regímenes Especiales"),
+         ("unico", u"Único Ingreso")],
+        string="Tipo de Comprobante"
+        )
 
     journal_id = fields.Many2one(
         "account.journal", string="Diario de Compras",
@@ -87,10 +77,11 @@ class AccountFiscalPosition(models.Model):
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    purchase_tax_type = fields.Selection([
-        ('itbis', 'ITBIS Pagado'),
-        ('ritbis', 'ITBIS Retenido'),
-        ('isr', 'ISR Retenido'),
-        ('cost', 'Forma Parte del Gasto'),
-        ('none', 'No Deducible')
-        ], default="itbis", string="Tipo de Impuesto de Compra")
+    purchase_tax_type = fields.Selection(
+        [('itbis', 'ITBIS Pagado'),
+         ('ritbis', 'ITBIS Retenido'),
+         ('isr', 'ISR Retenido'),
+         ('cost', 'Forma Parte del Gasto'),
+         ('none', 'No Deducible')],
+        default="itbis", string="Tipo de Impuesto de Compra"
+        )

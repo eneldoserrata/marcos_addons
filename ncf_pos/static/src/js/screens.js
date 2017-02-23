@@ -20,7 +20,7 @@ odoo.define('ncf_pos.screens', function(require) {
                 return "La orden no tiene tipo de comprobante asignada.";
             }
 
-            if (order.fiscal_position.client_fiscal_type != 'final' && !client.vat) {
+            if (order.fiscal_position.sale_fiscal_type != 'final' && !client.vat) {
                 return "La posicion fiscal del cliente seleccionado requiere RNC/Cédula. Acceda al cliente y agregue esta informacion";
 
             } else {

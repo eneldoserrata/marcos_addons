@@ -122,7 +122,7 @@ class DgiiSaleReport(models.Model):
         line_number = 1
         for inv in invoices:
             LINE = line_number
-            if inv.fiscal_position_id.client_fiscal_type == "final":
+            if inv.fiscal_position_id.sale_fiscal_type == "final":
                 RNC_CEDULA = ""
                 TIPO_IDENTIFICACION = "3"
             else:

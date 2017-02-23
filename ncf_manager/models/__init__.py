@@ -34,14 +34,14 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-import shop
-import account
-import account_invoice
-import dgii_purchase
-import dgii_sale
-import res_partner
-import dgii_cancel
-import dgii_exterior
-import account_move
-import number_to_word
-import account_payment
+from . import shop
+from . import account
+from . import account_invoice
+from . import dgii_purchase
+from . import dgii_sale
+from . import res
+from . import dgii_cancel
+from . import dgii_exterior
+from . import account_move
+from . import number_to_word
+from . import account_payment

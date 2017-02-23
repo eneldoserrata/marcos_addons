@@ -23,7 +23,7 @@ odoo.define('ncf_pos.models', function (require) {
                         if (fiscal_position.id === client.property_account_position_id[0]) {
                             self.fiscal_position = fiscal_position;
                         }
-                    } else if (fiscal_position.client_fiscal_type === "final") {
+                    } else if (fiscal_position.sale_fiscal_type === "final") {
                         self.fiscal_position = fiscal_position;
                     }
                 });

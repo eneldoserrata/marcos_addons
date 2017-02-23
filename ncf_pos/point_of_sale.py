@@ -151,13 +151,13 @@ class PosOrder(models.Model):
             self._cr.commit()
 
         res.update({"ncf": order_id.invoice_id.number})
-        if order_id.invoice_id.fiscal_position_id.client_fiscal_type == "fiscal":
+        if order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "fiscal":
             res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA CON VALOR FISCAL"})
-        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "final":
+        elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "final":
             res.update({"fiscal_type": "final", "fiscal_type_name": "FACTURA PARA CONSUMIDOR FINAL"})
-        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "gov":
+        elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "gov":
             res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA GUBERNAMENTAL"})
-        elif order_id.invoice_id.fiscal_position_id.client_fiscal_type == "special":
+        elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "special":
             res.update({"fiscal_type": "special", "fiscal_type_name": "FACTURA PARA REGIMENES ESPECIALES"})
 
         return res

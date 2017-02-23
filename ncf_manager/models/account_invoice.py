@@ -48,54 +48,41 @@ class AccountInvoice(models.Model):
 
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
-        return shop_user_config["shop_ids"][0]
+        return shop_user_config
 
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
                               required=False, default=_default_user_shop)
 
     ncf_required = fields.Boolean(copy=True)
 
-    client_fiscal_type = fields.Selection(
-                            related="fiscal_position_id.client_fiscal_type")
+    sale_fiscal_type = fields.Selection(
+                            related="fiscal_position_id.sale_fiscal_type")
 
-    expense_type = fields.Selection([
-        ('01', u'01 - Gastos de Personal'),
-        ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
-        ('03', u'03 - Arrendamientos'),
-        ('04', u'04 - Gastos de Activos Fijos'),
-        ('05', u'05 - Gastos de Representación'),
-        ('06', u'06 - Otras Deducciones Admitidas'),
-        ('07', u'07 - Gastos Financieros'),
-        ('08', u'08 - Gastos Extraordinarios'),
-        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
-        ('10', u'10 - Adquisiciones de Activos'),
-        ('11', u'11 - Gastos de Seguro'),
-        ], string=u"Tipo de gasto")
+    expense_type = fields.Selection(
+        [('01', u'01 - Gastos de Personal'),
+         ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
+         ('03', u'03 - Arrendamientos'),
+         ('04', u'04 - Gastos de Activos Fijos'),
+         ('05', u'05 - Gastos de Representación'),
+         ('06', u'06 - Otras Deducciones Admitidas'),
+         ('07', u'07 - Gastos Financieros'),
+         ('08', u'08 - Gastos Extraordinarios'),
+         ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
+         ('10', u'10 - Adquisiciones de Activos'),
+         ('11', u'11 - Gastos de Seguro')],
+        string=u"Tipo de gasto")
 
-    purchase_type = fields.Selection(
-        [("normal", u"Requiere NCF"),
-         ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
-         ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),
-         ("exterior", u"Pagos al Exterior. NCF Generado por el Sistema"),
-         ("import", u"Importaciones. NCF Generado por el Sistema"),
-         ("others", u"Otros. No requiere NCF"),
-         ], string=u"Tipo de compra", default="normal",
-        related="journal_id.purchase_type"
-        )
+    purchase_type = fields.Selection(related="journal_id.purchase_type")
 
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,
                              states={'draft': [('readonly', False)]},
                              copy=False)
+
     charge_to = fields.Many2one("res.partner", string="Facturar a",
                                 readonly=True,
                                 states={'draft': [('readonly', False)]},
                                 copy=False)
-    _sql_constraints = [
-        ('number_uniq',
-         'unique(number, company_id, journal_id, type, partner_id)',
-         'Invoice Number must be unique per Company!'),
-        ]
 
     @api.onchange("move_name")
     def onchange_ncf(self):
@@ -115,10 +102,6 @@ class AccountInvoice(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
-        if self.journal_id:
-            self.currency_id = (self.journal_id.currency_id.id or
-                                self.journal_id.company_id.currency_id.id)
-
         if self.type in ('in_invoice', 'in_refund'):
             if self.purchase_type == "normal":
                 self.ncf_required = True
@@ -190,10 +173,6 @@ class AccountInvoice(models.Model):
                    self.partner_id.property_account_position_supplier_id.id !=
                    self.fiscal_position_id.id):
                         self.journal_id = self.fiscal_position_id.journal_id.id
-                    # self.partner_id.write(
-                    #     {"property_account_position_supplier_id":
-                    #      self.fiscal_position_id.id}
-                    #      )
 
     def _check_ncf(self, rnc, ncf):
         if ncf and rnc:
@@ -267,7 +246,7 @@ class AccountInvoice(models.Model):
                     if not vals.get("fiscal_position_id", False):
                         if not rec.fiscal_position_id:
                             fiscal_position_id = rec.env["account.fiscal.position"].search(
-                                [('client_fiscal_type', '=', 'final')])
+                                [('sale_fiscal_type', '=', 'final')])
                             if not fiscal_position_id:
                                 raise exceptions.ValidationError(
                                     "Antes de generar una factura debe definir"
@@ -289,45 +268,3 @@ class AccountInvoice(models.Model):
             raise exceptions.UserError(u"¡No está permitido duplicar Notas de"
                                        u" Crédito!")
         return super(AccountInvoice, self).copy(default=default)
-
-    @api.multi
-    def set_ncf(self):
-        for inv in self:
-            if (inv.type == 'out_invoice' and not inv.move_name and
-               inv.journal_id.ncf_control):
-                fiscal_type = inv.fiscal_position_id.client_fiscal_type
-                if fiscal_type == 'fiscal':
-                    sequence = inv.journal_id.fiscal_sequence_id
-                elif fiscal_type == 'gov':
-                    sequence = inv.journal_id.gov_sequence_id
-                elif fiscal_type == 'special':
-                    sequence = inv.journal_id.special_sequence_id
-                elif fiscal_type == 'unico':
-                    sequence = inv.journal_id.unique_sequence_id
-                else:
-                    sequence = inv.journal_id.final_sequence_id
-
-                if not sequence:
-                    raise exceptions.ValidationError(
-                        u"Las secuencias para este diario de ventas no están"
-                        " configuradas.")
-
-                next_ncf = True
-                while next_ncf:
-                    ncf_next = sequence.with_context(
-                        ir_sequence_date=inv.date_invoice).next_by_id()
-                    if not self.search_count([('number', '=', ncf_next),
-                                             ('journal_id', '=',
-                                              self.journal_id.id)]):
-                        _logger.info(
-                            u"El Sistema Saltó el Número {} del Diario {}"
-                            " porque ya Existe desde Contabilidad".format(
-                             ncf_next, self.journal_id.name))
-                        next_ncf = False
-                inv.move_name = ncf_next
-
-
-class AccountInvoiceTax(models.Model):
-    _inherit = "account.invoice.tax"
-
-    amount = fields.Float(digits=(12, 6))

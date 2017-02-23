@@ -61,7 +61,7 @@ class AccountInvoice(models.Model):
         if self.state in ['open', 'paid'] and self.fiscal_nif == "false":
             invoice_dict["ncf"] = self.number
 
-            ncf_type = self.fiscal_position_id.client_fiscal_type
+            ncf_type = self.fiscal_position_id.sale_fiscal_type
 
             if self.type == "out_invoice":
                 if ncf_type == "gov":
@@ -71,7 +71,7 @@ class AccountInvoice(models.Model):
                     if not invoice_dict["type"]:
                         invoice_dict["type"] = "final"
             elif self.type == "out_refund":
-                ncf_type = self.fiscal_position_id.client_fiscal_type or "final"
+                ncf_type = self.fiscal_position_id.sale_fiscal_type or "final"
                 invoice_dict["reference_ncf"] = self.origin
                 if ncf_type == "final":
                     invoice_dict["type"] = "final_note"

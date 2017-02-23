@@ -45,18 +45,40 @@ class AccountMove(models.Model):
     @api.multi
     def post(self):
         invoice = self._context.get('invoice', False)
+        self._post_validate()
+        sale_fiscal_type = invoice.fiscal_position_id.sale_fiscal_type
+        ncf_control = invoice.journal_id.ncf_control
+
         if invoice:
             if invoice.amount_total == 0:
                 raise ValidationError(
-                    u"¡No puede grabar una factura con valor 0!")
-            if invoice.type in ('out_invoice', 'out_refund'):
-                fiscal_position = invoice.fiscal_position_id.client_fiscal_type
-                ncf_control = invoice.journal_id.ncf_control
-                if fiscal_position is not False and ncf_control is True:
-                    if (fiscal_position != 'final' and
-                       not invoice.partner_id.vat):
-                        raise ValidationError(
-                            u"Para este tipo de posición fiscal el Contacto"
-                            " debe de tener un RNC establecido!")
-                invoice.set_ncf()
+                    u"¡No puede validar una factura con valor 0!")
+            if invoice.type in ('out_invoice', 'out_refund') and ncf_control is True:
+                if not sale_fiscal_type:
+                    raise ValidationError(
+                        u"Debe especificar el tipo de comprobante para la"
+                        " venta.")
+                if (sale_fiscal_type != 'final' and
+                   not invoice.partner_id.vat):
+                    raise ValidationError(
+                        u"Para este tipo de posición fiscal el Contacto"
+                        " debe de tener un RNC establecido!")
+
+                if not invoice.move_name:
+                    if invoice.type == "out_refund":
+                        sequence = invoice.shop_id.nc_sequence_id
+                    elif sale_fiscal_type == "final":
+                        sequence = invoice.shop_id.final_sequence_id
+                    elif sale_fiscal_type == "fiscal":
+                        sequence = invoice.shop_id.fiscal_sequence_id
+                    elif sale_fiscal_type == "gov":
+                        sequence = invoice.shop_id.gov_sequence_id
+                    elif sale_fiscal_type == "special":
+                        sequence = invoice.shop_id.special_sequence_id
+
+                    invoice.shop_id.check_max(sale_fiscal_type,
+                                              invoice)
+                    invoice.move_name = sequence.with_context(
+                            ir_sequence_date=invoice.date_invoice).next_by_id()
+                    invoice.reference = invoice.journal_id.sequence_id.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
         return super(AccountMove, self).post()
