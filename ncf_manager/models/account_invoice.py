@@ -329,7 +329,6 @@ class AccountInvoice(models.Model):
                         else:
                             vals.update({"fiscal_position_id":
                                         fiscal_position_id.id})
-
             if rec.type in ("in_invoice", "in_refund"):
                 if vals.get("purchase_type", False) == "minor":
                     vals.update({"partner_id":
