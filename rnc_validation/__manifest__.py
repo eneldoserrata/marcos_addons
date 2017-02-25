@@ -69,5 +69,6 @@
     ],
     "price": 200,
     'currency': 'EUR',
-    'license': "Other proprietary"
+    'license': "Other proprietary",
+    'installable': False
 }
