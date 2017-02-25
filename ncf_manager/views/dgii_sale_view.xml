@@ -19,16 +19,15 @@
                             <field name="ITBIS_TOTAL" readonly="1"/>
                             <field name="TOTAL_MONTO_FACTURADO" readonly="1"/>
                             <field filename="txt_name" name="txt"/>
-                        </group>
-                        <group>
-                            <field name="TOTAL_MONTO_FACTURAS"/>
-                            <field name="ITBIS_TOTAL_FACTURAS"/>
-                            <field name="TOTAL_MONTO_NC"/>
-                            <field name="ITBIS_TOTAL_NC"/>
-                            <field name="TOTAL_VENTA"/>
-                            <field name="TOTAL_VENTA_ITBIS"/>
-                        </group>
-                    </group>
+                        <!--<group>-->
+                            <!--<field name="TOTAL_MONTO_FACTURAS"/>-->
+                            <!--<field name="ITBIS_TOTAL_FACTURAS"/>-->
+                            <!--<field name="TOTAL_MONTO_NC"/>-->
+                            <!--<field name="ITBIS_TOTAL_NC"/>-->
+                            <!--<field name="TOTAL_VENTA"/>-->
+                            <!--<field name="TOTAL_VENTA_ITBIS"/>-->
+                        <!--</group>-->
+                    <!--</group>-->
                     <notebook>
                         <page string="Detalle">
                             <field name="report_lines" readonly="1">

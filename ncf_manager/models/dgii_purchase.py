@@ -164,6 +164,7 @@ class DgiiPurchaseReport(models.Model):
                                            u" proveedor {} no es válido"
                                            " para el NCF {}".format(
                                             inv.partner_id.name, inv.number))
+
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
             TIPO_BIENES_SERVICIOS_COMPRADOS = (
@@ -186,11 +187,14 @@ class DgiiPurchaseReport(models.Model):
             if inv.type == "in_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "in_refund":
-                affected_invoice_id = self.env["account.invoice"].search([('number', '=', inv.origin),('partner_id','=',inv.partner_id.id)])
-                if not len(affected_invoice_id) == 1 and affected_invoice_id:
-                    raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_invoice_id]))
-                elif not affected_invoice_id:
-                    raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_invoice_id.number)
+                affected_nvoice_id = self.env["account.invoice"].search(
+                        [('number', '=', inv.origin),
+                         ('partner_id', '=', inv.partner_id.id)]
+                         )
+                if not len(affected_nvoice_id) == 1 and affected_nvoice_id:
+                    raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_nvoice_id]))
+                elif not affected_nvoice_id:
+                    raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_nvoice_id.number)
                 else:
                     affected_invoice_id = affected_invoice_id.id
 
@@ -202,27 +206,25 @@ class DgiiPurchaseReport(models.Model):
                 FECHA_PAGO = max(inv.payment_move_line_ids).date
             else:
                 FECHA_PAGO = False
+            lines.append(
+                (0, False,
+                 {"LINE": LINE,
+                  "invoice_id": inv.id,
+                  "RNC_CEDULA": RNC_CEDULA,
+                  "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
+                  "TIPO_BIENES_SERVICIOS_COMPRADOS": TIPO_BIENES_SERVICIOS_COMPRADOS,
+                  "NUMERO_COMPROBANTE_FISCAL": NUMERO_COMPROBANTE_FISCAL,
+                  "NUMERO_COMPROBANTE_MODIFICADO": NUMERO_COMPROBANTE_MODIFICADO,
+                  "affected_nvoice_id": affected_nvoice_id,
+                  "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
+                  "FECHA_PAGO": FECHA_PAGO,
+                  "ITBIS_FACTURADO": LINE_ITBIS_TOTAL,
+                  "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
+                  "MONTO_FACTURADO": (inv.amount_untaxed + LINE_TAX_COST) * CURRENCY_RATE,
+                  "RETENCION_RENTA": LINE_RETENCION_RENTA}
+                 ))
 
-            lines.append((0, False,
-                          {"LINE": LINE,
-                           "RNC_CEDULA": RNC_CEDULA,
-                           "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
-                           "TIPO_BIENES_SERVICIOS_COMPRADOS":
-                           TIPO_BIENES_SERVICIOS_COMPRADOS,
-                           "NUMERO_COMPROBANTE_FISCAL":
-                           NUMERO_COMPROBANTE_FISCAL,
-                           "NUMERO_COMPROBANTE_MODIFICADO":
-                           NUMERO_COMPROBANTE_MODIFICADO,
-                           "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
-                           "FECHA_PAGO": FECHA_PAGO,
-                           "ITBIS_FACTURADO": LINE_ITBIS_TOTAL,
-                           "ITBIS_RETENIDO": abs(LINE_ITBIS_RETENIDO),
-                           "MONTO_FACTURADO": (inv.amount_untaxed +
-                                               LINE_TAX_COST) * CURRENCY_RATE,
-                           "RETENCION_RENTA": LINE_RETENCION_RENTA}))
-
-        self.write(
-                   {"report_lines": lines,
+        self.write({"report_lines": lines,
                     "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
                     "ITBIS_RETENIDO": abs(ITBIS_RETENIDO),
                     "ITBIS_TOTAL": ITBIS_TOTAL,
@@ -319,7 +321,6 @@ class DgiiPurchaseReport(models.Model):
                  ('reconciled', '=', True),
                  ('type', 'in', ('in_invoice', 'in_refund'))]
                  )
-
             for inv_paid in paid_in_period_with_retention_invoices:
                 account_ids = [move_id.account_id.id for move_id in inv_paid.move_id.line_ids]
                 for account in account_ids:
