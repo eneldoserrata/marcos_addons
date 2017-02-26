@@ -126,7 +126,7 @@ class AccountInvoice(models.Model):
                                  'account.invoice').partner_id.id)
                     self.ncf_required = False
 
-    @api.onchange('partner_id', 'company_id')
+    @api.onchange('partner_id')
     def _onchange_partner_id(self):
         super(AccountInvoice, self)._onchange_partner_id()
         if self.type in ("in_invoice", "in_refund"):

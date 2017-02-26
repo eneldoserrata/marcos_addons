@@ -45,19 +45,23 @@ class ShopJournalConfig(models.Model):
     company_id = fields.Many2one("res.company", required=True,
                                  default=lambda s: s.env.user.company_id.id,
                                  string=u"Compañia")
-    name = fields.Char("Nombre", size=40, required=True)
+    name = fields.Char("Sucursal", size=40, required=True)
 
     journal_id = fields.Many2one("account.journal", string="Diario")
 
     user_ids = fields.Many2many("res.users",
                                 string=u"Usuarios que pueden usar esta sucursal")
 
-    _sql_constraints = [('shop_ncf_config_name_uniq', 'unique(name)',
-                         u'El nombre de la sucursal debe de ser único!')]
+    _sql_constraints = [
+                        ('shop_ncf_config_name_uniq',
+                         'unique(name, company_id)',
+                         u'¡El nombre de la sucursal debe de ser único!')
+                        ]
 
     # #### VARIABLES DE CONFIGURACION DE LOS COMPROBANTES FISCALES ####
 
     # SECUENCIA FINAL
+    final_active = fields.Boolean("Activo")
     final_sequence_id = fields.Many2one("ir.sequence",
                                         string=u"Secuencia")
     final_number_next_actual = fields.Integer(
@@ -66,6 +70,7 @@ class ShopJournalConfig(models.Model):
     final_max = fields.Integer(string=u"Número Máximo")
 
     # SECUENCIA FISCAL
+    fiscal_active = fields.Boolean("Activo")
     fiscal_sequence_id = fields.Many2one("ir.sequence",
                                          string=u"Secuencia")
     fiscal_number_next_actual = fields.Integer(
@@ -74,6 +79,7 @@ class ShopJournalConfig(models.Model):
     fiscal_max = fields.Integer(string=u"Número Máximo")
 
     # SECUENCIA GUBERNAMENTAL
+    gov_active = fields.Boolean("Activo")
     gov_sequence_id = fields.Many2one("ir.sequence",
                                       string=u"Secuencia")
     gov_number_next_actual = fields.Integer(
@@ -82,6 +88,7 @@ class ShopJournalConfig(models.Model):
     gov_max = fields.Integer(string=u"Número Máximo")
 
     # SECUENCIA ESPECIAL
+    special_active = fields.Boolean("Activo")
     special_sequence_id = fields.Many2one("ir.sequence",
                                           string=u"Secuencia")
     special_number_next_actual = fields.Integer(
@@ -105,19 +112,34 @@ class ShopJournalConfig(models.Model):
                             related="nd_sequence_id.number_next_actual")
     nd_max = fields.Integer(string=u"Número Máximo")
 
+    # SECUENCIA ÚNICA
+    unico_active = fields.Boolean("Activo")
+    unico_sequence_id = fields.Many2one("ir.sequence", string=u"Especiales")
+    unico_number_next_actual = fields.Integer(
+                            string=u"Próximo número",
+                            related="unico_sequence_id.number_next_actual")
+    unico_max = fields.Integer(string=u"Número máximo")
+
     @api.model
     def get_user_shop_config(self):
-
         user_shops = self.search([('user_ids', '=', self._uid)])
         if not user_shops:
             raise exceptions.UserError("Su usuario no tiene una sucursal"
                                        " asignada.")
-
         return user_shops[0]
 
     @api.model
-    def setup_ncf(self):
+    def setup_ncf(self, name=False, company_id=False, journal_id=False,
+                  user_id=False):
         self.env["account.fiscal.position"].search([]).unlink()
+
+        name = name or u"A01001001"
+        company_id = company_id or self.env.user.company_id.id
+
+        journal_id = journal_id or 1
+        self.env["account.journal"].sudo().browse(journal_id).write(
+                                                        {"ncf_control": True})
+        user_id = user_id or 1
 
         fiscal_prefix = u"A0100100101"
         final_prefix = u"A0100100102"
@@ -125,21 +147,22 @@ class ShopJournalConfig(models.Model):
         nc_prefix = u"A0100100104"
         esp_prefix = u"A0100100114"
         gov_prefix = u"A0100100115"
+        unico_prefix = u"A0100100112"
 
-        if not self.search([]):
-            shop = self.create({"name": "Principal",
-                                "journal_id": 1,
-                                "user_ids": [(4, 1, False)],
-                                "final_account_id": 115,
-                                "fiscal_account_id": 115,
-                                "gov_account_id": 115,
-                                "special_account_id": 115,
-                                "final_max": 100,
-                                "fiscal_max": 100,
-                                "gov_max": 100,
-                                "special_max": 100,
-                                "nc_max": 100,
-                                "nd_max": 100
+        if self.search_count(
+                [('company_id', '=', company_id), ('name', '=', name)]
+                ) == 0:
+            shop = self.create({"name": name,
+                                "journal_id": journal_id,
+                                "user_ids": [(4, user_id, False)],
+                                "company_id": company_id,
+                                u'final_max': 10000000,
+                                u'fiscal_max': 10000000,
+                                u'gov_max': 10000000,
+                                u'special_max': 10000000,
+                                u'nc_max': 10000000,
+                                u'nd_max': 10000000,
+                                u'unico_max': 10000000
                                 })
 
             seq_values = {u'padding': 8,
@@ -159,35 +182,42 @@ class ShopJournalConfig(models.Model):
             sale_journal.ncf_control = True
 
             seq_values["prefix"] = final_prefix
-            seq_values["name"] = "Facturas para Consumidores Finales"
+            seq_values["name"] = "Facturas para Consumidores Finales {}".format(name)
             final_id = self.env["ir.sequence"].create(seq_values)
             shop.final_sequence_id = final_id.id
 
             seq_values["prefix"] = fiscal_prefix
-            seq_values["name"] = "Facturas con Valor Fiscal"
+            seq_values["name"] = "Facturas con Valor Fiscal {}".format(name)
             fiscal_id = self.env["ir.sequence"].create(seq_values)
             shop.fiscal_sequence_id = fiscal_id.id
 
             seq_values["prefix"] = gov_prefix
-            seq_values["name"] = "Facturas Gubernamentales"
+            seq_values["name"] = "Facturas Gubernamentales {}".format(name)
             gov_id = self.env["ir.sequence"].create(seq_values)
             shop.gov_sequence_id = gov_id.id
 
             seq_values["prefix"] = esp_prefix
-            seq_values["name"] = u"Facturas de Regímenes Especiales"
+            seq_values["name"] = u"Facturas de Regímenes Especiales {}".format(name)
             esp_id = self.env["ir.sequence"].create(seq_values)
             shop.special_sequence_id = esp_id.id
 
             seq_values["prefix"] = nc_prefix
-            seq_values["name"] = u"Notas de Crédito"
+            seq_values["name"] = u"Notas de Crédito {}".format(name)
             nc_id = self.env["ir.sequence"].create(seq_values)
             shop.refund_sequence_id = nc_id.id
             shop.nc_sequence_id = nc_id.id
 
             seq_values["prefix"] = nd_prefix
-            seq_values["name"] = u"Notas de Débito"
+            seq_values["name"] = u"Notas de Débito {}".format(name)
             nd_id = self.env["ir.sequence"].create(seq_values)
             shop.nd_sequence_id = nd_id.id
+
+            seq_values["prefix"] = unico_prefix
+            seq_values["name"] = u"Facturas de Único Ingreso {}".format(name)
+            unico_id = self.env["ir.sequence"].create(seq_values)
+            shop.unico_sequence_id = unico_id.id
+
+            return shop
 
     def check_max(self, sale_fiscal_type, invoice):
         message = False
@@ -223,10 +253,4 @@ class ShopJournalConfig(models.Model):
             u" más NCF para esta sucursal".format(self.name)
 
         if message:
-            mail_details = {'subject': "NCF casi Agotados",
-                            'body': message,
-                            'partner_ids': [user.id for user in self.user_ids]
-                            }
-
-            invoice.message_post(type="notification", subtype="mt_comment",
-                                 **mail_details)
+            invoice.message_post(body=message)
