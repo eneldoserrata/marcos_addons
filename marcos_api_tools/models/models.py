@@ -91,14 +91,12 @@ class MarcosApiTools(models.Model):
                     res = requests.get(
                         '{}/ncf/{}/{}'.format(request_params[1], invoice.partner_id.vat, invoice.move_name),
                         proxies=request_params[2])
-                    if res.status_code == 200 and res.json().get("valid", False):
+                    if res.status_code == 200 and not res.json().get("valid", False) == True:
                         return (500, u"Ncf invalido", u"El numero de comprobante fiscal no es valido! "
                                                       u"no paso la validacion en DGII, Verifique que el NCF y el RNC del "
                                                       u"proveedor esten correctamente digitados, si es de proveedor informal o de "
                                                       u"gasto menor vefifique si debe solicitar nuevos numero.")
 
-                else:
-                    return request_params
 
         return True
 
