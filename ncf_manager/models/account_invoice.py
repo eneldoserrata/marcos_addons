@@ -129,9 +129,11 @@ class AccountInvoice(models.Model):
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         super(AccountInvoice, self)._onchange_partner_id()
-        if self.type in ("in_invoice", "in_refund"):
-            self.fiscal_position_id = (
-                self.partner_id.property_account_position_supplier_id.id)
+        if self.partner_id:
+            if self.type in ('out_invoice', 'out_refund'):
+                self.sale_fiscal_type = self.fiscal_position_id.sale_fiscal_type
+            elif self.type in ("in_invoice", "in_refund"):
+                self.fiscal_position_id = self.partner_id.property_account_position_supplier_id.id
 
     @api.onchange("payment_term_id")
     def onchange_payment_term_id(self):

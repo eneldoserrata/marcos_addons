@@ -48,9 +48,6 @@ class ResCompany(models.Model):
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    journal_id = fields.Many2one("account.journal", "Diario de compra",
-                                 domain=[('type', '=', 'purchase')]
-                                 )
     property_account_position_supplier_id = fields.Many2one(
         'account.fiscal.position', company_dependent=True,
         string=_(u"Posición Fiscal de Proveedor"),

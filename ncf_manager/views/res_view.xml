@@ -16,9 +16,8 @@
         <field name="inherit_id" ref="account.view_partner_property_form"/>
         <field name="arch" type="xml">
             <field name="property_account_position_id" position="replace">
-                <field attrs="{'domain': [('supplier','=',False)]}" name="property_account_position_id" string="Posición fiscal cliente"/>
+                <field attrs="{'domain': [('supplier','=',False)]}" name="property_account_position_id"/>
                 <field attrs="{'domain': [('supplier','=',True)]}" name="property_account_position_supplier_id"/>
-                <field name="journal_id"/>
             </field>
         </field>
     </record>
