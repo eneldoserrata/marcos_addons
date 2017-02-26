@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-        <record id="inherit_view_company_inherit_form" model="ir.ui.view">
-            <field name="name">inherit_view_company_inherit_form</field>
-            <field name="model">res.company</field>
-            <field name="inherit_id" ref="account.view_company_inherit_form"/>
-            <field name="arch" type="xml">
-                <field name="tax_calculation_rounding_method" position="after">
-                    <field name="payment_tax_on_606"/>
-                </field>
+<odoo>
+    <record id="inherit_view_company_inherit_form" model="ir.ui.view">
+        <field name="name">inherit_view_company_inherit_form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="account.view_company_inherit_form"/>
+        <field name="arch" type="xml">
+            <field name="tax_calculation_rounding_method" position="after">
+                <field name="payment_tax_on_606"/>
             </field>
-        </record>
-        <record id="ncf_manager_view_partner_property_form" model="ir.ui.view">
-            <field name="name">ncf_manager_customer.form.inherit.payment.order</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="account.view_partner_property_form"/>
-            <field name="arch" type="xml">
-                <field name="property_account_position_id" position="replace">
-                    <field attrs="{'domain': [('supplier','=',False)]}" name="property_account_position_id" string="Posición fiscal cliente"/>
-                    <field attrs="{'domain': [('supplier','=',True)]}" name="property_account_position_supplier_id"/>
-                    <field name="journal_id"/>
-                </field>
+        </field>
+    </record>
+    <record id="ncf_manager_view_partner_property_form" model="ir.ui.view">
+        <field name="name">ncf_manager_customer.form.inherit.payment.order</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <field name="property_account_position_id" position="replace">
+                <field attrs="{'domain': [('supplier','=',False)]}" name="property_account_position_id" string="Posición fiscal cliente"/>
+                <field attrs="{'domain': [('supplier','=',True)]}" name="property_account_position_supplier_id"/>
+                <field name="journal_id"/>
             </field>
-        </record>
-        <record id="ncf_manager_res_partner_form" model="ir.ui.view">
-            <field name="name">ncf manager res partner form</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="base.view_partner_form"/>
-            <field name="arch" type="xml">
-                <field name="parent_id" position="after">
-                    <field name="vat" placeholder="RNC/Cédula" string="RNC/Cédula"/>
-                    <!--attrs="{'required':[('company_type','=','company')], 'invisible':[('company_type','!=','company')]}"-->
-                </field>
+        </field>
+    </record>
+    <record id="ncf_manager_res_partner_form" model="ir.ui.view">
+        <field name="name">ncf manager res partner form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="parent_id" position="after">
+                <field name="vat" placeholder="RNC/Cédula" string="RNC/Cédula"/>
+                <!--attrs="{'required':[('company_type','=','company')], 'invisible':[('company_type','!=','company')]}"-->
             </field>
-        </record>
-    </data>
-</openerp>
+        </field>
+    </record>
+</odoo>
