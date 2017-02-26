@@ -41,7 +41,7 @@ from openerp import models, fields
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    purchase_type = fields.Selection(
+    purchase_fiscal_type = fields.Selection(
         [("normal", u"Requiere NCF"),
          ("minor", u"Gasto Menor. NCF Generado por el Sistema"),
          ("informal", u"Proveedores Informales. NCF Generado por el Sistema"),

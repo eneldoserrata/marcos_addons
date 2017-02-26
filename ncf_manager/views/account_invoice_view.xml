@@ -44,8 +44,8 @@
             </xpath>
             <field name="fiscal_position_id" position="replace"/>
             <field name="partner_id" position="replace">
-                <field name="purchase_type" readonly="1"/>
-                <field attrs="{'readonly': [('purchase_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Proveedor"/>
+                <field name="purchase_fiscal_type" readonly="1"/>
+                <field attrs="{'readonly': [('purchase_fiscal_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Proveedor"/>
                 <field attrs="{'required': True}" name="fiscal_position_id"/>
                 <field invisible="1" name="ncf_required"/>
                 <field attrs="{'size': 19, 'invisible': [('ncf_required','=',False)], 'required': [('ncf_required','=',True)], 'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>

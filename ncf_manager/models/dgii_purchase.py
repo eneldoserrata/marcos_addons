@@ -306,7 +306,7 @@ class DgiiPurchaseReport(models.Model):
         invoices = self.env["account.invoice"].search(
          [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date),
           ('state', 'in', ('open', 'paid')),
-          ('journal_id.purchase_type', 'in', ('normal', 'minor', 'informal')),
+          ('journal_id.purchase_fiscal_type', 'in', ('normal', 'minor', 'informal')),
           ('type', 'in', ('in_invoice', 'in_refund'))]
           )
 
@@ -316,7 +316,7 @@ class DgiiPurchaseReport(models.Model):
                 "account.invoice"].search(
                 [('payment_move_line_ids.date', '>=', start_date),
                  ('payment_move_line_ids.date', '<=', end_date),
-                 ('journal_id.purchase_type', 'in',
+                 ('journal_id.purchase_fiscal_type', 'in',
                   ('normal', 'minor', 'informal')),
                  ('reconciled', '=', True),
                  ('type', 'in', ('in_invoice', 'in_refund'))]

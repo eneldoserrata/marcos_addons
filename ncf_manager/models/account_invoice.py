@@ -51,9 +51,11 @@ class AccountInvoice(models.Model):
         return shop_user_config
 
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal",
-                              required=False, default=_default_user_shop)
-
+                              required=False, default=_default_user_shop,
+                              domain=lambda s: [('user_ids', '=', [s._uid])])
     ncf_required = fields.Boolean(copy=True)
+
+    ncf_control = fields.Boolean(related="journal_id.ncf_control")
 
     sale_fiscal_type = fields.Selection(
                             related="fiscal_position_id.sale_fiscal_type")
@@ -72,7 +74,7 @@ class AccountInvoice(models.Model):
          ('11', u'11 - Gastos de Seguro')],
         string=u"Tipo de gasto")
 
-    purchase_type = fields.Selection(related="journal_id.purchase_type")
+    purchase_fiscal_type = fields.Selection(related="journal_id.purchase_fiscal_type")
 
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,
@@ -100,10 +102,14 @@ class AccountInvoice(models.Model):
                     }
             self.invoice_ncf_validation()
 
+    @api.onchange("shop_id")
+    def onchange_shop_id(self):
+        self.journal_id = self.shop_id.journal_id
+
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
         if self.type in ('in_invoice', 'in_refund'):
-            if self.purchase_type == "normal":
+            if self.purchase_fiscal_type == "normal":
                 self.ncf_required = True
             else:
                 self.ncf_required = False
@@ -114,7 +120,7 @@ class AccountInvoice(models.Model):
                 if not self.partner_id.journal_id:
                     self.partner_id.write({"journal_id": self.journal_id.id})
 
-                if self.purchase_type == "minor":
+                if self.purchase_fiscal_type == "minor":
                     self.partner_id = (
                         self.env['res.company']._company_default_get(
                                  'account.invoice').partner_id.id)
@@ -152,7 +158,7 @@ class AccountInvoice(models.Model):
                 elif self.fiscal_position_id.journal_id:
                     self.journal_id = self.fiscal_position_id.journal_id.id
 
-                elif self.journal_id.purchase_type == "normal":
+                elif self.journal_id.purchase_fiscal_type == "normal":
                     self.ncf_required = True
                 else:
                     self.ncf_required = False
@@ -190,7 +196,7 @@ class AccountInvoice(models.Model):
                         " en borrador o cancelada".format(invoice.move_name))
                 if (_internet_on() and
                         self.journal_id.ncf_remote_validation):
-                    if invoice.journal_id.purchase_type == 'normal':
+                    if invoice.journal_id.purchase_fiscal_type == 'normal':
                         result = self._check_ncf(
                                                  invoice.partner_id.vat,
                                                  invoice.move_name)
@@ -244,7 +250,7 @@ class AccountInvoice(models.Model):
                                     {"fiscal_position_id":
                                      fiscal_position_id.id})
             if rec.type in ("in_invoice", "in_refund"):
-                if vals.get("purchase_type", False) == "minor":
+                if vals.get("purchase_fiscal_type", False) == "minor":
                     vals.update({"partner_id":
                                 self.env.user.company_id.partner_id.id})
 
