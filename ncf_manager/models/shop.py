@@ -97,6 +97,7 @@ class ShopJournalConfig(models.Model):
     special_max = fields.Integer(string=u"Número Máximo")
 
     # SECUENCIA NOTA DE CRÉDITO
+    nc_active = fields.Boolean("Activo")
     nc_sequence_id = fields.Many2one("ir.sequence",
                                      string=u"Secuencia")
     nc_number_next_actual = fields.Integer(
@@ -105,6 +106,7 @@ class ShopJournalConfig(models.Model):
     nc_max = fields.Integer(string=u"Número Máximo")
 
     # SECUENCIA NOTA DE DÉBITO
+    nd_active = fields.Boolean("Activo")
     nd_sequence_id = fields.Many2one("ir.sequence",
                                      string=u"Secuencia")
     nd_number_next_actual = fields.Integer(
