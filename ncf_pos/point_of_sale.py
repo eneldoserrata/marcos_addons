@@ -108,11 +108,11 @@ class PosOrder(models.Model):
             self.partner_id.write(
                 {"property_account_position_id": self.fiscal_position_id.id})
 
-    def create_from_ui(self, cr, uid, orders, context=None):
+    def create_from_ui(self, orders):
         # Keep only new orders
         submitted_references = [o['data']['name'] for o in orders]
-        existing_order_ids = self.search(cr, uid, [('pos_reference', 'in', submitted_references)], context=context)
-        existing_orders = self.read(cr, uid, existing_order_ids, ['pos_reference'], context=context)
+        existing_order_ids = self.search([('pos_reference', 'in', submitted_references)])
+        existing_orders = self.read(existing_order_ids, ['pos_reference'])
         existing_references = set([o['pos_reference'] for o in existing_orders])
         orders_to_save = [o for o in orders if o['data']['name'] not in existing_references]
 
@@ -120,21 +120,21 @@ class PosOrder(models.Model):
 
         for tmp_order in orders_to_save:
             order = tmp_order['data']
-            self._match_payment_to_invoice(cr, uid, order, context=context)
-            order_id = self._process_order(cr, uid, order, context=context)
+            self._match_payment_to_invoice(order)
+            order_id = self._process_order(order)
             order_ids.append(order_id)
 
             try:
-                self.signal_workflow(cr, uid, [order_id], 'paid')
+                self.signal_workflow([order_id], 'paid')
             except psycopg2.OperationalError:
                 # do not hide transactional errors, the order(s) won't be saved!
                 raise
             except Exception as e:
                 _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
 
-            self.action_invoice(cr, uid, [order_id], context)
-            order_obj = self.browse(cr, uid, order_id, context)
-            self.pool['account.invoice'].signal_workflow(cr, SUPERUSER_ID, [order_obj.invoice_id.id], 'invoice_open')
+            self.action_invoice([order_id], context)
+            order_obj = self.browse(order_id, context)
+            self.env['account.invoice'].signal_workflow([order_obj.invoice_id.id], 'invoice_open')
 
         return order_ids
 
