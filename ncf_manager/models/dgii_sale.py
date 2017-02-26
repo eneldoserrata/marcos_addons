@@ -37,10 +37,9 @@ from odoo import models, fields, api, exceptions
 import calendar
 import base64
 import time
-
 import re
+from .tools import is_ncf
 
-import re
 
 class DgiiSaleReport(models.Model):
     _name = "dgii.sale.report"

@@ -65,6 +65,9 @@ class AccountInvoice(models.Model):
                 rec.is_company_currency = False
 
     def _default_user_shop(self):
+	if not self:
+	    return {}
+	# import pdb; pdb.set_trace()
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config
 
