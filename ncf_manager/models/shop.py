@@ -133,7 +133,7 @@ class ShopJournalConfig(models.Model):
     @api.model
     def setup_ncf(self, name=False, company_id=False, journal_id=False,
                   user_id=False):
-        self.env["account.fiscal.position"].search([]).unlink()
+        #self.env["account.fiscal.position"].search([]).unlink()
 
         name = name or u"A01001001"
         company_id = company_id or self.env.user.company_id.id
