@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from odoo import models, fields, api
+from odoo import models, api
 from tools import is_ncf, _internet_on, is_identification
 
 
@@ -42,7 +42,7 @@ class MarcosApiTools(models.Model):
 
         return (1, api_marcos, proxies)
 
-    def ncf_validation(self, fiscal_id):
+    def rnc_cedula_validation(self, fiscal_id):
         invalid_fiscal_id_message = (500, u"RNC/Cédula invalido", u"El número de RNC/C´ula no es valido.")
         if not is_identification(fiscal_id):
             return invalid_fiscal_id_message
