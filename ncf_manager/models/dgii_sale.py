@@ -50,24 +50,6 @@ class DgiiSaleReport(models.Model):
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
 
-    company_id = fields.Many2one(
-            'res.company', string='Company', required=True,
-            default=lambda self: self.env['res.company']._company_default_get(
-                                                        'dgii.sale.report')
-            )
-    name = fields.Char("Nombre")
-    year = fields.Integer(u"Año", size=4,
-                          default=lambda s: int(time.strftime("%Y")))
-    month = fields.Integer(u"Mes", size=2,
-                           default=lambda s: int(time.strftime("%m")))
-    CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
-    ITBIS_TOTAL = fields.Float(u"ITBIS FACTURADO")
-    TOTAL_MONTO_FACTURADO = fields.Float(u"TOTAL FACTURADO",
-                                         help=u"Suma de las facturas y las notas de crédito como se digitan en el formulario de la DGII")
-
-    def get_default_period(self):
-        self.year = int(time.strftime("%Y"))
-
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True,
                                  default=lambda self: self.env['res.company']._company_default_get('dgii.sale.report'))
@@ -78,10 +60,11 @@ class DgiiSaleReport(models.Model):
                            int(time.strftime("%m")))
     CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros")
     ITBIS_TOTAL = fields.Float(u"ITBIS FACTURADO")
-    TOTAL_MONTO_FACTURADO = fields.Float(u"TOTAL FACTURADO",
-                                         help=u"Suma de las facturas y las"
-                                         " notas de crédito como se digitan en"
-                                         " el formulario de la DGII")
+    TOTAL_MONTO_FACTURADO = fields.Float(
+                                    u"TOTAL FACTURADO",
+                                    help="Suma de las facturas y las notas de"
+                                    " crédito como se digitan en el formulario"
+                                    " de la DGII")
 
     report_lines = fields.One2many("dgii.sale.report.line",
                                    "sale_report_id")

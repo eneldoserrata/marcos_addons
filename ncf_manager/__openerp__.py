@@ -53,8 +53,8 @@
     'category': 'Localization',
     'version': '2.0',
 
-    'depends': ['base', 'account', 'account_invoice_refund_link', 'l10n_do',
-                'rnc_validation', 'web_sheet_full_width'],
+    'depends': ['base', 'account', 'l10n_do', 'rnc_validation',
+                'web_sheet_full_width'],
 
     'data': [
         'security/ir.model.access.csv',
