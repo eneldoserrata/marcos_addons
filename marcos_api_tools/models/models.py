@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from odoo import models, api
+from odoo import models, api, exceptions
 from tools import is_ncf, _internet_on, is_identification
 
 
@@ -29,9 +29,9 @@ class MarcosApiTools(models.Model):
         api_marcos = config_parameter.get_param("api_marcos")
 
         if not api_marcos:
-            return (400, u"Configuración pendiente", u"Debe configurar la URL de validación en línea")
+            raise exceptions.ValidationError(u"Debe configurar la URL de validación en línea")
         if not _internet_on(api_marcos):
-            return (600, u"No se pudo validar con la DGII por falta de conexión a internet.")
+            return exceptions.ValidationError(u"No se pudo validar con la DGII por falta de conexión a internet.")
 
         proxies = {}
         if http_proxy != "False":
@@ -101,3 +101,13 @@ class MarcosApiTools(models.Model):
                     return request_params
 
         return True
+
+    def rates(self):
+        request_params = self.get_marcos_api_request_params()
+        if request_params[0] == 1:
+            return requests.get("{}/rates".format(request_params[1], proxies=request_params[2])).json()
+
+    def central_bank_rates(self):
+        request_params = self.get_marcos_api_request_params()
+        if request_params[0] == 1:
+            return requests.get("{}/central_bank_rates".format(request_params[1], proxies=request_params[2])).json()
