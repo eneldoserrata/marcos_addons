@@ -35,8 +35,8 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import models, api
-from openerp.exceptions import ValidationError
+from odoo import models, api
+from odoo.exceptions import ValidationError
 
 
 class AccountMove(models.Model):

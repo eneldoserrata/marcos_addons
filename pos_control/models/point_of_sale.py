@@ -34,7 +34,7 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from openerp import models, api
+from odoo import models, api
 import logging
 
 _logger = logging.getLogger(__name__)

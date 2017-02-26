@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 
 
-from openerp import models
-from openerp.tools import float_compare, float_round
+from odoo import models
+from odoo.tools import float_compare, float_round
 
 
 class AccountBankStatementLine(models.Model):

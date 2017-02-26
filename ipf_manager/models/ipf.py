@@ -34,7 +34,7 @@
 ########################################################################################################################
 
 
-from openerp import models, fields, api, exceptions
+from odoo import models, fields, api, exceptions
 import re
 import base64
 import openerp.addons.decimal_precision as dp

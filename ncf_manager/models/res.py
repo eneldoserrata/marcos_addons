@@ -35,7 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import models, fields, _
+from odoo import models, fields, _
 
 
 class ResCompany(models.Model):

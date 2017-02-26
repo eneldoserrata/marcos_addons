@@ -34,10 +34,10 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from openerp import exceptions
+from odoo import exceptions
 import requests
 from tools import is_ncf, _internet_on
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 import logging
 _logger = logging.getLogger(__name__)

@@ -34,7 +34,7 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from openerp import models, fields, api, tools, SUPERUSER_ID
+from odoo import models, fields, api, tools, SUPERUSER_ID
 import psycopg2
 import time
 import logging

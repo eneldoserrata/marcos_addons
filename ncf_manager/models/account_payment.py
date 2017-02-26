@@ -35,7 +35,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-from openerp import models, fields
+from odoo import models, fields
 import number_to_word
 
 

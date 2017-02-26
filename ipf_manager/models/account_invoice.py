@@ -34,7 +34,7 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import models, fields, exceptions
+from odoo import models, fields, exceptions
 
 import re
 
