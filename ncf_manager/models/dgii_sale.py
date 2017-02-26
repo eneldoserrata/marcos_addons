@@ -47,6 +47,17 @@ import io
 class DgiiSaleReport(models.Model):
     _name = "dgii.sale.report"
 
+    @api.one
+    @api.depends("ITBIS_TOTAL","TOTAL_MONTO_FACTURADO")
+    def _calc_total(self):
+
+        self.TOTAL_MONTO_FACTURAS = sum([line.MONTO_FACTURADO for line in self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+        self.TOTAL_MONTO_NC = sum([line.MONTO_FACTURADO for line in self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+        self.ITBIS_TOTAL_FACTURAS = sum([line.ITBIS_FACTURADO for line in self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+        self.ITBIS_TOTAL_NC = sum([line.ITBIS_FACTURADO for line in self.report_lines if line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
+        self.TOTAL_VENTA = self.TOTAL_MONTO_FACTURAS-self.TOTAL_MONTO_NC
+        self.TOTAL_VENTA_ITBIS = self.ITBIS_TOTAL_FACTURAS-self.ITBIS_TOTAL_NC
+
     def get_default_period(self):
         self.year = int(time.strftime("%Y"))
 
@@ -65,6 +76,13 @@ class DgiiSaleReport(models.Model):
                                     help="Suma de las facturas y las notas de"
                                     " crédito como se digitan en el formulario"
                                     " de la DGII")
+
+    TOTAL_MONTO_FACTURAS = fields.Float(u"FACTURADO", compute=_calc_total)
+    TOTAL_MONTO_NC = fields.Float(u"NOTAS CRÉDITO", compute=_calc_total)
+    ITBIS_TOTAL_FACTURAS = fields.Float(u"ITBIS FACTURADO", compute=_calc_total)
+    ITBIS_TOTAL_NC = fields.Float(u"ITBIS NOTAS CRÉDITO", compute=_calc_total)
+    TOTAL_VENTA = fields.Float(u"VENTA", compute=_calc_total)
+    TOTAL_VENTA_ITBIS = fields.Float(u"ITBIS", compute=_calc_total)
 
     report_lines = fields.One2many("dgii.sale.report.line",
                                    "sale_report_id")
@@ -223,7 +241,8 @@ class DgiiSaleReport(models.Model):
                                                self.company_id.vat)
 
         if not (company_fiscal_identificacion or not
-                is_identification(company_fiscal_identificacion)):
+                self.env['res.partner'].is_identification(
+                company_fiscal_identificacion)):
             raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
                                              " su empresa!")
 

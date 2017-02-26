@@ -131,10 +131,7 @@ class DgiiPurchaseReport(models.Model):
                 #     move_line.amount_currency)
 
                 if tax_account[move_line.account_id.id] == "itbis":
-                    if inv.type == "in_invoice":
-                        ITBIS_TOTAL += amount
-                    else:
-                        ITBIS_TOTAL -= amount
+                    ITBIS_TOTAL += amount
                     LINE_ITBIS_TOTAL += amount
                 elif tax_account[
                  move_line.account_id.id] == "ritbis" and inv.state == 'paid':
@@ -149,15 +146,9 @@ class DgiiPurchaseReport(models.Model):
                 elif tax_account[
                  move_line.account_id.id] == "cost" and move_line.tax_line_id:
                     LINE_TAX_COST += amount
-                    if inv.type == "in_invoice":
-                        TOTAL_MONTO_FACTURADO += amount
-                    else:
-                        TOTAL_MONTO_FACTURADO -= amount
+                    TOTAL_MONTO_FACTURADO += amount
 
-            if inv.type == "in_invoice":
-                TOTAL_MONTO_FACTURADO += inv.amount_untaxed * CURRENCY_RATE
-            else:
-                TOTAL_MONTO_FACTURADO -= inv.amount_untaxed * CURRENCY_RATE
+            TOTAL_MONTO_FACTURADO += inv.amount_untaxed * CURRENCY_RATE
 
             if not inv.partner_id.vat:
                 raise exceptions.UserError(u"El número de RNC/Cédula del"
@@ -177,7 +168,7 @@ class DgiiPurchaseReport(models.Model):
                                              inv.fiscal_position_id.name,
                                              inv.number)
                                            )
-            if not is_ncf(inv.number, inv.type):
+            if not self.env['res.partner'].is_ncf(inv.number, inv.type):
                 raise exceptions.UserError(u"¡El número de NCF {} no es"
                                            u"válido!".format(inv.number))
 
