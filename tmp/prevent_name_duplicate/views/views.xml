@@ -1,0 +1,59 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="prevent_name_duplicate.list">
+      <field name="name">prevent_name_duplicate list</field>
+      <field name="model">prevent_name_duplicate.prevent_name_duplicate</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="prevent_name_duplicate.action_window">
+      <field name="name">prevent_name_duplicate window</field>
+      <field name="res_model">prevent_name_duplicate.prevent_name_duplicate</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="prevent_name_duplicate.action_server">
+      <field name="name">prevent_name_duplicate server</field>
+      <field name="model_id" ref="model_prevent_name_duplicate_prevent_name_duplicate"/>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="prevent_name_duplicate" id="prevent_name_duplicate.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="prevent_name_duplicate.menu_1" parent="prevent_name_duplicate.menu_root"/>
+    <menuitem name="Menu 2" id="prevent_name_duplicate.menu_2" parent="prevent_name_duplicate.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="prevent_name_duplicate.menu_1_list" parent="prevent_name_duplicate.menu_1"
+              action="prevent_name_duplicate.action_window"/>
+    <menuitem name="Server to list" id="prevent_name_duplicate" parent="prevent_name_duplicate.menu_2"
+              action="prevent_name_duplicate.action_server"/>
+    -->
+  </data>
+</odoo>

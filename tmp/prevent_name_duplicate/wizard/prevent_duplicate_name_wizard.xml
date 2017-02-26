@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="prevent_duplicate_name_wizard_form" model="ir.ui.view">
+            <field name="name">Prevent duplicate name wizard form</field>
+            <field name="model">prevent.duplicate.name.wizard</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <group>
+                        <field name="name_list_radio" widget="radio"/>
+                        <field name="new_name"/>
+                    </group>
+                    <footer>
+                        <button name="name_selectd" type="object"
+                                string="Subscribe" class="oe_highlight"/>
+                        or
+                        <button special="cancel" string="Cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</openerp>
