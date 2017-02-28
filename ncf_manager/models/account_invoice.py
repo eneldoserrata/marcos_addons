@@ -76,6 +76,9 @@ class AccountInvoice(models.Model):
 
     purchase_fiscal_type = fields.Selection(related="journal_id.purchase_fiscal_type")
 
+    anulation_type = fields.Selection(
+                            related="account.invoice.cancel")
+
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,
                              states={'draft': [('readonly', False)]},
@@ -202,8 +205,8 @@ class AccountInvoice(models.Model):
                                 u"¡El número de comprobante {} del proveedor"
                                 u" {} no es válido! No pasó la validación en"
                                 u" DGII. Verifique que el NCF y el RNC del"
-                                u"proveedor estén correctamente"
-                                u"digitados.".format(
+                                u" proveedor estén correctamente"
+                                u" digitados.".format(
                                                      invoice.move_name,
                                                      invoice.partner_id.vat))
                     else:

@@ -15,20 +15,24 @@
             <field name="partner_id" position="after">
                 <field attrs="{'required': True}" name="fiscal_position_id"/>
             </field>
+            <field name="fiscal_position_id" position="attributes">
+                <attribute name="domain">[('supplier','=',False)]</attribute>
+                <attribute name="required">1</attribute>
+            </field>
             <field name="user_id" position="after">
-                <field attrs="{'readonly': [('state','!=','draft')]}" name="shop_id" required="1"/>
+                <field attrs="{'readonly': [('state','!=','draft')]}" name="shop_id" options="{'no_quick_create': True, 'no_create_edit' : True}" required="1"/>
+                <field invisible="1" name="ncf_control"/>
+                <field attrs="{'invisible': [('ncf_control','=',False)], 'required': [('ncf_control','=',True)], 'readonly': [('state','!=','draft')]}" name="sale_fiscal_type"/>
+                <field invisible="0" name="reference" readonly="1"/>
+                <field groups="account.group_account_manager" invisible="0" name="move_name"/>
             </field>
             <field name="date_due" position="replace"/>
             <field name="date_invoice" position="after">
                 <field attrs="{'required': True}" name="journal_id"/>
             </field>
-            <field name="fiscal_position_id" position="attributes">
-                <attribute name="domain">[('supplier','=',False)]</attribute>
-                <attribute name="required">1</attribute>
-            </field>
-            <field name="move_name" position="replace"/>
             <field name="number" position="before">
                 <label attrs="{'invisible': [('state','!=','cancel')]}" string="Cancelada por:"/>
+                <field attrs="{'invisible': [('state','!=','cancel')]}" name="anulation_type" readonly="1"/>
                 <field attrs="{'invisible': [('state','!=','cancel')]}" name="move_name" readonly="1"/>
             </field>
         </field>
@@ -44,36 +48,22 @@
                 <field attrs="{'readonly': [('purchase_fiscal_type','=','minor')]}" context="{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}" domain="[('supplier', '=', True)]" name="partner_id" string="Proveedor"/>
                 <field attrs="{'required': True}" name="fiscal_position_id"/>
                 <field invisible="1" name="ncf_required"/>
-                <field attrs="{'size': 19, 'invisible': [('ncf_required','=',False)], 'required': [('ncf_required','=',True)], 'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>
             </field>
             <field name="fiscal_position_id" position="attributes">
                 <attribute name="domain">[('supplier','=',True)]</attribute>
                 <attribute name="required">1</attribute>
             </field>
             <field name="fiscal_position_id" position="after">
-                <field attrs="{'required': True}" name="expense_type"/>
+                <field attrs="{'required': True,'readonly': [('state','!=','draft')]}" name="expense_type"/>
             </field>
             <field name="journal_id" position="replace"/>
             <field name="date_due" position="after">
-                <field name="journal_id"/>
+                <field attrs="{'readonly':[('move_name','!=',False)]}" groups="account.group_account_user" name="journal_id" options="{'no_create': True}"/>
             </field>
-            <field name="move_id" position="after">
-                <field name="pay_to"/>
-                <field name="charge_to"/>
+            <field name="move_name" position="replace"/>
+            <field name="reference" position="before">
+                <field attrs="{'size': 19,'invisible': [('purchase_fiscal_type','!=','normal')],'required': [('purchase_fiscal_type','=','normal')],'readonly': [('state','!=','draft')]}" name="move_name" string="NCF"/>
             </field>
-        </field>
-    </record>
-    <!-- Inherit Form View to Modify it -->
-    <record id="ncf_manager_account_invoice_cancel_view" model="ir.ui.view">
-        <field name="name">ncf manager account invoice view</field>
-        <field name="model">account.invoice.cancel</field>
-        <field name="inherit_id" ref="account.account_invoice_cancel_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//footer" position="before">
-                <group>
-                    <field name="anulation_type"/>
-                </group>
-            </xpath>
         </field>
     </record>
 </odoo>
