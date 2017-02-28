@@ -77,7 +77,16 @@ class AccountInvoice(models.Model):
     purchase_fiscal_type = fields.Selection(related="journal_id.purchase_fiscal_type")
 
     anulation_type = fields.Selection(
-                            related="account.invoice.cancel")
+        [("01", u"01 - Deterioro de Factura Pre-impresa"),
+         ("02", u"02 - Errores de Impresión (Factura Pre-impresa)"),
+         ("03", u"03 - Impresión Defectuosa"),
+         ("04", u"04 - Duplicidad de Factura"),
+         ("05", u"05 - Corrección de La Información"),
+         ("06", u"06 - Cambio de Productos"),
+         ("07", u"07 - Devolución de Productos"),
+         ("08", u"08 - Omisión de Productos"),
+         ("09", u"09 - Errores en Secuencia de NCF")],
+        string=u"Tipo de anulación", required=True)
 
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,

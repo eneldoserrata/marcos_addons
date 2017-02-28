@@ -46,10 +46,10 @@ class AccountMove(models.Model):
     def post(self):
         invoice = self._context.get('invoice', False)
         self._post_validate()
-        sale_fiscal_type = invoice.fiscal_position_id.sale_fiscal_type
-        ncf_control = invoice.journal_id.ncf_control
 
         if invoice:
+            sale_fiscal_type = invoice.fiscal_position_id.sale_fiscal_type
+            ncf_control = invoice.journal_id.ncf_control
             if invoice.amount_total == 0:
                 raise ValidationError(
                     u"¡No puede validar una factura con valor 0!")
