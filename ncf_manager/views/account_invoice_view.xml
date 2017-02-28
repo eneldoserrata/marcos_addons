@@ -38,10 +38,6 @@
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_supplier_form"/>
         <field name="arch" type="xml">
-            <field name="move_name" position="replace"/>
-            <xpath expr="//button[@name='invoice_open']" position="replace">
-                <button class="oe_highlight" groups="account.group_account_invoice" name="invoice_ncf_validation" states="draft,proforma2" string="Validate" type="object"/>
-            </xpath>
             <field name="fiscal_position_id" position="replace"/>
             <field name="partner_id" position="replace">
                 <field name="purchase_fiscal_type" readonly="1"/>

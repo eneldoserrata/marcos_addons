@@ -8,7 +8,6 @@ odoo.define('ncf_pos.models', function (require) {
 
     var QWeb = core.qweb;
 
-    models.load_fields("res.company", ['street', 'street2', "city", 'state_id', 'zip', 'country_id']);
     models.load_fields("res.partner", ['property_account_position_id']);
 
     var _super_order = models.Order.prototype;

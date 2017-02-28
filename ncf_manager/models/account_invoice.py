@@ -117,9 +117,6 @@ class AccountInvoice(models.Model):
             if not self._context.get("default_supplier", False):
                 self.move_name = False
 
-                if not self.partner_id.journal_id:
-                    self.partner_id.write({"journal_id": self.journal_id.id})
-
                 if self.purchase_fiscal_type == "minor":
                     self.partner_id = (
                         self.env['res.company']._company_default_get(
@@ -155,9 +152,7 @@ class AccountInvoice(models.Model):
                          self.fiscal_position_id.id})
 
             elif self.type in ('in_invoice', 'in_refund'):
-                if self.partner_id.journal_id:
-                    self.journal_id = self.partner_id.journal_id.id
-                elif self.fiscal_position_id.journal_id:
+                if self.fiscal_position_id.journal_id:
                     self.journal_id = self.fiscal_position_id.journal_id.id
 
                 elif self.journal_id.purchase_fiscal_type == "normal":

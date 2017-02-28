@@ -34,7 +34,7 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from odoo import models, fields, api, tools, SUPERUSER_ID
+from odoo import models, fields, api, tools
 import psycopg2
 import time
 import logging
@@ -96,12 +96,6 @@ class PosOrder(models.Model):
     _inherit = ["pos.order"]
     _name = 'pos.order'
 
-    @api.onchange("partner_id")
-    def _onchange_partner_id(self, part=False):
-        if self.partner_id:
-            self.pricelist_id = self.partner_id.property_product_pricelist.id
-            self.fiscal_position_id = self.partner_id.property_account_position_id.id
-
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
         if self.fiscal_position_id and self.partner_id.property_account_position_id.id != self.fiscal_position_id:
@@ -111,31 +105,30 @@ class PosOrder(models.Model):
     def create_from_ui(self, orders):
         # Keep only new orders
         submitted_references = [o['data']['name'] for o in orders]
-        existing_order_ids = self.search([('pos_reference', 'in', submitted_references)])
-        existing_orders = self.read(existing_order_ids, ['pos_reference'])
+        pos_order = self.search([('pos_reference', 'in', submitted_references)])
+        existing_orders = pos_order.read(['pos_reference'])
         existing_references = set([o['pos_reference'] for o in existing_orders])
         orders_to_save = [o for o in orders if o['data']['name'] not in existing_references]
-
         order_ids = []
 
         for tmp_order in orders_to_save:
             order = tmp_order['data']
             self._match_payment_to_invoice(order)
-            order_id = self._process_order(order)
-            order_ids.append(order_id)
+            pos_order = self._process_order(order)
+            order_ids.append(pos_order.id)
 
             try:
-                self.signal_workflow([order_id], 'paid')
+                pos_order.action_pos_order_paid()
             except psycopg2.OperationalError:
                 # do not hide transactional errors, the order(s) won't be saved!
                 raise
             except Exception as e:
                 _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
 
-            self.action_invoice([order_id], context)
-            order_obj = self.browse(order_id, context)
-            self.env['account.invoice'].signal_workflow([order_obj.invoice_id.id], 'invoice_open')
-
+            pos_order.action_pos_order_invoice()
+            pos_order.invoice_id.sale_fiscal_type = pos_order.partner_id.sale_fiscal_type
+            pos_order.invoice_id.sudo().action_invoice_open()
+            pos_order.account_move = pos_order.invoice_id.move_id
         return order_ids
 
     @api.model

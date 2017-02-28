@@ -7,9 +7,4 @@
             <script src="/ncf_pos/static/src/js/screens.js" type="text/javascript"/>
         </xpath>
     </template>
-    <template id="ncf_pos_receipt_inherit" inherit_id="point_of_sale.report_receipt">
-        <xpath expr="//div[@class='col-xs-12 text-center']/br" position="after">RNC No.:
-            <span t-field="o.invoice_id.number"/>
-            <br/></xpath>
-    </template>
 </odoo>
