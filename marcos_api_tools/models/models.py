@@ -29,7 +29,8 @@ class MarcosApiTools(models.Model):
         api_marcos = config_parameter.get_param("api_marcos")
 
         if not api_marcos:
-            raise exceptions.ValidationError(u"Debe configurar la URL de validación en línea")
+            raise exceptions.ValidationError(
+                u"Debe configurar la URL de validación en línea: es la variable api_marcos en el menu de parametros del sistema")
         if not _internet_on(api_marcos):
             return exceptions.ValidationError(u"No se pudo validar con la DGII por falta de conexión a internet.")
 
@@ -56,6 +57,9 @@ class MarcosApiTools(models.Model):
                     return invalid_fiscal_id_message
 
     def invoice_ncf_validation(self, invoice):
+        if not self._context.get("validate_ncf") or not invoice.journal_id.ncf_remote_validation:
+            return True
+
         if not is_ncf(invoice.move_name, invoice.type):
             return (100, u"Ncf invalido", u"El numero de comprobante fiscal no es valido "
                                           u"verifique de que no esta digitando un comprobante"
@@ -96,7 +100,6 @@ class MarcosApiTools(models.Model):
                                                       u"no paso la validacion en DGII, Verifique que el NCF y el RNC del "
                                                       u"proveedor esten correctamente digitados, si es de proveedor informal o de "
                                                       u"gasto menor vefifique si debe solicitar nuevos numero.")
-
 
         return True
 
