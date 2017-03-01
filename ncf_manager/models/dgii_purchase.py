@@ -38,6 +38,7 @@ import calendar
 import base64
 import time
 import re
+from tools import is_ncf, is_identification
 
 
 class ResCompany(models.Model):
@@ -138,7 +139,6 @@ class DgiiPurchaseReport(models.Model):
             if not inv.partner_id.vat:
                 raise exceptions.UserError(u"El número de RNC/Cédula del proveedor {} no es valido para el NCF {}".format(inv.partner_id.name, inv.number))
 
-
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
             TIPO_BIENES_SERVICIOS_COMPRADOS = inv.purchase_fiscal_type
@@ -146,9 +146,8 @@ class DgiiPurchaseReport(models.Model):
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.UserError(u"Debe de definir el tipo de gasto para la posición fiscal {}! en la factura {}".format(inv.fiscal_position_id.name, inv.number))
 
-            #if not self.env['res.partner'].is_ncf(inv.number, inv.type):
-            #if not inv.partner_id.is_ncf(inv.number, inv.type):
-            #    raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.number))
+            if not is_ncf(inv.number, inv.type):
+                raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
 
@@ -178,7 +177,6 @@ class DgiiPurchaseReport(models.Model):
                                    "RETENCION_RENTA": LINE_RETENCION_RENTA
                                    }))
 
-
         self.write({"report_lines": lines,
                        "CANTIDAD_REGISTRO": CANTIDAD_REGISTRO,
                        "ITBIS_RETENIDO": abs(ITBIS_RETENIDO),
@@ -193,9 +191,9 @@ class DgiiPurchaseReport(models.Model):
             raise exceptions.ValidationError(u"Para poder generar el 606 primero debe especificar el RNC/Cédula de la compañia.")
 
         company_fiscal_identificacion = re.sub("[^0-9]", "", self.company_id.vat)
-	print "EXISTE EL PARTNER 1:{}: 2: {}".format(self, self.env['res.partner'])
-        #if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
-        #    raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
+
+        if not company_fiscal_identificacion or not is_identification(company_fiscal_identificacion):
+            raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
         file = open(path,'w')
@@ -248,7 +246,6 @@ class DgiiPurchaseReport(models.Model):
             if tax.purchase_tax_type != 'none':
                 tax_account[tax.account_id.id] = tax.purchase_tax_type
 
-
         invoices = self.env["account.invoice"].search([('date_invoice','>=',start_date),
                                                        ('date_invoice','<=',end_date),
                                                        ('state','in',('open','paid')),
@@ -263,15 +260,12 @@ class DgiiPurchaseReport(models.Model):
                                                             ('reconciled','=',True),
                                                             ('type','in',('in_invoice','in_refund'))])
 
-
-
             for inv_paid in paid_in_period_with_retention_invoices:
                 account_ids = [move_id.account_id.id for move_id in inv_paid.move_id.line_ids]
                 for account in account_ids:
                     if tax_account.get(account, "") in ('ritbis','isr'):
                         invoices += inv_paid
                         continue
-
 
         invoice_ids = [rec.id for rec in invoices]
         invoice_ids = list(set(invoice_ids))
@@ -298,7 +292,4 @@ class DgiiPurchaseReportline(models.Model):
     ITBIS_RETENIDO = fields.Float("ITBIS Retenido")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
     RETENCION_RENTA = fields.Float(u"Retención Renta")
-
-
-
 

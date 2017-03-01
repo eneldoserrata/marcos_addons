@@ -38,6 +38,7 @@ import calendar
 import base64
 import time
 import re
+from tools import is_ncf, is_identification
 
 
 class DgiiSaleReport(models.Model):
@@ -114,9 +115,8 @@ class DgiiSaleReport(models.Model):
                 RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
                 TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()) == 9 else "2"
 
-            #if not self.env['res.partner'].is_ncf(inv.number, inv.type):
-            #    raise exceptions.ValidationError(u"El número de NCF o el RNC/Cédula del clienten para el comprobante {} no es valido!".format(inv.number))
-
+            if not is_ncf(inv.number, inv.type):
+                raise exceptions.ValidationError(u"El número de NCF o el RNC/Cédula del clienten para el comprobante {} no es valido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             if inv.type == "out_invoice":
@@ -131,7 +131,6 @@ class DgiiSaleReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-
             account_ids = list(set([l.account_id.id for l in inv.invoice_line_ids if l.account_id.user_type_id.name == 'Ingreso']))
 
             move_lines = self.env["account.move.line"].search([('move_id','=',inv.move_id.id),('account_id','in',account_ids)])
@@ -139,7 +138,6 @@ class DgiiSaleReport(models.Model):
 
             if not MONTO_FACTURADO:
                 MONTO_FACTURADO = 0
-
 
             ITBIS_FACTURADO = 0
 
@@ -161,7 +159,6 @@ class DgiiSaleReport(models.Model):
                                    "MONTO_FACTURADO":MONTO_FACTURADO
                                    }))
 
-
             line_number += 1
 
         CANTIDAD_REGISTRO = len(lines)
@@ -179,8 +176,8 @@ class DgiiSaleReport(models.Model):
 
         company_fiscal_identificacion = re.sub("[^0-9]", "", self.company_id.vat)
 
-        #if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
-        #    raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
+        if not company_fiscal_identificacion or not is_identification(company_fiscal_identificacion):
+            raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
 
         path = '/tmp/607{}.txt'.format(company_fiscal_identificacion)
         file = open(path,'w')
@@ -241,7 +238,4 @@ class DgiiSaleReportline(models.Model):
     FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
-
-
-
 
