@@ -51,50 +51,8 @@ class PosConfig(models.Model):
                                            domain=[('supplier', '=', False)])
 
 
-class ResPartner(models.Model):
-    _inherit = 'res.partner'
-
-    @api.model
-    def create_from_ui(self, partner):
-        """ create or modify a partner from the point of sale ui.
-            partner contains the partner's fields. """
-        try:
-            name = partner.get("name", False)
-            if isinstance(int(name), (int,)):
-                partner_exist = self.search([('vat', '=', name)])
-                if partner_exist:
-                    if partner.get("property_account_position_id", False):
-                        partner.pop("property_account_position_id", None)
-                    partner.update({"id": partner_exist[0].id,
-                                    "name": partner_exist.name})
-        except:
-            pass
-
-        if partner.get('image', False):
-            img = partner['image'].split(',')[1]
-            partner['image'] = img
-
-        property_account_position_id = partner.get(
-            "property_account_position_id", False)
-        if property_account_position_id:
-            partner.update({
-                "property_account_position_id": int(
-                    property_account_position_id)})
-
-        if partner.get('id', False):
-            partner_id = partner['id']
-            del partner['id']
-            self.browse(partner_id).write(partner)
-        else:
-            partner_id = self.create(partner)
-            return partner_id.id
-
-        return partner_id
-
-
 class PosOrder(models.Model):
-    _inherit = ["pos.order"]
-    _name = 'pos.order'
+    _inherit = "pos.order"
 
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
@@ -102,6 +60,7 @@ class PosOrder(models.Model):
             self.partner_id.write(
                 {"property_account_position_id": self.fiscal_position_id.id})
 
+    @api.model
     def create_from_ui(self, orders):
         # Keep only new orders
         submitted_references = [o['data']['name'] for o in orders]
@@ -125,8 +84,10 @@ class PosOrder(models.Model):
             except Exception as e:
                 _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
 
+            if not pos_order.partner_id:
+                pos_order.partner_id = pos_order.session_id.config_id.default_partner_id.id
             pos_order.action_pos_order_invoice()
-            pos_order.invoice_id.sale_fiscal_type = pos_order.partner_id.sale_fiscal_type
+            pos_order.invoice_id.sale_fiscal_type = pos_order.fiscal_position_id.sale_fiscal_type
             pos_order.invoice_id.sudo().action_invoice_open()
             pos_order.account_move = pos_order.invoice_id.move_id
         return order_ids
@@ -149,7 +110,7 @@ class PosOrder(models.Model):
         elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "final":
             res.update({"fiscal_type": "final", "fiscal_type_name": "FACTURA PARA CONSUMIDOR FINAL"})
         elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "gov":
-            res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA GUBERNAMENTAL"})
+            res.update({"fiscal_type": "gov", "fiscal_type_name": "FACTURA GUBERNAMENTAL"})
         elif order_id.invoice_id.fiscal_position_id.sale_fiscal_type == "special":
             res.update({"fiscal_type": "special", "fiscal_type_name": "FACTURA PARA REGIMENES ESPECIALES"})
 
