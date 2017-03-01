@@ -37,7 +37,7 @@
                     <button name="%(account.action_account_invoice_cancel)d" type='action' states="draft,proforma2,open"
                             string="Cancel Invoice" groups="account.group_account_user"/>
                 </xpath>
-                <field name="reference" position="replace"/>
+                <!--field name="reference" position="replace"/-->
                 <field name="date_invoice" position="after">
                     <field name="date_due" string="Vence"/>
                     <field name="shop_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"
@@ -92,7 +92,7 @@
                 <field name="reference" position="before">
                     <field name="purchase_type" invisible="1"/>
                     <field name="journal_id" groups="account.group_account_user" options="{'no_create': True}"
-                           attrs="{'readonly':[('move_name','!=',False)]}"/>
+                           attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                     <field name="purchase_fiscal_type" attrs="{'invisible':[('purchase_type','not in',['normal','minor','informal'])],
                     'required': [('purchase_type','in',['normal','minor','informal'])],'readonly': [('state','!=','draft')]}"/>
                     <field name="move_name" string="NCF"

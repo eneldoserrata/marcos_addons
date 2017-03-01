@@ -38,7 +38,6 @@ import calendar
 import base64
 import time
 import re
-from .tools import is_ncf
 
 
 class ResCompany(models.Model):
@@ -147,8 +146,9 @@ class DgiiPurchaseReport(models.Model):
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.UserError(u"Debe de definir el tipo de gasto para la posición fiscal {}! en la factura {}".format(inv.fiscal_position_id.name, inv.number))
 
-            if not self.env['res.partner'].is_ncf(inv.number, inv.type):
-                raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.number))
+            #if not self.env['res.partner'].is_ncf(inv.number, inv.type):
+            #if not inv.partner_id.is_ncf(inv.number, inv.type):
+            #    raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
 
@@ -193,9 +193,9 @@ class DgiiPurchaseReport(models.Model):
             raise exceptions.ValidationError(u"Para poder generar el 606 primero debe especificar el RNC/Cédula de la compañia.")
 
         company_fiscal_identificacion = re.sub("[^0-9]", "", self.company_id.vat)
-
-        if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
-            raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
+	print "EXISTE EL PARTNER 1:{}: 2: {}".format(self, self.env['res.partner'])
+        #if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
+        #    raise exceptions.ValidationError("Debe de configurar el RNC de su empresa!")
 
         path = '/tmp/606{}.txt'.format(company_fiscal_identificacion)
         file = open(path,'w')
