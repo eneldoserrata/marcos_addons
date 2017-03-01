@@ -34,7 +34,8 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from odoo import models, fields, api, tools
+from odoo import models, fields, api, tools, _
+from odoo.exceptions import UserError
 import psycopg2
 import time
 import logging
@@ -92,6 +93,21 @@ class PosOrder(models.Model):
             pos_order.account_move = pos_order.invoice_id.move_id
         return order_ids
 
+    def _reconcile_payments(self):
+        """This introduces an auto-reconciliation process upon order closing.
+        The process restricts the reconciliation to an order individually, i.e. we don't try to cross-reconcile several orders for a customer."""
+        for order in self:
+            aml = order.statement_ids.mapped('journal_entry_ids') | order.account_move.line_ids
+            aml = aml.filtered(lambda r: not r.reconciled and r.account_id.internal_type == 'receivable' and r.partner_id == order.partner_id)
+            try:
+                aml.reconcile()
+            except:
+                # There might be unexpected situations where the automatic reconciliation won't
+                # work. We don't want the user to be blocked because of this, since the automatic
+                # reconciliation is introduced for convenience, not for mandatory accounting
+                # reasons.
+                continue
+
     @api.model
     def get_fiscal_data(self, name):
         res = {}
@@ -115,3 +131,23 @@ class PosOrder(models.Model):
             res.update({"fiscal_type": "special", "fiscal_type_name": "FACTURA PARA REGIMENES ESPECIALES"})
 
         return res
+
+
+class PosSession(models.Model):
+    _inherit = "pos.session"
+
+    def _confirm_orders(self):
+        super(PosSession, self)._confirm_orders()
+        for session in self:
+            company_id = session.config_id.journal_id.company_id.id
+            orders = session.order_ids.filtered(lambda order: order.state == 'paid')
+            journal_id = self.env['ir.config_parameter'].sudo().get_param(
+                'pos.closing.journal_id_%s' % company_id, default=session.config_id.journal_id.id)
+
+            move = self.env['pos.order'].with_context(force_company=company_id)._create_account_move(session.start_at, session.name, int(journal_id), company_id)
+            orders.with_context(force_company=company_id)._create_account_move_line(session, move)
+            for order in session.order_ids.filtered(lambda o: o.state not in ['done', 'invoiced']):
+                if order.state not in ('paid'):
+                    raise UserError(_("You cannot confirm all orders of this session, because they have not the 'paid' status"))
+                order.action_pos_order_done()
+            orders._reconcile_payments()
