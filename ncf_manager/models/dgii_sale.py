@@ -132,10 +132,9 @@ class DgiiSaleReport(models.Model):
                 TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()
                                                  ) == 9 else "2"
             if not is_ncf(inv.number, inv.type):
-                raise exceptions.ValidationError(u"¡El número de NCF o el RNC/"
-                                                 u"Cédula del clienten para el"
-                                                 " comprobante {} no es"
-                                                 u" válido!".format(inv.number)
+                raise exceptions.ValidationError(
+                    u"¡El número de NCF o el RNC/Cédula del clienten para el"
+                    u" comprobante {} no es válido!".format(inv.number)
                                                  )
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             affected_invoice_id = False

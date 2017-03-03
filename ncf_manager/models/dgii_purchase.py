@@ -131,12 +131,13 @@ class DgiiPurchaseReport(models.Model):
                 #     move_line.amount_currency)
 
                 if tax_account[move_line.account_id.id] == "itbis":
-                    ITBIS_TOTAL += amount
+                    if inv.type == "in_invoice":
+                        ITBIS_TOTAL += amount
+                    else:
+                        ITBIS_TOTAL -= amount
                     LINE_ITBIS_TOTAL += amount
                 elif tax_account[move_line.account_id.id] == "ritbis" and inv.state == 'paid':
-                    if int(max
-                           (inv.payment_move_line_ids).date.split("-")[1]
-                           ) == self.month:
+                    if int(max(inv.payment_move_line_ids).date.split("-")[1]) == self.month:
                         ITBIS_RETENIDO += abs(amount)
                         LINE_ITBIS_RETENIDO += amount
                 elif tax_account[move_line.account_id.id] == "isr":
@@ -144,9 +145,15 @@ class DgiiPurchaseReport(models.Model):
                     LINE_RETENCION_RENTA += amount
                 elif tax_account[move_line.account_id.id] == "cost" and move_line.tax_line_id:
                     LINE_TAX_COST += amount
-                    TOTAL_MONTO_FACTURADO += amount
+                    if inv.type == "in_invoice":
+                        TOTAL_MONTO_FACTURADO += amount
+                    else:
+                        TOTAL_MONTO_FACTURADO -= amount
 
-            TOTAL_MONTO_FACTURADO += inv.amount_untaxed * CURRENCY_RATE
+            if inv.type == "in_invoice":
+                TOTAL_MONTO_FACTURADO += inv.amount_untaxed * CURRENCY_RATE
+            else:
+                TOTAL_MONTO_FACTURADO -= inv.amount_untaxed * CURRENCY_RATE
 
             if not inv.partner_id.vat:
                 raise exceptions.UserError(u"El número de RNC/Cédula del"
@@ -159,15 +166,15 @@ class DgiiPurchaseReport(models.Model):
             TIPO_BIENES_SERVICIOS_COMPRADOS = inv.expense_type
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
-                raise exceptions.UserError(u"¡Debe definir el tipo de gasto"
-                                           u" para la posición fiscal {}!"
-                                           " En la factura {}".format(
+                raise exceptions.UserError(
+                    u"¡Debe definir el tipo de gasto para la posición fiscal"
+                    u" {} en la factura {}!".format(
                                              inv.fiscal_position_id.name,
                                              inv.number)
                                            )
-            if not self.env['res.partner'].is_ncf(inv.number, inv.type):
-                raise exceptions.UserError(u"¡El número de NCF {} no es"
-                                           u"válido!".format(inv.number))
+            if not is_ncf(inv.number, inv.type):
+                raise exceptions.UserError(
+                    u"¡El número de NCF {} no es válido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             affected_invoice_id = False
@@ -183,7 +190,7 @@ class DgiiPurchaseReport(models.Model):
                 if not affected_invoice_id:
                     raise exceptions.ValidationError(
                         u"La Nota de Crédito {} no tiene el NCF que afecta en"
-                        " el campo origen".format(inv.number.number))
+                        " el campo origen".format(inv.number))
 
                 elif not len(affected_invoice_id) == 1 and affected_invoice_id:
                     raise exceptions.ValidationError(
