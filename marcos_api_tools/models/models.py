@@ -8,6 +8,12 @@ from tools import is_ncf, _internet_on, is_identification
 class MarcosApiTools(models.Model):
     _name = 'marcos.api.tools'
 
+    def is_identification(self, value):
+        return is_identification(value)
+
+    def is_ncf(self, value, type):
+        return is_ncf(value, type)
+
     @api.model
     def setup(self):
         config_parameter = self.env['ir.config_parameter'].sudo()
