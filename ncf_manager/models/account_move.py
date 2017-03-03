@@ -53,7 +53,7 @@ class AccountMove(models.Model):
             if invoice.amount_total == 0:
                 raise ValidationError(
                     u"¡No puede validar una factura con valor 0!")
-            if invoice.type in ('out_invoice', 'out_refund') and ncf_control is True:
+            if invoice.type in ['out_invoice', 'out_refund'] and ncf_control is True:
                 if not sale_fiscal_type:
                     raise ValidationError(
                         u"Debe especificar el tipo de comprobante para la"
@@ -61,8 +61,8 @@ class AccountMove(models.Model):
                 if (sale_fiscal_type != 'final' and
                    not invoice.partner_id.vat):
                     raise ValidationError(
-                        u"Para este tipo de posición fiscal el Contacto"
-                        " debe de tener un RNC establecido!")
+                        u"¡Para este tipo de Posición Fiscal el Cliente"
+                        u" debe de tener un RNC/Cédula establecido!")
 
                 if not invoice.move_name:
                     if invoice.type == "out_refund":
@@ -81,4 +81,10 @@ class AccountMove(models.Model):
                     invoice.move_name = sequence.with_context(
                             ir_sequence_date=invoice.date_invoice).next_by_id()
                     invoice.reference = invoice.journal_id.sequence_id.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
+
+            if invoice.type in ['in_invoice', 'in_refund']:
+                if invoice.purchase_fiscal_type in ('normal', 'minor', 'informal') and not self.partner_id.vat:
+                    raise ValidationError(
+                        u"¡Para este tipo de Posición Fiscal el Proveedor"
+                        u" debe de tener un RNC/Cédula establecido!")
         return super(AccountMove, self).post()

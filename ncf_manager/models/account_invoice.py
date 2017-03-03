@@ -47,6 +47,9 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     def _default_user_shop(self):
+        if not self:
+            return {}
+            # import pdb; pdb.set_trace()
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config
 
@@ -86,7 +89,7 @@ class AccountInvoice(models.Model):
          ("07", u"07 - Devolución de Productos"),
          ("08", u"08 - Omisión de Productos"),
          ("09", u"09 - Errores en Secuencia de NCF")],
-        string=u"Tipo de anulación", required=True)
+        string=u"Tipo de anulación", copy=False)
 
     pay_to = fields.Many2one("res.partner", string="Pagar a",
                              readonly=True,
@@ -100,7 +103,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange("move_name")
     def onchange_ncf(self):
-        if self.move_name and self.type in ('in_invoice', 'in_refund'):
+        if self.move_name and self.type in ['in_invoice', 'in_refund']:
             if not is_ncf(self.move_name, self.type):
                 self.move_name = False
                 return {
@@ -118,30 +121,13 @@ class AccountInvoice(models.Model):
     def onchange_shop_id(self):
         self.journal_id = self.shop_id.journal_id
 
-    @api.onchange('journal_id')
-    def _onchange_journal_id(self):
-        if self.type in ('in_invoice', 'in_refund'):
-            if self.purchase_fiscal_type == "normal":
-                self.ncf_required = True
-            else:
-                self.ncf_required = False
-
-            if not self._context.get("default_supplier", False):
-                self.move_name = False
-
-                if self.purchase_fiscal_type == "minor":
-                    self.partner_id = (
-                        self.env['res.company']._company_default_get(
-                                 'account.invoice').partner_id.id)
-                    self.ncf_required = False
-
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         super(AccountInvoice, self)._onchange_partner_id()
         if self.partner_id:
-            if self.type in ('out_invoice', 'out_refund'):
+            if self.type in ['out_invoice', 'out_refund']:
                 self.sale_fiscal_type = self.fiscal_position_id.sale_fiscal_type
-            elif self.type in ("in_invoice", "in_refund"):
+            elif self.type in ["in_invoice", "in_refund"]:
                 self.fiscal_position_id = self.partner_id.property_account_position_supplier_id.id
 
     @api.onchange("payment_term_id")
@@ -155,7 +141,7 @@ class AccountInvoice(models.Model):
     @api.onchange("fiscal_position_id")
     def onchange_fiscal_position_id(self):
         if self.fiscal_position_id:
-            if self.type in ('out_invoice', 'out_refund'):
+            if self.type in ['out_invoice', 'out_refund']:
                 if (self.partner_id and self.partner_id.
                    property_account_position_id.id !=
                    self.fiscal_position_id.id):
@@ -163,11 +149,11 @@ class AccountInvoice(models.Model):
                         {"property_account_position_id":
                          self.fiscal_position_id.id})
 
-            elif self.type in ('in_invoice', 'in_refund'):
+            elif self.type in ['in_invoice', 'in_refund']:
                 if self.fiscal_position_id.journal_id:
                     self.journal_id = self.fiscal_position_id.journal_id.id
 
-                elif self.journal_id.purchase_fiscal_type == "normal":
+                if self.journal_id.purchase_fiscal_type == "normal":
                     self.ncf_required = True
                 else:
                     self.ncf_required = False
@@ -213,9 +199,9 @@ class AccountInvoice(models.Model):
                             raise exceptions.UserError(
                                 u"¡El número de comprobante {} del proveedor"
                                 u" {} no es válido! No pasó la validación en"
-                                u" DGII. Verifique que el NCF y el RNC del"
+                                " DGII. Verifique que el NCF y el RNC del"
                                 u" proveedor estén correctamente"
-                                u" digitados.".format(
+                                " digitados.".format(
                                                      invoice.move_name,
                                                      invoice.partner_id.vat))
                     else:
@@ -226,8 +212,8 @@ class AccountInvoice(models.Model):
                             raise exceptions.UserError(
                                 u"¡El número de comprobante {} no es válido."
                                 u" No pasó la validación en DGII.\n\n"
-                                u" Si es un NCF de Proveedor Informal o de"
-                                u" Gasto Menor vefifique si debe solicitar"
+                                " Si es un NCF de Proveedor Informal o de"
+                                " Gasto Menor vefifique si debe solicitar"
                                 u" números nuevos.".format(invoice.move_name))
 
         self.signal_workflow("invoice_open")
@@ -239,35 +225,9 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).create(vals)
         return res
 
-    @api.multi
-    def write(self, vals):
-        for rec in self:
-            if rec.type in ("out_invoice", "out_refund"):
-                if self._context.get("active_model", False) == "sale.order":
-                    vals.update({"fiscal_position_id": rec.partner_id.property_account_position_id.id})
-                else:
-                    if not vals.get("fiscal_position_id", False):
-                        if not rec.fiscal_position_id:
-                            fiscal_position_id = rec.env["account.fiscal.position"].search(
-                                [('sale_fiscal_type', '=', 'final')])
-                            if not fiscal_position_id:
-                                raise exceptions.ValidationError(
-                                    "Antes de generar una factura debe definir"
-                                    " las posiciones fiscales.")
-                            else:
-                                vals.update(
-                                    {"fiscal_position_id":
-                                     fiscal_position_id.id})
-            if rec.type in ("in_invoice", "in_refund"):
-                if vals.get("purchase_fiscal_type", False) == "minor":
-                    vals.update({"partner_id":
-                                self.env.user.company_id.partner_id.id})
-
-        return super(AccountInvoice, self).write(vals)
-
     @api.one
     def copy(self, default=None):
-        if self.type in ("in_refund", "out_refund"):
+        if self.type in ["in_refund", "out_refund"]:
             raise exceptions.UserError(u"¡No está permitido duplicar Notas de"
                                        u" Crédito!")
         return super(AccountInvoice, self).copy(default=default)
