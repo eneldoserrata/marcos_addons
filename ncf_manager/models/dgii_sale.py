@@ -142,18 +142,20 @@ class DgiiSaleReport(models.Model):
             if inv.type == "out_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "out_refund":
-                affected_nvoice_id = self.env["account.invoice"].search(
+                affected_invoice_id = self.env["account.invoice"].search(
                         [('number', '=', inv.origin),
                          ('partner_id', '=', inv.partner_id.id)]
                         )
-                if not len(affected_nvoice_id) == 1 and affected_nvoice_id:
-                    raise exceptions.ValidationError(
-                        u"Una misma Nota de Crédito no puede afectar dos"
-                        " facturas {}".format([rec.number for rec in affected_nvoice_id]))
-                elif not affected_nvoice_id:
+
+                if not affected_invoice_id:
                     raise exceptions.ValidationError(
                         u"La Nota de Crédito {} no tiene el NCF que afecta en"
-                        " el campo origen").format(affected_nvoice_id.number)
+                        " el campo origen".format(inv.number))
+
+                elif not len(affected_invoice_id) == 1 and affected_invoice_id:
+                    raise exceptions.ValidationError(
+                        u"Una misma Nota de Crédito no puede afectar dos"
+                        " facturas {}".format([rec.number for rec in affected_invoice_id]))
                 else:
                     affected_invoice_id = affected_invoice_id.id
 
@@ -197,7 +199,7 @@ class DgiiSaleReport(models.Model):
             lines.append((0, False, {
                           "LINE": LINE,
                           "invoice_id": inv.id,
-                          "affected_nvoice_id": affected_nvoice_id,
+                          "affected_invoice_id": affected_invoice_id,
                           "RNC_CEDULA": RNC_CEDULA,
                           "TIPO_IDENTIFICACION": TIPO_IDENTIFICACION,
                           "NUMERO_COMPROBANTE_FISCAL":
@@ -314,4 +316,4 @@ class DgiiSaleReportline(models.Model):
     inv_partner = fields.Many2one("res.partner",
                                   related="invoice_id.partner_id",
                                   string="Relacionado")
-    affected_nvoice_id = fields.Many2one("account.invoice", "Afecta")
+    affected_invoice_id = fields.Many2one("account.invoice", "Afecta")

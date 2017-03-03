@@ -57,7 +57,7 @@ class DgiiPurchaseReport(models.Model):
     CANTIDAD_REGISTRO = fields.Integer("Cantidad de registros")
     ITBIS_RETENIDO = fields.Float("Total ITBIS Retenido")
     ITBIS_TOTAL = fields.Float("Total ITBIS Pagado")
-    TOTAL_MONTO_FACTURADO = fields.Float("Total Facturad")
+    TOTAL_MONTO_FACTURADO = fields.Float("Total Facturado")
     RETENCION_RENTA = fields.Float(u"Total Retención ISR")
     report_lines = fields.One2many("dgii.purchase.report.line",
                                    "purchase_report_id")
@@ -78,7 +78,7 @@ class DgiiPurchaseReport(models.Model):
     def get_date_range(self):
         if self.month > 12 or self.month < 1:
             self.month = False
-            raise exceptions.ValidationError(u"El mes es inválido!")
+            raise exceptions.ValidationError(u"¡El mes es inválido!")
         last_day = calendar.monthrange(self.year, self.month)[1]
         return (
             "{}-{}-{}".format(str(self.year), str(self.month).zfill(2), "01"),
@@ -133,8 +133,7 @@ class DgiiPurchaseReport(models.Model):
                 if tax_account[move_line.account_id.id] == "itbis":
                     ITBIS_TOTAL += amount
                     LINE_ITBIS_TOTAL += amount
-                elif tax_account[
-                 move_line.account_id.id] == "ritbis" and inv.state == 'paid':
+                elif tax_account[move_line.account_id.id] == "ritbis" and inv.state == 'paid':
                     if int(max
                            (inv.payment_move_line_ids).date.split("-")[1]
                            ) == self.month:
@@ -143,8 +142,7 @@ class DgiiPurchaseReport(models.Model):
                 elif tax_account[move_line.account_id.id] == "isr":
                     RETENCION_RENTA += amount
                     LINE_RETENCION_RENTA += amount
-                elif tax_account[
-                 move_line.account_id.id] == "cost" and move_line.tax_line_id:
+                elif tax_account[move_line.account_id.id] == "cost" and move_line.tax_line_id:
                     LINE_TAX_COST += amount
                     TOTAL_MONTO_FACTURADO += amount
 
@@ -158,8 +156,7 @@ class DgiiPurchaseReport(models.Model):
 
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
             TIPO_IDENTIFICACION = "1" if len(RNC_CEDULA.strip()) == 9 else "2"
-            TIPO_BIENES_SERVICIOS_COMPRADOS = (
-                inv.expense_type)
+            TIPO_BIENES_SERVICIOS_COMPRADOS = inv.expense_type
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
                 raise exceptions.UserError(u"¡Debe definir el tipo de gasto"
@@ -178,14 +175,20 @@ class DgiiPurchaseReport(models.Model):
             if inv.type == "in_invoice":
                 NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "in_refund":
-                affected_nvoice_id = self.env["account.invoice"].search(
+                affected_invoice_id = self.env["account.invoice"].search(
                         [('number', '=', inv.origin),
                          ('partner_id', '=', inv.partner_id.id)]
                          )
-                if not len(affected_nvoice_id) == 1 and affected_nvoice_id:
-                    raise exceptions.ValidationError(u"Una misma nota de crédito no puede afectar dos facturas {}".format([rec.number for rec in affected_nvoice_id]))
-                elif not affected_nvoice_id:
-                    raise exceptions.ValidationError(u"La nota de crédito {} no tiene el NCF que afecta en el campo origen").format(affected_nvoice_id.number)
+
+                if not affected_invoice_id:
+                    raise exceptions.ValidationError(
+                        u"La Nota de Crédito {} no tiene el NCF que afecta en"
+                        " el campo origen".format(inv.number.number))
+
+                elif not len(affected_invoice_id) == 1 and affected_invoice_id:
+                    raise exceptions.ValidationError(
+                        u"Una misma Nota de Crédito no puede afectar dos"
+                        " facturas {}".format([rec.number for rec in affected_invoice_id]))
                 else:
                     affected_invoice_id = affected_invoice_id.id
 
@@ -206,7 +209,7 @@ class DgiiPurchaseReport(models.Model):
                   "TIPO_BIENES_SERVICIOS_COMPRADOS": TIPO_BIENES_SERVICIOS_COMPRADOS,
                   "NUMERO_COMPROBANTE_FISCAL": NUMERO_COMPROBANTE_FISCAL,
                   "NUMERO_COMPROBANTE_MODIFICADO": NUMERO_COMPROBANTE_MODIFICADO,
-                  "affected_nvoice_id": affected_nvoice_id,
+                  "affected_invoice_id": affected_invoice_id,
                   "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
                   "FECHA_PAGO": FECHA_PAGO,
                   "ITBIS_FACTURADO": LINE_ITBIS_TOTAL,
