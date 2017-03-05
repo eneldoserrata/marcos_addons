@@ -47,9 +47,6 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     def _default_user_shop(self):
-        if not self:
-            return {}
-            # import pdb; pdb.set_trace()
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config
 
@@ -77,7 +74,8 @@ class AccountInvoice(models.Model):
          ('11', u'11 - Gastos de Seguro')],
         string=u"Tipo de gasto")
 
-    purchase_fiscal_type = fields.Selection(related="journal_id.purchase_fiscal_type")
+    purchase_fiscal_type = fields.Selection(
+                            related="journal_id.purchase_fiscal_type")
 
     anulation_type = fields.Selection(
         [("01", u"01 - Deterioro de Factura Pre-impresa"),
@@ -105,7 +103,6 @@ class AccountInvoice(models.Model):
     def onchange_ncf(self):
         if self.move_name and self.type in ['in_invoice', 'in_refund']:
             if not is_ncf(self.move_name, self.type):
-                self.move_name = False
                 return {
                     'warning': {
                             'title': u"NCF Inválido",
