@@ -76,10 +76,6 @@ class AccountMove(models.Model):
                     elif sale_fiscal_type == "special":
                         sequence = invoice.shop_id.special_sequence_id
 
-                    if not sequence:
-                        raise ValidationError(
-                            u"Las secuencias para el diario {} de la sucursal"
-                            u" no están configuradas.".format(invoice.shop_id))
                     invoice.shop_id.check_max(sale_fiscal_type,
                                               invoice)
                     invoice.move_name = sequence.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
