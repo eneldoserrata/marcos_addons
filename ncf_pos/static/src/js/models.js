@@ -2,10 +2,13 @@ odoo.define('ncf_pos.ncf_ticket', function (require) {
     "use strict";
 
     var core = require('web.core');
+    var models = require('point_of_sale.models');
     var screens = require('point_of_sale.screens');
     var Model = require('web.DataModel');
 
     var QWeb = core.qweb;
+
+    models.load_fields('res.company', ['street', 'street2', 'city', 'state_id', 'country_id', 'zip', ]);
 
     screens.ReceiptScreenWidget.include({
 

@@ -22,32 +22,6 @@
                             </t>
                         </select>
                     </div>
-                    <div class="client-detail">
-                        <span class="label">Calle</span>
-                        <input class="detail client-address-street" name="street" placeholder="Street" t-att-value="partner.street"/>
-                    </div>
-                    <div class="client-detail">
-                        <span class="label">Ciudad</span>
-                        <input class="detail client-address-city" name="city" placeholder="City" t-att-value="partner.city"/>
-                    </div>
-                    <div class="client-detail">
-                        <span class="label">Código</span>
-                        <input class="detail barcode" name="barcode" t-att-value="partner.barcode || &quot;&quot;"/>
-                    </div>
-                </div>
-                <div class="client-details-right">
-                    <div class="client-detail">
-                        <span class="label">Teléfono</span>
-                        <input class="detail client-phone" name="phone" t-att-value="partner.phone || &quot;&quot;" type="tel"/>
-                    </div>
-                    <div class="client-detail">
-                        <span class="label">Celular</span>
-                        <input class="detail client-mobile" name="mobile" t-att-value="partner.mobile || &quot;&quot;" type="tel"/>
-                    </div>
-                    <div class="client-detail">
-                        <span class="label">Email</span>
-                        <input class="detail client-email" name="email" t-att-value="partner.email || &quot;&quot;" type="email"/>
-                    </div>
                 </div>
             </div>
         </t>
@@ -57,120 +31,212 @@
             <span class="label">RNC/Céd</span>
         </t>
     </t>
-    <t t-extend="PosTicket">
-        <t t-jquery="t[t-esc='moment().format(\'L LT\')']" t-operation="replace"/>
-        <t t-jquery="t[t-esc='order.name']" t-operation="replace">
+  <t t-extend="PosTicket">
+    <t t-jquery=".pos-sale-ticket" t-operation="replace">
+      <div class="pos-sale-ticket">
+        <div>
+          <strong><t t-esc="moment().format('L LT')"/></strong>
+        </div>
+        <br/>
+        <div id="company-logo" align="center">
+            <img t-att-src="receipt.company.logo" width="240px"/>
+        </div>
+        <br/>
+
+        <div align="center">
+            <t t-if="widget.pos.company">
+               <t t-esc="widget.pos.company.name"/><br />
+            </t>
+            <t t-if="widget.pos.company.street">
+               <t t-esc="widget.pos.company.street"/>,
+            </t>
+            <t t-if="widget.pos.company.street2">
+               <t t-esc="widget.pos.company.street2"/>
+            </t>
+        </div>
+
+        <div align="center">
+          <t t-if="widget.pos.company.city">
+            <t t-esc="widget.pos.company.city"/>
+          </t>
+        </div>
+
+        <div align="center">
+          <t t-if="widget.pos.company.phone">
+            <strong>Tel:</strong><t t-esc="widget.pos.company.phone || ''" /><br />
+          </t>
+          <t t-if="widget.pos.company.vat">
+            <strong>RNC:</strong><t t-esc="widget.pos.company.vat"/>
+          </t>
+       </div>
+
+        <div align="center">
+        </div>
+        <br/>
+        <div class="pos-center-align">
             <div class="pos-center-align">
-                <h2>
-                    <t t-esc="order.pos.company.name"/>
-                </h2>
+                <t t-esc="order.name"/>
             </div>
-            <div class="header col-xs-12 company-info" t-attf-style="padding-bottom:0px; padding-left:0px; padding-right:0px;text-align: left;">
-                <div class="mb8" style="font-size:12px !important; padding-bottom:2px;">
-                    <div t-if="widget.pos.company.street or widget.pos.company.street2 or widget.pos.company.zip">
-                        <span class="fa fa-map-marker fa-lg"/>
-                        <span t-esc="widget.pos.company.street"/>
-                        <span t-if="widget.pos.company.street and widget.pos.company.street2">,</span>
-                        <span t-esc="widget.pos.company.street2"/>
-                    </div>
-                    <div t-if="widget.pos.company.city or widget.pos.company.country_id">
-                        <span class="fa fa-map-marker fa-lg"/>
-                        <span t-esc="widget.pos.company.city"/>
-                    </div>
-                    <div t-if="widget.pos.company.phone or widget.pos.company.fax">
-                        <span class="fa fa-phone-square fa-lg"/>
-                        <span t-esc="widget.pos.company.phone"/>
-                        <span t-if="widget.pos.company.phone and widget.pos.company.fax">,</span>
-                        <span t-if="widget.pos.company.fax">Fax:</span>
-                        <span t-esc="widget.pos.company.fax"/>
-                    </div>
-                    <div t-if="widget.pos.company.email">
-                        <span class="fa fa-envelope-square fa-lg"/>
-                        <span t-esc="widget.pos.company.email"/>
-                    </div>
-                    <div t-if="widget.pos.company.website">
-                        <span class="fa fa-globe fa-lg"/>
-                        <span t-esc="widget.pos.company.website"/>
-                    </div>
-                    <div t-if="widget.pos.company.vat">
-                        <span class="fa fa-building fa-lg">RNC:</span>
-                        <span t-esc="widget.pos.company.vat"/>
-                    </div>
-                </div>
-                <div t-attf-style="width:auto; float:left; padding-left:15px; padding-right:15px; padding-top:2px; padding-bottom:2px;">
-                    <span class="fa fa-twitter-square fa-lg" style="padding-left:0px;" t-if="widget.pos.company.twitter"/>
-                    <span t-esc="widget.pos.company.twitter"/>
-                    <span class="fa fa-facebook-square fa-lg" style="padding-left:13px;" t-if="widget.pos.company.facebook"/>
-                    <span t-esc="widget.pos.company.facebook"/>
-                    <span class="fa fa-google-plus-square fa-lg" style="padding-left:13px;" t-if="widget.pos.company.googleplus"/>
-                    <span t-esc="widget.pos.company.googleplus"/>
-                </div>
-            </div>
+            <strong>
+                <strong><t t-esc="order.fiscal_type_name"/><br/></strong>
+                <strong><t t-esc="order.ncf"/><br/></strong>
+                <t t-if="order.origin_ncf">
+                    <strong>Afecta: </strong><span t-esc="order.origin_ncf"/>
+                </t>
+            </strong>
+        </div>
+        <br/>
+        <t t-set="client" t-value="order.get('client')"/>
+        <t t-if="client">
+            <strong>Cliente:</strong><t t-esc="client.name || ''"/>
+            <br t-if="client.vat"/>
+            <t t-if="client.vat">
+                <strong>RNC:</strong><t t-esc="client.vat"/>
+            </t>
         </t>
-        <t t-jquery="t[t-esc='widget.pos.company.name']" t-operation="replace">
-            <div class="pos-center-align">
-                <div class="pos-center-align">
-                    <t t-esc="moment().format('L LT')"/>
-                    <t t-esc="order.name"/>
-                </div>
-                <strong>
-                    <span t-esc="order.fiscal_type_name"/>
-                    <br/>
-                    <span t-esc="order.ncf"/>
-                    <br/>
-                    <t t-if="order.origin_ncf">
-                        <span>Afecta: </span>
-                        <span t-esc="order.origin_ncf"/>
-                    </t>
-                </strong>
+        <br/>
+        <strong>Cajero(a):</strong><t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br/>
+        <strong>Sucursal:</strong><t t-esc="widget.pos.shop.name"/><br/>
+        <br/>
+
+        <div style="border-bottom: 2px solid black;"></div>
+        <t t-if="receipt.header">
+            <div style='text-align:center'>
+                <t t-esc="receipt.header" />
             </div>
             <br/>
-            <t t-set="client" t-value="order.get('client')"/>
-            <t t-if="client">
-                <span>Cliente:</span>
-                <t t-esc="client.name || ''"/>
-                <br t-if="client.vat"/>
-                <t t-if="client.vat">
-                    <span>RNC:</span>
-                    <t t-esc="client.vat"/>
-                </t>
-                <br t-if="client.address"/>
-                <t t-if="client.address">
-                    <span>Dirección:</span>
-                    <t t-esc="client.address || ''"/>
-                </t>
-            </t>
         </t>
-        <t t-jquery="t[t-esc*='widget.pos.company.phone']" t-operation="replace">
-            <t t-if="client">
-                <t t-esc="client.phone || ''"/>
-            </t>
-        </t>
-        <t t-jquery="tr[t-foreach='orderlines']" t-operation="replace">
-            <table class="table">
-                <tr style="border-width: 2px;border-style: dotted;">
-                    <th>Cant.</th>
-                    <th>Desc.</th>
-                    <th class="pos-right-align">Monto</th>
+        <table class='receipt-orderlines'>
+            <thead>
+              <tr>
+                 <th width='40%'><strong>Producto</strong></th>
+                 <th width='20%'><strong>Prec/Und</strong></th>
+                 <th width='20%' class="pos-right-align"><strong>Cant.</strong></th>
+                 <th width='20%' class="pos-right-align"><strong>Valor $</strong></th>
+              </tr>
+              </thead>
+            <tr>
+                <td><div style="border-bottom: 1px solid black;"></div></td>
+                <td><div style="border-bottom: 1px solid black;"></div></td>
+                <td><div style="border-bottom: 1px solid black;"></div></td>
+                <td><div style="border-bottom: 1px solid black;"></div></td>
+            </tr>
+            <tr t-foreach="orderlines" t-as="orderline">
+                <td width='40%'>
+                    <t t-esc="orderline.get_product().display_name"/>
+                     <t t-if="orderline.get_discount() > 0">
+                        <div class="pos-disc-font">
+                            With a <t t-esc="orderline.get_discount()"/>% discount
+                        </div>
+                    </t>
+                </td>
+                <td width='20%' class="pos-center-align">
+                    <t t-esc="widget.format_currency_no_symbol(orderline.price)"/>
+                </td>
+                <td width='20%' class="pos-right-align">
+                    <t t-esc="orderline.get_quantity_str_with_unit()"/>
+                </td>
+                <td width='20%' class="pos-right-align">
+                    <t t-esc="widget.format_currency_no_symbol(orderline.get_display_price())"/>
+                </td>
+            </tr>
+        </table>
+
+        <table>
+         <tr width='100%'>
+            <br />
+              <td width='50%' class="pos-left-align"></td>
+              <td width='50%' class="pos-right-align">
+                  <div style="border-bottom: 1px dashed black"></div>
+              </td>
+         </tr>
+        </table>
+
+        <table class='receipt-total'>
+            <tr width='100%'>
+                <td width='75%' class="pos-right-align">SubTotal:</td>
+                <td width='25%' class="pos-right-align">
+                    <t t-esc="widget.format_currency_no_symbol(order.get_total_without_tax())"/>
+                </td>
+            </tr>
+            <t t-foreach="order.get_tax_details()" t-as="taxdetail">
+                <tr>
+                    <td width='75%' class="pos-right-align"><t t-esc="taxdetail.name"/>:</td>
+                    <td width='25%'  class="pos-right-align">
+                        <t t-esc="widget.format_currency_no_symbol(taxdetail.amount)"/>
+                    </td>
                 </tr>
-                <tr t-as="orderline" t-foreach="orderlines">
-                    <td>
-                        <t t-esc="orderline.get_quantity_str_with_unit()"/>
-                    </td>
-                    <td>
-                        <t t-esc="orderline.get_product().display_name"/>
-                        <t t-if="orderline.get_discount() > 0">
-                            <div class="pos-disc-font">
-                                <span>With a</span>
-                                <t t-esc="orderline.get_discount()">% discount</t>
-                            </div>
-                        </t>
-                    </td>
-                    <td class="pos-right-align">
-                        <t t-esc="widget.format_currency(orderline.get_display_price())"/>
-                    </td>
-                </tr>
-            </table>
+            </t>
+            <tr width='100%'>
+                <td width='75%' class="pos-right-align">Descuento:</td>
+                <td width='25%' class="pos-right-align">
+                    <t t-esc="widget.format_currency_no_symbol(order.get_total_discount())"/>
+                </td>
+            </tr>
+         </table>
+
+         <table>
+            <tr width='100%'>
+             <td width='50%'>
+             </td>
+             <td width='50%'>
+              <div style="border-bottom: 1px solid black;"></div>
+             </td>
+           </tr>
+         </table>
+
+         <table>
+            <tr width='100%' class="emph">
+                <td width='45%' class="pos-right-align">Total:</td>
+                <td width='55%' class="pos-right-align">
+                    <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <table class='receipt-paymentlines'>
+            <t t-foreach="paymentlines" t-as="line">
+              <tr width='100%'>
+                  <td width='75%' class="pos-right-align">
+                      <t t-esc="line.name"/>:
+                  </td>
+                  <td width='25%' class="pos-right-align">
+                      <t t-esc="widget.format_currency_no_symbol(line.get_amount())"/>
+                  </td>
+              </tr>
+            </t>
+        </table>
+
+      <table class='receipt-change'>
+          <tr width='100%'>
+            <td width='75%' class="pos-right-align"><strong>Cambio:</strong></td>
+            <td width='25%' class="pos-right-align">
+              <t t-esc="widget.format_currency_no_symbol(order.get_change())"/>
+            </td>
+        </tr>
+      </table>
+      <br/>
+      <div align="center">
+          <strong>FB: iterativo.do</strong><br/>
+          <strong>info@iterativo.do</strong><br/>
+          <strong>www.iterativo.do</strong>
+      </div>
+      <div t-attf-style="width:auto; float:left; padding-left:15px; padding-right:15px; padding-top:2px; padding-bottom:2px;">
+          <span  t-if="widget.pos.company.twitter" style="padding-left:0px;" class="fa fa-twitter-square fa-lg"/>&#160;
+          <span  t-esc="widget.pos.company.twitter"/>
+          <span  t-if="widget.pos.company.facebook" style="padding-left:13px;" class="fa fa-facebook-square fa-lg"/>&#160;
+          <span  t-esc="widget.pos.company.facebook"/>
+          <span  t-if="widget.pos.company.googleplus" style="padding-left:13px;" class="fa fa-google-plus-square fa-lg"/>&#160;
+          <span  t-esc="widget.pos.company.googleplus"/>
+      </div>
+      <br/>
+      <t t-if="receipt.footer">
+        <br />
+        <div style='text-align:center'>
+            <t t-esc="receipt.footer" />
+        </div>
         </t>
+      </div>
     </t>
+  </t>
 </templates>
