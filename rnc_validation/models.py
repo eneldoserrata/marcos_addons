@@ -34,12 +34,11 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from tools import is_identification, _internet_on, is_ncf
 import requests
 from odoo import models, api, exceptions
+from tools import is_identification, _internet_on, is_ncf
 
 import logging
-
 
 _logger = logging.getLogger(__name__)
 
@@ -95,7 +94,10 @@ class ResPartner(models.Model):
                     vals['vat'] = data['rnc'].strip()
                     vals['name'] = data['name'].strip()
                     vals["comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
-                        data['comercial_name'], data['payment_regimen'], data['status'], data['category'])
+                        data['comercial_name'],
+                        data.get('payment_regimen', ""),
+                        data['status'],
+                        data['category'])
                     vals.update({"company_type": "company"})
                     if len(fiscal_id) == 9:
                         vals.update({"company_type": "company"})
