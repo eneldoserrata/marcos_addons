@@ -216,11 +216,6 @@
         </tr>
       </table>
       <br/>
-      <div align="center">
-          <strong>FB: iterativo.do</strong><br/>
-          <strong>info@iterativo.do</strong><br/>
-          <strong>www.iterativo.do</strong>
-      </div>
       <div t-attf-style="width:auto; float:left; padding-left:15px; padding-right:15px; padding-top:2px; padding-bottom:2px;">
           <span  t-if="widget.pos.company.twitter" style="padding-left:0px;" class="fa fa-twitter-square fa-lg"/>&#160;
           <span  t-esc="widget.pos.company.twitter"/>
