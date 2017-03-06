@@ -9,24 +9,8 @@
                 <input class="detail client-name" name="name" placeholder="Cédula, RNC o Nombre" readonly="1" style="width:50%;font-size: 14px;background-color: #F0EEEE;" t-att-value="partner.name" t-if="partner.vat"/>
             </div>
         </t>
-        <t t-jquery=".client-details-box" t-operation="replace">
-            <div class="client-details-box clearfix">
-                <div class="client-details-left">
-                    <div class="client-detail">
-                        <span class="label">Comprob.</span>
-                        <select class="detail client-fiscal_position" name="property_account_position_id">
-                            <t t-as="fiscal_position" t-foreach="widget.pos.fiscal_positions">
-                                <option t-att-selected="partner.property_account_position_id ? ((fiscal_position.id === partner.property_account_position_id[0]) ? true : false) : false" t-att-value="fiscal_position.id">
-                                    <t t-esc="fiscal_position.name"/>
-                                </option>
-                            </t>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </t>
     </t>
-    <t t-extend="ClientDetails">
+    <t t-extend="client-detail">
         <t t-jquery="span.label:contains('Tax ID')" t-operation="replace">
             <span class="label">RNC/Céd</span>
         </t>
@@ -168,10 +152,12 @@
                 </tr>
             </t>
             <tr width='100%'>
+              <t t-if="order.get_total_discount() > 0">
                 <td width='75%' class="pos-right-align">Descuento:</td>
                 <td width='25%' class="pos-right-align">
                     <t t-esc="widget.format_currency_no_symbol(order.get_total_discount())"/>
                 </td>
+              </t>
             </tr>
          </table>
 
