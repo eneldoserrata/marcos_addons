@@ -54,8 +54,9 @@
     'version': '2.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'l10n_do' 'web_sheet_full_width',
-                'marcos_api_tools', 'save_readonly_fields'],
+    'depends': ['base', 'account', 'l10n_do', 'web_sheet_full_width',
+                'marcos_api_tools'
+                ],
 
     # always loaded
     'data': [
@@ -70,7 +71,6 @@
         'views/dgii_purchase_view.xml',
         'views/dgii_sale_view.xml',
         'views/dgii_cancel_view.xml',
-        'views/account_move_view.xml',
         'views/res_view.xml',
         'data/setup_ncf.xml',
     ],

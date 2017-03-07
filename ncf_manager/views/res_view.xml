@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="dgii_update_partner_name_server_action" model="ir.actions.server">
-        <field name="name">Actulizar razón social desde DGII</field>
+        <field name="name">Actualizar razón social desde DGII</field>
         <field name="model_id" ref="model_res_partner"/>
         <field name="state">code</field>
         <field name="code">
@@ -59,11 +59,6 @@
         </field>
     </record>
 
-            <field name="property_account_position_id" position="replace">
-                <field attrs="{'domain': [('supplier','=',False)]}" name="property_account_position_id"/>
-                <field attrs="{'domain': [('supplier','=',True)]}" name="property_account_position_supplier_id"/>
-            </field>
-
     <record id="view_partner_property_form" model="ir.ui.view">
         <field name="name">res.partner.property.form.inherit</field>
         <field name="model">res.partner</field>
@@ -83,4 +78,5 @@
             </group>
         </field>
     </record>
+
 </odoo>
