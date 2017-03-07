@@ -1,3 +1,2 @@
 # -*- coding: utf-8 -*-
-
-import rate_update_wizard
+from . import update_rate_wizard

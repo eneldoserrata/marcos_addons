@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
 
         <record id="ncf_manager_account_invoice_inherit_form" model="ir.ui.view">
@@ -14,12 +14,18 @@
                     <field name="fiscal_nif" attrs="{'invisible': [('fiscal_nif','=','false')]}"/>
                 </field>
 
-                <xpath expr="//div[@class='oe_button_box']" position="inside">
-                    <widget type="ipf_button_post_invoice"/>
+                <xpath expr="//sheet//label" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <widget type="ipf_button_post_invoice"/>
+                    </div>
                 </xpath>
 
             </field>
         </record>
 
     </data>
+<<<<<<< HEAD
+</odoo>
+=======
 </openerp>
+>>>>>>> 623c88d5a388698a2b65a59b10a2584476295560

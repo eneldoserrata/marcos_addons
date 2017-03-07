@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,16 +30,13 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
-
-
-from openerp import models, fields, api, exceptions
-import re
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+from odoo import models, fields, api, exceptions
 import base64
-import openerp.addons.decimal_precision as dp
+import odoo.addons.decimal_precision as dp
 
 
 class ipf_printer_config(models.Model):
@@ -56,22 +55,23 @@ class ipf_printer_config(models.Model):
 
     name = fields.Char("Descripcion", required=True)
     host = fields.Char("Host", required=True)
-    print_source = fields.Selection([('server','Desde el servidor'),('browser','Desde el navegador de internet')],
-                                    string="Fuente de impresion", default="browser", required=True,
-                                    help="""
-                                    Desde el navegador de internet: Los comandos seran enviados a la impresora desde
-                                    su navegador de internet google Chrome con la extencion de marcos instalada y activada,
-                                     (Solo funciona con google Chrome).
-                                     <br/>
-                                     Desde el servidor: Los comandos seran enviados al servidor de odoo y este enviara
-                                     los comandos de impresion a la impresora fiscal, debe de tener en cuanta la configuracion
-                                     de router en caso de tener Odoo hosteado en la nube.
+    print_source = fields.Selection(
+        [('server', 'Desde el servidor'),
+         ('browser','Desde el navegador de internet')],
+        string="Fuente de impresion", default="browser", required=True,
+        help="""Desde el navegador de internet: Los comandos seran enviados a la impresora desde su navegador de internet google Chrome con la extencion de marcos instalada y activada, (Solo funciona con google Chrome). <br/> Desde el servidor: Los comandos seran enviados al servidor de odoo y este enviara los comandos de impresion a la impresora fiscal, debe de tener en cuanta la configuracion de router en caso de tener Odoo hosteado en la nube.
                                     """)
-    user_ids = fields.Many2many('res.users', string="Usuarios", required=True, domain=_user_ids_filter)
+    user_ids = fields.Many2many('res.users', string="Usuarios", required=True,
+                                domain=_user_ids_filter)
     print_copy = fields.Boolean("Imprimir con copia", default=False)
-    subsidiary = fields.Many2one("shop.ncf.config", string="Sucursal", required=True)
-    daily_book_ids = fields.One2many("ipf.daily.book", "printer_id", string="Libros diarios")
-    state = fields.Selection([("deactivate", "Desactivada"), ("active", "Activa")], default="deactivate")
+    subsidiary = fields.Many2one("shop.ncf.config", string="Sucursal",
+                                 required=True)
+    daily_book_ids = fields.One2many("ipf.daily.book", "printer_id",
+                                     string="Libros diarios")
+    state = fields.Selection(
+        [("deactivate", "Desactivada"),
+         ("active", "Activa")],
+        default="deactivate")
     serial = fields.Char("Serial de la impresora", readonly=True)
 
     def set_book_totals(self, book):
@@ -160,7 +160,7 @@ class ipf_printer_config(models.Model):
         if self._context.get("active_model", False) == "pos.order" and nif:
             invoice_id = self.env["pos.order"].browse(id).invoice_id
         elif nif:
-            invoice_id = self.env["account.invoices"].browse(id)
+            invoice_id = self.env["account.invoice"].browse(id)
 
         if nif:
             invoice_id.fiscal_nif = nif
@@ -180,7 +180,6 @@ class ipf_printer_config(models.Model):
     @api.model
     def ipf_print_nofiscal(self):
         pass
-
 
 
 class ipf_daily_book(models.Model):

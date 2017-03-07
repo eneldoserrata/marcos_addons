@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
-
-
-        <!-- Inherit Form View to Modify it -->
-        <record id="inherit_view_company_inherit_form" model="ir.ui.view">
-            <field name="name">inherit_view_company_inherit_form</field>
-            <field name="model">res.company</field>
-            <field name="inherit_id" ref="account.view_company_inherit_form"/>
-            <field name="arch" type="xml">
-
-                <field name="tax_calculation_rounding_method" position="after">
-                    <field name="payment_tax_on_606"/>
-                </field>
-
-            </field>
-        </record>
 
         <record id="ncf_manager_dgii_purchase_report_form" model="ir.ui.view">
             <field name="name">ncf manager dgii purchase report form</field>
@@ -31,7 +16,7 @@
                             <field name="company_id" readonly="[('state','=','done')]"/>
                             <field name="year" placeholder="2018" required="1" attrs="{'readonly': [('state','=','done')]}"/>
                             <field name="month" placeholder="12" required="1" attrs="{'readonly': [('state','=','done')]}"/>
-                            <field name="txt" filename="txt_filename"/>
+                            <field filename="txt_name" name="txt"/>
                         </group>
                         <group>
                             <field name="CANTIDAD_REGISTRO" readonly="1"/>
@@ -50,10 +35,9 @@
                                 <tree>
                                     <field name="LINE"/>
                                     <field name="RNC_CEDULA"/>
-                                    <field name="inv_partner"/>
                                     <field name="TIPO_BIENES_SERVICIOS_COMPRADOS"/>
-                                    <field name="invoice_id"/>
-                                    <field name="affected_nvoice_id"/>
+                                    <field name="NUMERO_COMPROBANTE_FISCAL"/>
+                                    <field name="NUMERO_COMPROBANTE_MODIFICADO"/>
                                     <field name="FECHA_COMPROBANTE"/>
                                     <field name="FECHA_PAGO"/>
                                     <field name="ITBIS_FACTURADO"/>
@@ -100,8 +84,8 @@
         </record>
 
         <!-- This Menu Item must have a parent and an action -->
-        <menuitem id="ncf_manager_dgii_purchase_report_menu" name="Reporte 606" parent="marcos_account_dgii_flies_menu"
+        <menuitem id="ncf_manager_dgii_purchase_report_menu" name="Reporte 606" parent="marcos_account_dgii_file_menu"
                   action="ncf_manager_dgii_purchase_report_action" sequence="1"/>
 
     </data>
-</openerp>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="currency_rates_account_invoice_form" model="ir.ui.view">
+        <field name="name">Currency Rates account invoice form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <field name="number" position="after">
+                <field invisible="0" name="is_company_currency"/>
+            </field>
+            <xpath expr="//sheet//label" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button attrs="{'invisible': [('is_company_currency', '=', True)]}" class="oe_stat_button" icon="fa-money" name="%(update_rate_wizard_action)d" type="action">
+                        <field name="invoice_rate" string="Tasa" widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+    <record id="currency_rates_supplier_account_invoice_form" model="ir.ui.view">
+        <field name="name">Currency Rates supplier account invoice form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="number" position="after">
+                <field invisible="1" name="is_company_currency"/>
+            </field>
+            <xpath expr="//sheet//label" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button attrs="{'invisible': [('is_company_currency', '=', True)]}" class="oe_stat_button" icon="fa-money" name="%(update_rate_wizard_action)d" type="action">
+                        <field name="invoice_rate" string="Tasa" widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

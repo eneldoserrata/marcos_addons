@@ -1,104 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
+    <report file="comisiones" id="commission_report_qweb" model="commission.report" name="marcos_commissions.sale_commission_report" report_type="qweb-pdf" string="Comisiones"/>
+    <template id="sale_commission_report" name="Sale Commision">
+        <t t-call="report.html_container">
+            <t t-as="o" t-foreach="docs">
+                <t t-call="report.external_layout">
+                    <div class="page">
+                        <h3>Reporte comisiones</h3>
+                        <table class="table">
+                            <tr>
+                                <th>
+                                    <h5>Desde
 
-        <report
-                id="commission_report_qweb"
-                model="commission.report"
-                string="Comisiones"
-                report_type="qweb-pdf"
-                name="marcos_commissions.sale_commission_report"
-                file="comisiones"
-        />
+                                        <span t-field="o.date_start"/>
+                                        hasta
 
-        <template id="sale_commission_report" name="Sale Commision">
-            <t t-call="report.html_container">
-                <t t-foreach="docs" t-as="o">
-                    <t t-call="report.external_layout">
-                        <div class="page">
-                            <h3>Reporte comisiones</h3>
+                                        <span t-field="o.date_end"/></h5>
+                                </th>
+                                <th>
+                                    <h5>Vendedor:
 
+                                        <span t-field="o.employee_id"/></h5>
+                                </th>
+                            </tr>
+                        </table>
+                        <t t-set="gran_total" t-value="0"/>
+                        <t t-set="report_detail" t-value="o.get_report_data()"/>
+                        <table class="table table table-condensed table-striped" style="font-size:11px;" t-as="client_line" t-foreach="report_detail">
+                            <t t-set="total" t-value="0"/>
+                            <tr>
+                                <th class="text-center" colspan="6">Cliente:
 
-                            <table class="table">
-                                <tr>
-                                    <th>
-                                        <h5>
-                                            Desde
-                                            <span t-field="o.date_start"/>
-                                            hasta
-                                            <span t-field="o.date_end"/>
-                                        </h5>
-                                    </th>
-                                    <th>
-                                        <h5>Vendedor:
-                                            <span t-field="o.employee_id"/>
-                                        </h5>
-                                    </th>
-                                </tr>
-                            </table>
+                                    <span t-esc="client_line[0]"/></th>
+                            </tr>
+                            <tr>
+                                <th>Fecha del pago</th>
+                                <th>Pago</th>
+                                <th>Fecha de la factura</th>
+                                <th>Factura</th>
+                                <th>Monto sin impuesto</th>
+                                <th>Comisión por cobro</th>
+                            </tr>
+                            <tr t-as="line" t-foreach="client_line[1]">
+                                <td>
+                                    <span t-esc="line['payemnt_date']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['payment_id']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['invoice_date']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['invoice_id']"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="line['amount_untaxed']" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.company_currency_id&quot;}"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="line['amount']" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.company_currency_id&quot;}"/>
+                                </td>
+                                <t t-set="total" t-value="total+line['amount']"/>
+                                <t t-set="gran_total" t-value="gran_total+line['amount']"/>
+                            </tr>
+                            <tr>
+                                <td class="text-right" colspan="5">TOTAL</td>
+                                <td class="text-right">
+                                    <span t-esc="total" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.company_currency_id&quot;}"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <h4>COMISION TOTAL:
 
-
-                            <t t-set="gran_total" t-value="0"/>
-                            <t t-set="report_detail" t-value="o.get_report_data()"/>
-
-
-                            <table t-foreach="report_detail" t-as="client_line"
-                                   class="table table table-condensed table-striped" style="font-size:11px;">
-                                <t t-set="total" t-value="0"/>
-                                <tr>
-                                    <th colspan="6" class="text-center">Cliente:
-                                        <span t-esc="client_line[0]"/>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>Fecha del pago</th>
-                                    <th>Pago</th>
-                                    <th>Fecha de la factura</th>
-                                    <th>Factura</th>
-                                    <th>Monto sin impuesto</th>
-                                    <th>Comisión por cobro</th>
-                                </tr>
-                                <tr t-foreach="client_line[1]" t-as="line">
-                                    <td>
-                                        <span t-esc="line['payemnt_date']"/>
-                                    </td>
-                                    <td>
-                                        <span t-esc="line['payment_id']"/>
-                                    </td>
-                                    <td>
-                                        <span t-esc="line['invoice_date']"/>
-                                    </td>
-                                    <td>
-                                        <span t-esc="line['invoice_id']"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-esc="line['amount_untaxed']"
-                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-esc="line['amount']"
-                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                                    </td>
-                                    <t t-set="total" t-value="total+line['amount']"/>
-                                    <t t-set="gran_total" t-value="gran_total+line['amount']"/>
-                                </tr>
-                                <tr>
-                                    <td colspan="5" class="text-right">TOTAL</td>
-                                    <td class="text-right">
-                                        <span t-esc="total"
-                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                                    </td>
-                                </tr>
-                            </table>
-                            <h4>COMISION TOTAL:
-                            <span t-esc="gran_total"
-                                              t-esc-options='{"widget": "monetary", "display_currency": "o.company_currency_id"}'/>
-                            </h4>
-                        </div>
-                    </t>
+                            <span t-esc="gran_total" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.company_currency_id&quot;}"/></h4>
+                    </div>
                 </t>
             </t>
-        </template>
-
-    </data>
-</openerp>
+        </t>
+    </template>
+</odoo>
