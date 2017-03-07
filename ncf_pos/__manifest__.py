@@ -34,4 +34,36 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from . import sale
+{
+    'name': "NCF POS",
+
+    'summary': """
+        Localizacion Para Republica Dominicana
+        Integracion con NCF""",
+
+    'description': """
+        Permite la integracion de los numeros de comprbantes fiscales y ajusta
+        la imprecion de ticket para estos fines`.
+    """,
+
+    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
+    'website': "http://marcos.do",
+
+    'category': 'Localization',
+    'version': '9.0',
+
+    # any module necessary for this one to work correctly
+    'depends': ['base', 'point_of_sale', 'ncf_manager'],
+
+    # always loaded
+    'data': [
+        'security/ir.model.access.csv',
+        'views/templates.xml',
+        'views/pos_view.xml',
+        '',
+    ],
+    # only loaded in demonstration mode
+    'demo': [],
+    'qweb': ['static/src/xml/pos.xml'],
+    'license': "Other proprietary"
+}

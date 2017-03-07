@@ -34,33 +34,12 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-{
-    'name': "Control en ventas",
+from odoo import models, fields
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Agrega control de acceso a los usuario para realizar las ventas""",
 
-    'description': """
-        Restricciones de funcionalidades en las ventas.
-    """,
+class PosConfig(models.Model):
+    _inherit = 'pos.config'
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Localization',
-    'version': '9.0',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'sale', 'purchase'],
-
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-    ],
-    'license': "Other proprietary"
-}
+    default_partner_id = fields.Many2one("res.partner",
+                                         string="Cliente Contado",
+                                         required=True)

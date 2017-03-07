@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <template id="assets_backend" inherit_id="point_of_sale.assets" name="pos_multi_session assets">
-        <xpath expr="." position="inside">
-            <script src="/pos_control/static/src/js/pos_orders.js" type="text/javascript"/>
-        </xpath>
-    </template>
-</odoo>

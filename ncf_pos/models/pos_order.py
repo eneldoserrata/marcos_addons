@@ -34,22 +34,11 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-from odoo import models, fields, api, tools, _
-from odoo.exceptions import UserError
+from odoo import models, api, tools
 import psycopg2
 import time
 import logging
 _logger = logging.getLogger(__name__)
-
-
-class PosConfig(models.Model):
-    _inherit = 'pos.config'
-
-    default_partner_id = fields.Many2one("res.partner",
-                                         string="Cliente de Contado")
-    fiscal_position_ids = fields.Many2many('account.fiscal.position',
-                                           string='Fiscal Positions',
-                                           domain=[('supplier', '=', False)])
 
 
 class PosOrder(models.Model):
@@ -131,23 +120,3 @@ class PosOrder(models.Model):
             res.update({"fiscal_type": "special", "fiscal_type_name": "FACTURA PARA REGIMENES ESPECIALES"})
 
         return res
-
-
-class PosSession(models.Model):
-    _inherit = "pos.session"
-
-    def _confirm_orders(self):
-        super(PosSession, self)._confirm_orders()
-        for session in self:
-            company_id = session.config_id.journal_id.company_id.id
-            orders = session.order_ids.filtered(lambda order: order.state == 'paid')
-            journal_id = self.env['ir.config_parameter'].sudo().get_param(
-                'pos.closing.journal_id_%s' % company_id, default=session.config_id.journal_id.id)
-
-            move = self.env['pos.order'].with_context(force_company=company_id)._create_account_move(session.start_at, session.name, int(journal_id), company_id)
-            orders.with_context(force_company=company_id)._create_account_move_line(session, move)
-            for order in session.order_ids.filtered(lambda o: o.state not in ['done', 'invoiced']):
-                if order.state not in ('paid'):
-                    raise UserError(_("You cannot confirm all orders of this session, because they have not the 'paid' status"))
-                order.action_pos_order_done()
-            orders._reconcile_payments()
