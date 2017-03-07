@@ -62,9 +62,11 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views.xml'
+        'views.xml',
+        'data/data.xml'
     ],
     "price": 200,
     'currency': 'EUR',
-    'license': "Other proprietary"
+    'license': "Other proprietary",
+    'installable': False
 }

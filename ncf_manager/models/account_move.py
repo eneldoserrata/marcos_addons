@@ -34,7 +34,6 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
 from odoo import models, api
 from odoo.exceptions import ValidationError
 
@@ -49,34 +48,44 @@ class AccountMove(models.Model):
 
         if invoice:
             sale_fiscal_type = invoice.fiscal_position_id.sale_fiscal_type
-            ncf_control = invoice.journal_id.ncf_control
             if invoice.amount_total == 0:
                 raise ValidationError(
                     u"¡No puede validar una factura con valor 0!")
-            if invoice.type in ['out_invoice', 'out_refund'] and ncf_control is True:
-                if not sale_fiscal_type:
-                    raise ValidationError(
-                        u"Debe especificar el tipo de comprobante para la"
-                        " venta.")
-                if (sale_fiscal_type != 'final' and
-                   not invoice.partner_id.vat):
-                    raise ValidationError(
-                        u"¡Para este tipo de Posición Fiscal el Cliente"
-                        u" debe de tener un RNC/Cédula establecido!")
 
                 if not invoice.move_name:
-                    if invoice.type == "out_refund":
+                    if invoice.is_nd:
+                        sequence = invoice.shop_id.nd_sequence_id
+                        active_sequence = invoice.shop_id.nd_active
+                        sequence_type = u"Nota de Débito"
+                    elif invoice.type == "out_refund":
                         sequence = invoice.shop_id.nc_sequence_id
+                        active_sequence = invoice.shop_id.nc_active
+                        sequence_type = u"Nota de Crédito"
                     elif sale_fiscal_type == "final":
                         sequence = invoice.shop_id.final_sequence_id
+                        active_sequence = invoice.shop_id.final_active
+                        sequence_type = u"Cosumidor Final"
                     elif sale_fiscal_type == "fiscal":
                         sequence = invoice.shop_id.fiscal_sequence_id
+                        active_sequence = invoice.shop_id.fiscal_active
+                        sequence_type = u"Crédito Fiscal"
                     elif sale_fiscal_type == "gov":
                         sequence = invoice.shop_id.gov_sequence_id
+                        active_sequence = invoice.shop_id.gov_active
+                        sequence_type = u"Gubernamentales"
                     elif sale_fiscal_type == "special":
                         sequence = invoice.shop_id.special_sequence_id
+                        active_sequence = invoice.shop_id.special_active
+                        sequence_type = u"RegÍmenes Especiales"
+                    elif sale_fiscal_type == "unico":
+                        sequence = invoice.shop_id.special_sequence_id
+                        active_sequence = invoice.shop_id.special_active
+                        sequence_type = u"Único Ingreso"
 
-                    invoice.shop_id.check_max(sale_fiscal_type,
+                    if not active_sequence:
+                        raise ValidationError(u"El NCF para {} no está activado.".format(sequence_type))
+
+                    invoice.shop_id.check_max(invoice.sale_fiscal_type,
                                               invoice)
                     invoice.move_name = sequence.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
                     invoice.reference = invoice.journal_id.sequence_id.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
@@ -86,4 +95,5 @@ class AccountMove(models.Model):
                     raise ValidationError(
                         u"¡Para este tipo de Posición Fiscal el Proveedor"
                         u" debe de tener un RNC/Cédula establecido!")
+
         return super(AccountMove, self).post()

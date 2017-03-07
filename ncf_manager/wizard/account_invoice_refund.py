@@ -1,74 +1,122 @@
 # -*- coding: utf-8 -*-
-###############################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
-#  (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
-#  See LICENSE file for full copyright and licensing details.
-#
-# Odoo Proprietary License v1.0
-#
-# This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it,
-# unless you gave them your consent)
-# if you have purchased a valid license
-# from the authors, typically via Odoo Apps, or if you have received a written
-# agreement from the authors of the Software (see the COPYRIGHT file).
-#
-# You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without
-# copying any source code or material from the Software. You may distribute
-# those modules under the license of your choice, provided that this license is
-# compatible with the terms of the Odoo Proprietary License (For example:
-# LGPL, MIT, or proprietary licenses similar to this one).
-#
-# It is forbidden to publish, distribute, sublicense, or sell copies of the
-# Softwar or modified copies of the Software.
-#
-# The above copyright notice and this permission notice must be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-# USE OR OTHER DEALINGS IN THE SOFTWARE.
-###############################################################################
+# Copyright 2004-2011 Pexego Sistemas Informáticos. (http://pexego.es)
+# Copyright 2014 Pedro M. Baeza <pedro.baeza@serviciosbaeza.com>
+# Copyright 2016 Antonio Espinosa <antonio.espinosa@tecnativa.com>
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+import requests
 
-from odoo import models, fields, api
-from ..models.tools import is_ncf
+from odoo import models, api, fields, exceptions
 
 
-class InheritedAccountInvoiceRefund(models.TransientModel):
-    _inherit = 'account.invoice.refund'
+class AccountInvoiceRefund(models.TransientModel):
+    _inherit = "account.invoice.refund"
 
-    refund_ncf = fields.Char(u"NCF nota de crédito", size=19)
+    filter_refund = fields.Selection(
+        [('refund', u'Crear'),
+         ('cancel', u'Cancelar'),
+         ('modify', u'Modificar'),
+         ('discount', u'Descuento'),
+         ('nd', u'Nota de débido')
+         ], default='refund', string='Opciones', required=True,
+        help='Refund base on this type. You can not Modify and Cancel if the invoice is already reconciled')
+    amount = fields.Float(u"Monto")
+    account_id = fields.Many2one(u"account.account", string=u"Cuenta contable")
+    supplier_ncf = fields.Char(string="NCF que afecta", size=19)
     invoice_type = fields.Char(default=lambda s: s._context.get("type", False))
 
-    @api.onchange("refund_ncf")
-    def onchange_ncf(self):
-        if self.refund_ncf:
-            if not is_ncf(self.refund_ncf, "in_refund"):
-                self.refund_ncf = False
-                return {
-                    'warning': {
-                     'title': "NCF invalido",
-                     'message': "El numero de comprobante fiscal no es valido\
-                      verifique de que no esta digitando un comprobante de\
-                      consumidor final codigo 02 o revise si lo ha \
-                      digitado incorrectamente"
-                      }
+    @api.onchange("filter_refund")
+    def onchange_filter_refund(self):
+        self.supplier_ncf = False
+        self.amount = False
+        self.account_id = False
+
+    @api.multi
+    def compute_refund(self, mode='refund'):
+        result = super(AccountInvoiceRefund, self).compute_refund(mode)
+
+        active_ids = self.env.context.get('active_ids')
+        if not active_ids:  # pragma: no cover
+            return result
+        # An example of result['domain'] computed by the parent wizard is:
+        # [('type', '=', 'out_refund'), ('id', 'in', [43L, 44L])]
+        # The created refund invoice is the first invoice in the
+        # ('id', 'in', ...) tupla
+        created_inv = [x[2] for x in result['domain']
+                       if x[0] == 'id' and x[1] == 'in'][0]
+        if mode == 'modify':
+            # Remove pairs ids, because they are new draft invoices
+            del created_inv[1::2]
+
+        if created_inv:
+            description = self[0].description or ''
+            for idx, refund_id in enumerate(created_inv):
+                origin_inv_id = active_ids[idx]
+                refund = self.env['account.invoice'].browse(refund_id)
+                vals = {
+                    'origin_invoice_ids': [(6, 0, [origin_inv_id])],
+                    'refund_reason': description,
                 }
+
+                if mode in ("nd","discount"):
+
+                    new_line = refund.invoice_line_ids[0].copy({"product_id": False,
+                                                                "name": self.description,
+                                                                "account_id": self.account_id.id,
+                                                                "quantity": 1,
+                                                                "price_unit": self.amount
+                                                                })
+                    vals.update({"invoice_line_ids": [(6, False, [new_line.id])]})
+
+                    if mode == "nd":
+                        vals.update({"is_nd": True})
+
+                        if refund.type == "out_refund":
+                            vals.update({"type": "out_invoice"})
+
+                        if refund.type == "in_refund":
+                            vals.update({"type": "in_invoice"})
+
+                origin_inv = self.env['account.invoice'].browse(origin_inv_id)
+
+                if self.supplier_ncf:
+                    vals.update({"is_nd": self.supplier_ncf,
+                                 "move_name": self.supplier_ncf,
+                                 "purchase_fiscal_type": origin_inv.purchase_fiscal_type})
+
+                refund.write(vals)
+
+                # Try to match refund invoice lines with original invoice lines
+                refund.match_origin_lines(origin_inv)
+
+        return result
 
     @api.multi
     def invoice_refund(self):
+        active_id = self._context.get("active_id", False)
+        if active_id:
+            invoice = self.env["account.invoice"].browse(active_id)
 
-        res = super(InheritedAccountInvoiceRefund, self).invoice_refund()
-        if self._context.get("type", False) == "in_invoice":
-            action_domain = res.get("domain", False)
-            if action_domain:
-                refund_id = action_domain[1][2][0]
-                self.env['account.invoice'].browse(refund_id).write({
-                 "move_name": self.refund_ncf, "ncf_required": True})
+            if invoice.state == "paid" and invoice.type in ('out_invoice', 'in_invoice') and self.filter_refund not in ('nd'):
+                raise exceptions.ValidationError(u"No puede aplicar Notas de Crédito a una factura pagada.")
 
-        return res
+            if self.supplier_ncf:
+                if self.filter_refund == 'nd' and self.supplier_ncf[9:-8] != "03":
+                    raise exceptions.ValidationError(u"El NCF digitado no es válido para Notas de Débito.")
+                elif self.supplier_ncf[9:-8] != "04":
+                    raise exceptions.ValidationError(u"El NCF digitado no es válido para Notas de Crédito.")
+
+            if self.supplier_ncf and invoice.journal_id.ncf_remote_validation:
+                    request_params = self.env["marcos.api.tools"].get_marcos_api_request_params()
+                    if request_params[0] == 1:
+                        res = requests.get('{}/ncf/{}/{}'.format(request_params[1], invoice.partner_id.vat, self.supplier_ncf),proxies=request_params[2])
+                        if res.status_code == 200 and res.json().get("valid", False) is False:
+                            return (500, u"NCF Inválido",
+                                    u"¡El número de comprobante {} del proveedor"
+                                    u" {} no es válido! No pasó la validación en"
+                                    " DGII. Verifique que el NCF y el RNC del"
+                                    u" proveedor estén correctamente"
+                                    " digitados.".format(invoice.move_name,
+                                                         invoice.partner_id.name))
+        ctx = dict(self._context) or {}
+        ctx.update({"validate_ncf": False})
+        return super(AccountInvoiceRefund, self.with_context(ctx)).invoice_refund()

@@ -99,11 +99,13 @@ class CommissionReport(models.Model):
         for invoice_id in invoice_ids:
             res = {"sale": 0, "paid": 0}
 
-            sale_commission_paid = self.env["commission.report.detail"].search([('invoice_id', '=', invoice_id.id),
-                                                                                ('sale_commission_amount', '!=', 0)])
+            sale_commission_paid = self.env["commission.report.detail"].search(
+                [('invoice_id', '=', invoice_id.id),
+                 ('sale_commission_amount', '!=', 0)])
 
-            paid_commission_paid = self.env["commission.report.detail"].search([('invoice_id', '=', invoice_id.id),
-                                                                                ('sale_payment_amount', '!=', 0)])
+            paid_commission_paid = self.env["commission.report.detail"].search(
+                [('invoice_id', '=', invoice_id.id),
+                 ('sale_payment_amount', '!=', 0)])
 
             for invoice_line in invoice_id.invoice_line_ids:
 
@@ -111,13 +113,15 @@ class CommissionReport(models.Model):
                     if not sale_commission_paid:
                         sale_comission = commission_product[invoice_line.product_id.id][0]
                         if sale_comission:
-                            res["sale"] += ((
-                                            invoice_line.price_subtotal_signed * sale_comission) / 100)
+                            res["sale"] += (
+                                (invoice_line.price_subtotal_signed *
+                                 sale_comission) / 100)
                     if not paid_commission_paid:
                         paid_comission = commission_product[invoice_line.product_id.id][1]
                         if paid_comission:
-                            res["paid"] += ((
-                                            invoice_line.price_subtotal_signed * paid_comission) / 100)
+                            res["paid"] += (
+                                (invoice_line.price_subtotal_signed *
+                                 paid_comission) / 100)
 
                 elif invoice_line.product_id.categ_id.id in commission_category.keys():
                     if not sale_commission_paid:
@@ -142,17 +146,21 @@ class CommissionReport(models.Model):
         for rec in self:
             self.commission_detail_ids.unlink()
 
-            commissions_config = self.env["commissions.config"].search([('employee_ids', 'in', [rec.employee_id.id])])
+            commissions_config = self.env["commissions.config"].search(
+                                [('employee_ids', 'in', [rec.employee_id.id])])
             if commissions_config:
-                partner_ids = self.env["res.partner"].search([('employee_id', '=', rec.employee_id.id)])
+                partner_ids = self.env["res.partner"].search(
+                                    [('employee_id', '=', rec.employee_id.id)])
                 if partner_ids:
                     for partner_id in partner_ids:
 
-                        payment_ids = self.env["account.payment"].search([('partner_id','=',partner_id.id),
-                                                                          ('partner_type','=','customer'),
-                                                                          ('payment_date','>=',self.date_start),
-                                                                          ('payment_date', '<=', self.date_end),
-                                                                          ('state','in',['posted','sent','reconciled'])])
+                        payment_ids = self.env["account.payment"].search(
+                            [('partner_id', '=', partner_id.id),
+                             ('partner_type', '=', 'customer'),
+                             ('payment_date', '>=', self.date_start),
+                             ('payment_date', '<=', self.date_end),
+                             ('state', 'in', ['posted', 'sent', 'reconciled'])]
+                            )
                         for payment_id in payment_ids:
                             invoice_ids = payment_id.invoice_ids.filtered(lambda r: r.state == "paid")
 
@@ -168,15 +176,15 @@ class CommissionReport(models.Model):
     def get_report_data(self):
         report_detail = {}
         for line in self.commission_detail_ids:
-            if not line.partner_id.name in report_detail.keys():
+            if line.partner_id.name not in report_detail.keys():
                 report_detail.update({line.partner_id.name: []})
-            report_detail[line.partner_id.name].append({"payemnt_date":line.payemnt_date,
-                                                        "payment_id": line.payment_id.name,
-                                                        "invoice_date": line.invoice_date,
-                                                        "invoice_id": line.invoice_id.number,
-                                                        "amount_untaxed": line.amount_untaxed,
-                                                        "amount": line.amount,
-                                                        })
+            report_detail[line.partner_id.name].append(
+                    {"payemnt_date": line.payemnt_date,
+                     "payment_id": line.payment_id.name,
+                     "invoice_date": line.invoice_date,
+                     "invoice_id": line.invoice_id.number,
+                     "amount_untaxed": line.amount_untaxed,
+                     "amount": line.amount})
         lista = []
         for item in report_detail.items():
             lista.append(item)
@@ -194,13 +202,21 @@ class CommissionReportDetail(models.Model):
 
     commission_report_id = fields.Many2one("commission.report")
     payment_id = fields.Many2one("account.payment", string="Pago")
-    payemnt_date = fields.Date(string="Fecha del Pago", related="payment_id.payment_date")
-    invoice_id = fields.Many2one("account.invoice", string="Factura / Referencia")
-    invoice_date = fields.Date(related="invoice_id.date_invoice", string="Fecha de la factura")
-    partner_id = fields.Many2one("res.partner", related="invoice_id.partner_id", string="Cliente")
+    payemnt_date = fields.Date(string="Fecha del Pago",
+                               related="payment_id.payment_date")
+    invoice_id = fields.Many2one("account.invoice",
+                                 string="Factura / Referencia")
+    invoice_date = fields.Date(related="invoice_id.date_invoice",
+                               string="Fecha de la factura")
+    partner_id = fields.Many2one("res.partner",
+                                 related="invoice_id.partner_id",
+                                 string="Cliente")
     company_currency_id = fields.Many2one("res.currency", default=74)
-    amount_untaxed = fields.Monetary(related="invoice_id.amount_untaxed_signed", string="Monto sin impuesto",
-                                     currency_field="company_currency_id")
-    sale_commission_amount = fields.Monetary(u"Comisión por venta", currency_field="company_currency_id")
-    sale_payment_amount = fields.Monetary(u"Comisión por cobro", currency_field="company_currency_id")
-    amount = fields.Monetary("Monto", compute=_get_commission_total, currency_field="company_currency_id")
+    amount_untaxed = fields.Monetary(related="invoice_id.amount_untaxed_signed", string="Monto sin impuesto", currency_field="company_currency_id")
+    sale_commission_amount = fields.Monetary(u"Comisión por venta",
+                                             currency_field="company_currency_id")
+    sale_payment_amount = fields.Monetary(u"Comisión por cobro",
+                                          currency_field="company_currency_id")
+    amount = fields.Monetary("Monto",
+                             compute=_get_commission_total,
+                             currency_field="company_currency_id")

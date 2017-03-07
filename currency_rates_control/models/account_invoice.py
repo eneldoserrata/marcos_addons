@@ -41,13 +41,12 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     @api.multi
-    @api.depends('currency_id', "invoice_rate", "date_invoice")
+    @api.depends('currency_id', "date_invoice")
     def _get_rate(self):
         for rec in self:
             try:
                 rec.invoice_rate = 1 / rec.currency_id.with_context(
-                                            dict(self._context or {},
-                                                 date=rec.date_invoice)).rate
+                    dict(self._context or {}, date=rec.date_invoice)).rate
             except:
                 pass
 
@@ -63,5 +62,5 @@ class AccountInvoice(models.Model):
             else:
                 rec.is_company_currency = False
 
-    invoice_rate = fields.Monetary(string="Tasa", compute=_get_rate)
     is_company_currency = fields.Boolean(compute=_is_company_currency)
+    invoice_rate = fields.Monetary(string="Tasa", compute=_get_rate)

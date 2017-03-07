@@ -34,11 +34,9 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
 from odoo import models, fields, api, exceptions
 import calendar
 import base64
-from tools import is_identification, is_ncf
 import time
 import re
 import io
@@ -48,7 +46,7 @@ class DgiiSaleReport(models.Model):
     _name = "dgii.sale.report"
 
     @api.one
-    @api.depends("ITBIS_TOTAL","TOTAL_MONTO_FACTURADO")
+    @api.depends("ITBIS_TOTAL", "TOTAL_MONTO_FACTURADO")
     def _calc_total(self):
 
         self.TOTAL_MONTO_FACTURAS = sum([line.MONTO_FACTURADO for line in self.report_lines if not line.NUMERO_COMPROBANTE_MODIFICADO.strip()])
@@ -131,7 +129,7 @@ class DgiiSaleReport(models.Model):
                 RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
                 TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()
                                                  ) == 9 else "2"
-            if not is_ncf(inv.number, inv.type):
+            if not self.env['res.partner'].is_ncf(inv.number, inv.type):
                 raise exceptions.ValidationError(
                     u"¡El número de NCF o el RNC/Cédula del clienten para el"
                     u" comprobante {} no es válido!".format(inv.number)
@@ -167,18 +165,11 @@ class DgiiSaleReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-            account_ids = list(set(
-                            [l.account_id.id for l in inv.invoice_line_ids
-                             if l.account_id.user_type_id.name == 'Ingreso']
-                             ))
+            account_ids = list(set([l.account_id.id for l in inv.invoice_line_ids if l.account_id.user_type_id.name == 'Ingreso']))
 
-            move_lines = self.env["account.move.line"].search(
-                                    [('move_id', '=', inv.move_id.id),
-                                     ('account_id', 'in', account_ids)])
-            MONTO_FACTURADO = abs(
-                            sum([l.credit for l in move_lines]) -
-                            sum([l.debit for l in move_lines])
-                            )
+            move_lines = self.env["account.move.line"].search([('move_id','=',inv.move_id.id),('account_id','in',account_ids)])
+            MONTO_FACTURADO = abs(sum([l.credit for l in move_lines])-sum([l.debit for l in move_lines]))
+
             if not MONTO_FACTURADO:
                 MONTO_FACTURADO = 0
 
@@ -241,9 +232,7 @@ class DgiiSaleReport(models.Model):
         company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
 
-        if not (company_fiscal_identificacion or not
-                self.env['res.partner'].is_identification(
-                company_fiscal_identificacion)):
+        if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
             raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
                                              " su empresa!")
 

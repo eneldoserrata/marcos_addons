@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <function model="shop.ncf.config" name="setup_ncf"/>
+    <data>
+        <function model="shop.ncf.config" name="setup_ncf"/>
+    </data>
 </odoo>

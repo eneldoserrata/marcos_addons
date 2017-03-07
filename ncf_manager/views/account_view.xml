@@ -23,14 +23,13 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
+
             <field name="type" position="after">
                 <field attrs="{'invisible': [('type','!=','sale')]}" name="ncf_control"/>
                 <field attrs="{'invisible': [('type','!=','purchase')]}" name="purchase_fiscal_type" widget="radio"/>
                 <field attrs="{'invisible': [('type','!=','purchase')]}" name="ncf_remote_validation"/>
             </field>
-            <field name="code" position="replace">
-                <field attrs="{'readonly': ['|',('type', 'in', ['bank','cash'])], 'required': [('type', 'not in', ['bank', 'cash'])]}" name="code"/>
-            </field>
+
         </field>
     </record>
     <record id="ncf_manager_account_tax_form" model="ir.ui.view">
@@ -38,10 +37,16 @@
         <field name="model">account.tax</field>
         <field name="inherit_id" ref="account.view_tax_form"/>
         <field name="arch" type="xml">
-            <field name="type_tax_use" position="after">
-                <field attrs="{'invisible': [('type_tax_use','!=','purchase')]}" name="purchase_tax_type" widget="radio"/>
+
+                <field name="type_tax_use" position="after">
+                    <field name="purchase_tax_type" widget="radio"
+                           attrs="{'invisible': [('type_tax_use','!=','purchase')]}"/>
+                </field>
+                <field name="price_include" position="before">
+                    <field name="tax_except"/>
+                </field>
+
             </field>
-        </field>
     </record>
     <menuitem groups="account.group_account_user" id="marcos_account_dgii_menu" name="DGII" parent="account.menu_finance" sequence="5"/>
     <menuitem id="marcos_account_dgii_file_menu" name="Archivos" parent="marcos_account_dgii_menu" sequence="5"/>

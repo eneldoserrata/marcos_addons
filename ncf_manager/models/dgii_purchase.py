@@ -37,7 +37,6 @@
 from odoo import models, fields, api, exceptions
 import calendar
 import base64
-from tools import is_identification, is_ncf
 import time
 import re
 import io
@@ -172,9 +171,8 @@ class DgiiPurchaseReport(models.Model):
                                              inv.fiscal_position_id.name,
                                              inv.number)
                                            )
-            if not is_ncf(inv.number, inv.type):
-                raise exceptions.UserError(
-                    u"¡El número de NCF {} no es válido!".format(inv.number))
+            if not self.env['marcos.api.tools'].is_ncf(inv.number, inv.type):
+                raise exceptions.UserError(u"El número de NCF {} no es válido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             affected_invoice_id = False
@@ -242,8 +240,7 @@ class DgiiPurchaseReport(models.Model):
         company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
 
-        if not (company_fiscal_identificacion or not
-                is_identification(company_fiscal_identificacion)):
+        if not company_fiscal_identificacion or not self.env['marcos.api.tools'].is_identification(company_fiscal_identificacion):
             raise exceptions.ValidationError("Debe configurar el RNC de su"
                                              " empresa!")
 

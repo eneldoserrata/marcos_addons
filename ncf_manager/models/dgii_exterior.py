@@ -34,11 +34,9 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
-
 from odoo import models, fields, api, exceptions
 import calendar
 import base64
-from tools import is_identification
 import time
 import re
 import io
@@ -167,8 +165,7 @@ class DgiiExteriorReport(models.Model):
         company_fiscal_identificacion = re.sub("[^0-9]", "",
                                                self.company_id.vat)
 
-        if not (company_fiscal_identificacion or not
-                is_identification(company_fiscal_identificacion)):
+        if not company_fiscal_identificacion or not self.env['res.partner'].is_identification(company_fiscal_identificacion):
             raise exceptions.ValidationError(u"¡Debe configurar el RNC de"
                                              " su empresa!")
 

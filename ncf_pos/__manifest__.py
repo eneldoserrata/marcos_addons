@@ -50,20 +50,21 @@
     'website': "http://marcos.do",
 
     'category': 'Localization',
-    'version': '9.0',
+    'version': '10.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'point_of_sale', 'ncf_manager'],
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
-        'views/templates.xml',
+        # 'security/ir.model.access.csv',
         'views/pos_view.xml',
-        '',
+        'views/templates.xml',
     ],
-    # only loaded in demonstration mode
-    'demo': [],
-    'qweb': ['static/src/xml/pos.xml'],
-    'license': "Other proprietary"
+
+    'qweb': [
+        'static/src/xml/pos_orders.xml',
+        'static/src/xml/pos_order_return.xml',
+        'static/src/xml/ncf_pos.xml',
+    ],
 }

@@ -53,11 +53,16 @@
     'category': 'Localization',
     'version': '2.0',
 
-    'depends': ['base', 'account', 'l10n_do', 'rnc_validation',
-                'web_sheet_full_width'],
+    # any module necessary for this one to work correctly
+    'depends': ['base', 'account', 'l10n_do' 'web_sheet_full_width',
+                'marcos_api_tools', 'save_readonly_fields'],
 
+    # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'security/ncf_manager_security.xml',
+        'wizard/account_invoice_cancel_view.xml',
+        'wizard/account_invoice_refund.xml',
         'views/shop_view.xml',
         'views/account_invoice_view.xml',
         'views/account_view.xml',
@@ -67,8 +72,6 @@
         'views/dgii_cancel_view.xml',
         'views/account_move_view.xml',
         'views/res_view.xml',
-        'wizard/account_invoice_cancel_view.xml',
-        'wizard/account_invoice_refund_view.xml',
         'data/setup_ncf.xml',
     ],
     'images': 'static/description/main.png',
