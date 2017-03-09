@@ -38,7 +38,6 @@ import calendar
 import base64
 import time
 import re
-from .tools import is_ncf
 
 
 class ResCompany(models.Model):
