@@ -71,7 +71,22 @@ class ResPartner(models.Model):
         return False
 
     def get_rnc(self, fiscal_id):
-        res = requests.get('http://api.marcos.do/rnc/%s' % fiscal_id)
+        config_parameter = self.env['ir.config_parameter'].sudo()
+        api_marcos = config_parameter.get_param("api_marcos")
+        if not api_marcos:
+            raise exceptions.MissingError(u"Debe configurar la URL de validacón en línea")
+
+        http_proxy = config_parameter.get_param("http_proxy")
+        https_proxy = config_parameter.get_param("https_proxy")
+
+        proxies = {}
+        if http_proxy != "False":
+            proxies.update({"http": http_proxy})
+
+        if http_proxy != "False":
+            proxies.update({"https": https_proxy})
+
+        res = requests.get('{}/rnc/{}'.format(api_marcos, fiscal_id), proxies=proxies)
         if res.status_code == 200:
             return res.json()
         else:
@@ -89,7 +104,7 @@ class ResPartner(models.Model):
                     vals['vat'] = data['rnc'].strip()
                     vals['name'] = data['name'].strip()
                     vals["comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
-                        data['comercial_name'], data['payment_regimen'], data['status'], data['category'])
+                        data['comercial_name'], data.get('payment_regimen', ""), data['status'], data['category'])
                     vals.update({"company_type": "company"})
                     if len(fiscal_id) == 9:
                         vals.update({"company_type": "company"})
@@ -120,7 +135,7 @@ class ResPartner(models.Model):
             if validation:
                 vals.update(validation)
             else:
-                raise exceptions.UserError(u"El número de RNC/Cédula no es vEalido en la DGII.")
+                raise exceptions.UserError(u"El número de RNC/Cédula no es valido en la DGII.")
             return super(ResPartner, self).create(vals)
 
     @api.onchange("vat")
@@ -128,7 +143,7 @@ class ResPartner(models.Model):
         if self.vat and not self._context.get("install_mode", False):
             if self.env["account.invoice"].search_count([('partner_id', '=', 'self.id')]):
                 raise exceptions.UserError(
-                    "No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
+                    u"No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
             self.check_vals(self.vat)
 
     @api.model

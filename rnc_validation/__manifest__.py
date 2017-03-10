@@ -60,7 +60,8 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views.xml'
+        'views.xml',
+        'data/data.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
@@ -68,5 +69,6 @@
     ],
     "price": 200,
     'currency': 'EUR',
-    'license': "Other proprietary"
+    'license': "Other proprietary",
+    'installable': False
 }
