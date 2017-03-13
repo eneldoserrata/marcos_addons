@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
 
         <!--modifica el modulo de partner para validar rnc y posicion fiscal-->
@@ -15,10 +15,8 @@
 
                 <field name="ref" position="replace"/>
 
-
-
             </field>
         </record>
 
     </data>
-</openerp>
+</odoo>
