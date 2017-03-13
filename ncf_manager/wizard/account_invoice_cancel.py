@@ -45,17 +45,17 @@ class AccountInvoiceCancel(models.TransientModel):
     _inherit = "account.invoice.cancel"
     _description = "Cancel the Selected Invoices"
 
-    anulation_type = fields.Selection([
-        ("01", u"01 - DETERIORO DE FACTURA PRE-IMPRESA"),
-        ("02", u"02 - ERRORES DE IMPRESIÓN (FACTURA PRE-IMPRESA)"),
-        ("03", u"03 - IMPRESIÓN DEFECTUOSA"),
-        ("04", u"04 - DUPLICIDAD DE FACTURA"),
-        ("05", u"05 - CORRECCIÓN DE LA INFORMACIÓN"),
-        ("06", u"06 - CAMBIO DE PRODUCTOS"),
-        ("07", u"07 - DEVOLUCIÓN DE PRODUCTOS"),
-        ("08", u"08 - OMISIÓN DE PRODUCTOS"),
-        ("09", u"09 - ERRORES EN SECUENCIA DE NCF")
-    ], string=u"Tipo de anulación", required=True)
+    anulation_type = fields.Selection(
+        [("01", u"Deterioro de Factura Pre-impresa"),
+         ("02", u"Errores de Impresión (Factura Pre-impresa)"),
+         ("03", u"Impresión Defectuosa"),
+         ("04", u"Duplicidad de Facturas"),
+         ("05", u"Corrección de la Información"),
+         ("06", u"Cambio de Productos"),
+         ("07", u"Devolución de Productos"),
+         ("08", u"Omisión de Productos"),
+         ("09", u"Errores en Secuencia de NCF")],
+        string=u"Tipo de anulación", copy=False)
 
     @api.multi
     def invoice_cancel(self):

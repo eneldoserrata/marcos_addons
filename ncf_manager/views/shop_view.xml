@@ -6,29 +6,29 @@
             <field name="name">invoice.journal.config.form</field>
             <field name="model">shop.ncf.config</field>
             <field name="arch" type="xml">
-                <form string="Comprobantes fiscales">
+                <form string="Comprobantes Fiscales">
                     <sheet>
                         <group col="2">
                             <field name="company_id"/>
                             <field name="name"/>
                             <field name="journal_id"/>
                         </group>
-                        <group col="6" string="Configuración NCF consumidor final">
+                        <group col="6" string="Configuración NCF para Consumidores Finales">
                             <field name="final_sequence_id"/>
                             <field name="final_number_next_actual"/>
                             <field name="final_max"/>
                         </group>
-                        <group col="6" string="Configuración NCF para crédito fiscal">
+                        <group col="6" string="Configuración NCF con Valor Fiscal">
                             <field name="fiscal_sequence_id"/>
                             <field name="fiscal_number_next_actual"/>
                             <field name="fiscal_max"/>
                         </group>
-                        <group col="6" string="Configuración NCF gubernamentales">
+                        <group col="6" string="Configuración NCF Gubernamentales">
                             <field name="gov_sequence_id"/>
                             <field name="gov_number_next_actual"/>
                             <field name="gov_max"/>
                         </group>
-                        <group col="6" string="Configuración NCF regímenes especiales">
+                        <group col="6" string="Configuración NCF de Regímenes Especiales">
                             <field name="special_sequence_id"/>
                             <field name="special_number_next_actual"/>
                             <field name="special_max"/>
@@ -53,14 +53,13 @@
             <field name="name">invoice.journal.config.tree</field>
             <field name="model">shop.ncf.config</field>
             <field name="arch" type="xml">
-                <tree string="Comprobantes fiscales">
+                <tree string="Comprobantes Fiscales">
                     <field name="name"/>
-                </tree>
-            </field>
+                </tree> </field>
         </record>
 
         <record id="shop_ncf_config_action" model="ir.actions.act_window">
-            <field name="name">Comprobantes fiscales</field>
+            <field name="name">Comprobantes Fiscales</field>
             <field name="res_model">shop.ncf.config</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
