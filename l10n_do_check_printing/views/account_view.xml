@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="l10n_do_check_printing_view_account_journal_form_inherited" model="ir.ui.view">
+            <field name="name">l10n_do_check_printing_view_account_journal_form_inherited</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account_check_printing.view_account_journal_form_inherited"/>
+            <field name="arch" type="xml">
+
+                <field name="check_next_number" position="after">
+                    <field name="check_layout"/>
+                </field>
+
+            </field>
+        </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="inherit_view_account_supplier_payment_tree" model="ir.ui.view">
+            <field name="name">inherit_view_account_supplier_payment_tree</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+            <field name="arch" type="xml">
+
+                <field name="payment_method_id" position="after">
+                    <field name="check_number"/>
+                </field>
+
+
+            </field>
+        </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="do_view_account_payment_form_inherited" model="ir.ui.view">
+            <field name="name">do_view_account_payment_form_inherited</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account_check_printing.view_account_payment_form_inherited"/>
+            <field name="arch" type="xml">
+
+                <field name="check_amount_in_words" position="replace"/>
+                <field name="check_number" position="replace">
+                    <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],'readonly': ['|',('check_manual_sequencing','!=',False),('state','!=','draft')]}"/>
+                    <field name="check_name" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],'readonly': ['|',('check_manual_sequencing','!=',False),('state','!=','draft')]}"/>
+                    <field name="check_amount_in_words" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')], 'readonly': [('state', '!=', 'draft')]}" groups="base.group_no_one"/>
+                </field>
+
+            </field>
+        </record>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="do_view_account_payment_invoice_form" model="ir.ui.view">
+            <field name="name">do_view_account_payment_invoice_form</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+            <field name="arch" type="xml">
+
+                <field name="check_number" position="replace">
+                    <field name="check_number" attrs="{'invisible': [('payment_method_code', '!=', 'check_printing')],
+                                                        'readonly': [('check_manual_sequencing','!=',False)]}"/>
+                </field>
+
+            </field>
+        </record>
+
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="view_account_payment_search_check" model="ir.ui.view">
+            <field name="name">view_account_payment_search_check</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_search"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="check_number"/>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

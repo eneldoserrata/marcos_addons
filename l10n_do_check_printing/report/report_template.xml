@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template name="ck_footer_banco_popular" id="ck_footer_banco_popular">
+            <style type="text/css">
+                .tg {border-collapse:collapse;border-spacing:0;}
+                .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;overflow:hidden;word-break:normal;}
+                .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px
+                5px;overflow:hidden;word-break:normal;}
+                .tg .tg-rg0h{font-size:12px;text-align:center;vertical-align:top}
+                .tg .tg-dx8v{font-size:12px;vertical-align:top}
+            </style>
+            <table class="tg" style="undefined;table-layout: fixed; width: 915px">
+                <colgroup>
+                    <col style="width: 138px"/>
+                    <col style="width: 600px"/>
+                    <col style="width: 177px"/>
+                </colgroup>
+                <tr>
+                    <th class="tg-rg0h">
+                        <span t-field="o.payment_date"/>
+                    </th>
+                    <th class="tg-dx8v">
+                        <span t-field="o.communication"/>
+                    </th>
+                    <th class="tg-dx8v">
+                        <span t-field="o.amount"/>
+                    </th>
+                </tr>
+            </table>
+        </template>
+
+        <template id="check_print_report">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <div class="page">
+                        <style>
+                            body {
+                            font-size:<t t-esc="o.journal_id.check_layout.font_zise"/>px;
+                            }
+                            .check_header{
+                            margin-top:<t t-esc="o.journal_id.check_layout.check_header_top"/>mm;
+                            margin-top:<t t-esc="o.journal_id.check_layout.check_header_left"/>mm;
+                            position: absolute;
+
+                            }
+                            .check_body{
+                            margin-top:<t t-esc="o.journal_id.check_layout.body_top"/>mm;
+                            position: absolute;
+                            }
+                            .check_name {
+                            margin-top:<t t-esc="o.journal_id.check_layout.name_top"/>mm;
+                            margin-left:<t t-esc="o.journal_id.check_layout.name_left"/>mm;
+                            width: 200mm;
+                            position: absolute;
+                            }
+                            .check_date {
+                            margin-top:<t t-esc="o.journal_id.check_layout.date_top"/>mm;
+                            margin-left:<t t-esc="o.journal_id.check_layout.date_left"/>mm;
+                            width: 40mm;
+                            position: absolute;
+                            }
+                            .check_amount {
+                            margin-top:<t t-esc="o.journal_id.check_layout.amount_top"/>mm;
+                            margin-left:<t t-esc="o.journal_id.check_layout.amount_left"/>mm;
+                            position: absolute;
+                            font-size: 18px;
+                            font-weight: bold !important;
+                            }
+                            .check_in_words {
+                            margin-top:<t t-esc="o.journal_id.check_layout.amount_letter_top"/>mm;
+                            margin-left:<t t-esc="o.journal_id.check_layout.amount_letter_left"/>mm;
+                            width: 200mm;
+                            position: absolute;
+                            }
+                            .check_footer{
+                            margin-top:<t t-esc="o.journal_id.check_layout.check_footer_top"/>mm;
+                            margin-left:<t t-esc="o.journal_id.check_layout.check_footer_left"/>mm;
+                            position: absolute;
+                            }
+                        </style>
+                        <span class="check_header" t-if="o.journal_id.check_layout.check_header">
+                            <t t-call="{{o.journal_id.check_layout.check_header.id}}"/>
+                        </span>
+
+                        <span class="check_body">
+                            <t t-if="o.check_name">
+                                <span class="check_name" t-field="o.check_name.name"/>
+                            </t>
+                            <t t-if="not o.check_name">
+                                <span class="check_name" t-field="o.partner_id.name"/>
+                            </t>
+                            <span class="check_date" style="word-spacing: 7px;" t-esc="o.report_date"/>
+                            <span class="check_amount" t-esc="o.report_amount"/>
+                            <span class="check_in_words" t-field="o.amont_in_word"/>
+                        </span>
+                        <span class="check_footer" t-if="o.journal_id.check_layout.check_footer">
+                            <t t-call="{{o.journal_id.check_layout.check_footer.id}}"/>
+                        </span>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>
