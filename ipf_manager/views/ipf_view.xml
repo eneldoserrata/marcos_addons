@@ -1,4 +1,4 @@
-<openerp>
+<odoo>
     <data>
         <record id="marcos_ipf_printer_config_form_view" model="ir.ui.view">
             <field name="name">marcos.ipf.printer.config.form.view</field>
@@ -189,4 +189,4 @@
                   action="marcos_ipf_daily_book_action" sequence="2"/>
 
     </data>
-</openerp>
+</odoo>
