@@ -63,7 +63,7 @@ class MarcosApiTools(models.Model):
                     return invalid_fiscal_id_message
 
     def invoice_ncf_validation(self, invoice):
-        if not self._context.get("validate_ncf") or not invoice.journal_id.ncf_remote_validation:
+        if not invoice.journal_id.ncf_remote_validation:
             return True
 
         if not is_ncf(invoice.move_name, invoice.type):
@@ -73,7 +73,7 @@ class MarcosApiTools(models.Model):
                                           u"digitado incorrectamente")
 
         elif not invoice.journal_id.purchase_type in ['exterior', 'import',
-                                                      'others'] and invoice.journal_id.purchase_type == "normal":
+                                                      'others'] and invoice.journal_id.type == "purchase":
 
             if invoice.id:
                 inv_in_draft = self.env["account.invoice"].search_count([('id', '!=', invoice.id),
