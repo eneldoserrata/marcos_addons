@@ -2,8 +2,8 @@
     <data>
         <template id="assets_backend" name="togetherjs" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script src="https://togetherjs.com/togetherjs-min.js"></script>
-                <script src="/togetherjs/static/src/xml/js/together.js"></script>
+                <script src="/togetherjs/static/src/js/togetherjs-min.js"></script>
+                <script src="/togetherjs/static/src/js/together.js"></script>
             </xpath>
         </template>
     </data>
