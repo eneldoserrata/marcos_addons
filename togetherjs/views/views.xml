@@ -1,0 +1,59 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="togetherjs.list">
+      <field name="name">togetherjs list</field>
+      <field name="model">togetherjs.togetherjs</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="togetherjs.action_window">
+      <field name="name">togetherjs window</field>
+      <field name="res_model">togetherjs.togetherjs</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="togetherjs.action_server">
+      <field name="name">togetherjs server</field>
+      <field name="model_id" ref="model_togetherjs_togetherjs"/>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="togetherjs" id="togetherjs.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="togetherjs.menu_1" parent="togetherjs.menu_root"/>
+    <menuitem name="Menu 2" id="togetherjs.menu_2" parent="togetherjs.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="togetherjs.menu_1_list" parent="togetherjs.menu_1"
+              action="togetherjs.action_window"/>
+    <menuitem name="Server to list" id="togetherjs" parent="togetherjs.menu_2"
+              action="togetherjs.action_server"/>
+    -->
+  </data>
+</odoo>
