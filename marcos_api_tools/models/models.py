@@ -58,7 +58,18 @@ class MarcosApiTools(models.Model):
             if request_params[0] == 1:
                 res = requests.get('{}/rnc/{}'.format(request_params[1], fiscal_id), proxies=request_params[2])
                 if res.status_code == 200:
-                    return (1, res.json())
+                    dgii_data = res.json()
+                    dgii_data["vat"] = dgii_data['rnc']
+                    dgii_data[
+                        "comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
+                        dgii_data['comercial_name'], dgii_data.get('payment_regimen', ""), dgii_data['status'],
+                        dgii_data['category'])
+                    if len(fiscal_id) == 9:
+                        dgii_data.update({"company_type": u"company"})
+                        dgii_data.update({"is_company": u"True"})
+                    else:
+                        dgii_data.update({"company_type": u"person"})
+                    return (1, dgii_data)
                 else:
                     return invalid_fiscal_id_message
 
