@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 ########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -32,39 +33,11 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Controlador para impresoras fiscales Dominicana",
 
-    'summary': """
-        Localizacion Para Republica Dominicana
-        Controlador para impresoras fiscales EPSON TM-T88v.
-    """,
+from odoo import models, fields
 
-    'description': """
-        Este modulo permite que odoo pueda imprimir desde el modulo de punto de venta y el modulo de contabilidad
-        en la impresora fiscal EPSON TM-T88v utilizando una interface fiscal desarrollada por nuestra empresa.
-    """,
+class PosConfig(models.Model):
+    _inherit = "pos.config"
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
-    'category': 'Uncategorized',
-    'version': '9.0',
-    'depends': ['base', 'web', 'account', 'ncf_manager','point_of_sale'],
 
-    # always loaded
-    'data': [
-        'security/ir.model.access.csv',
-        'views/templates.xml',
-        'views/ipf_view.xml',
-        'views/account_view.xml',
-        'views/account_invoice_view.xml',
-        'views/pos_config_view.xml'
-
-    ],
-    # only loaded in demonstration mode
-    'qweb': ['static/src/xml/ipf_manager.xml'],
-    'demo': [
-        'demo/demo.xml',
-    ],
-    'license': "Other proprietary"
-}
+    iface_fiscal_printer = fields.Many2one("ipf.printer.config", string="Impresora fiscal")

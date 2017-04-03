@@ -32,7 +32,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-import ipf
-import account
-import account_invoice
-
+from . import ipf
+from . import account
+from . import account_invoice
+from . import pos_config

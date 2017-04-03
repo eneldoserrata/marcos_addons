@@ -100,12 +100,15 @@ odoo.define('ipf_manager.devices', function (require) {
             var self = this;
 
             var order = self.pos.get_order();
-
+            console.log(order);
             var ipfProxy = new IpfApi();
 
             return new Model('pos.order').call("get_fiscal_data", [order_name]).then(function (result) {
-                console.log(result);
-                order.set_ncf(result.ncf);
+                console.log("=========================================");
+                console.log(order);
+                console.log("=========================================");
+
+
 
                 var ipf_invoice = {
                     type: result.fiscal_type,
@@ -114,8 +117,8 @@ odoo.define('ipf_manager.devices', function (require) {
                     subsidiary: self.pos.config.iface_fiscal_printer_subsidiary[0],
                     ncf: result.ncf || "Documento de no venta",
                     reference_ncf: result.origin || "",
-                    client: order.get_client().name,
-                    rnc: order.get_client().vat || "",
+                    client: typeof variable === "undefined" ?  order.pos.config.default_partner_id[1]: order.get_client().name,
+                    rnc: typeof variable === "undefined" ?  "" : order.get_client().vat,
                     items: [],
                     payments: [],
                     discount: false,
