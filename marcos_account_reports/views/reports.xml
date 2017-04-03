@@ -1,0 +1,81 @@
+<openerp>
+    <data>
+        <report
+                id="account_move_report_action"
+                model="account.move"
+                string="Asientos Contables"
+                report_type="qweb-pdf"
+                name="marcos_account_reports.account_move_report"
+                file="marcos_account_reports.account_move_report"
+        />
+
+        <template id="account_move_report">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="report.internal_layout">
+                        <div class="page">
+                            <h2>Asientos Contables</h2>
+
+                            <div class="row mt32">
+                                <div class="col-xs-3">
+                                    <strong>Número:</strong>
+                                    <p t-field="o.name"/>
+                                </div>
+                                <div class="col-xs-6">
+                                    <strong>Referencia</strong>
+                                    <p t-field="o.ref"/>
+                                </div>
+                                <div class="col-xs-3">
+                                    <strong>Fecha</strong>
+                                    <p t-field="o.date"/>
+                                </div>
+                            </div>
+
+
+                            <style type="text/css">
+                                .tg {border-collapse:collapse;border-spacing:0;}
+                                .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px
+                                5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+                                .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px
+                                5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+                                .tg .tg-amwm{font-weight:bold;text-align:center;vertical-align:top}
+                                .tg .tg-yw4l{vertical-align:top}
+                            </style>
+
+                            <t t-set="display_contact" t-value="any([l.partner_id for l in o.line_ids])"/>
+                            <t t-set="display_product" t-value="any([l.product_id for l in o.line_ids])"/>
+                            <t t-set="display_analitic" t-value="any([l.analytic_account_id for l in o.line_ids])"/>
+                            <t t-set="display_curr" t-value="any([l.amount_currency for l in o.line_ids])"/>
+
+                            <table class="table table-condensed" style="font-size:10px">
+                                <tr>
+                                    <th t-if="display_contact" class="tg-amwm">Contacto</th>
+                                    <th t-if="display_product" class="tg-amwm">Producto</th>
+                                    <th class="tg-amwm">Cuenta</th>
+                                    <th class="tg-amwm">Etiqueta</th>
+                                    <th t-if="display_analitic" class="tg-amwm">Cuenta Analítica</th>
+                                    <th t-if="display_curr" class="tg-amwm">Monto Divisa</th>
+                                    <th class="tg-amwm">Débito</th>
+                                    <th class="tg-amwm">Crédito</th>
+                                </tr>
+
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <tr>
+                                        <td t-if="display_contact" class="tg-yw4l"><span t-field="line.partner_id"/></td>
+                                        <td t-if="display_product" class="tg-yw4l"><span t-field="line.product_id"/></td>
+                                        <td class="tg-yw4l"><span t-field="line.account_id"/></td>
+                                        <td class="tg-yw4l"><span t-field="line.name"/></td>
+                                        <td t-if="display_analitic" class="tg-yw4l"><span t-field="line.analytic_account_id"/></td>
+                                        <td t-if="display_curr" class="tg-yw4l"><span t-field="line.amount_currency"/></td>
+                                        <td class="tg-yw4l"><span t-field="line.debit"/></td>
+                                        <td class="tg-yw4l"><span t-field="line.credit"/></td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

@@ -13,9 +13,9 @@
 
         <template id="report_invoice_move">
             <t t-call="report.html_container" >
-                <t t-set="data_report_margin_top" t-value="20"/>
-                <t t-set="data_report_header_spacing" t-value="17"/>
-                <t t-set="data_report_dpi" t-value="300"/>
+                <!--<t t-set="data_report_margin_top" t-value="20"/>-->
+                <!--<t t-set="data_report_header_spacing" t-value="17"/>-->
+                <!--<t t-set="data_report_dpi" t-value="300"/>-->
 
                 <t t-call="report.internal_layout">
                     <div class="page" style="font-size:10px">

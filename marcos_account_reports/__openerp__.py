@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 ########################################################################################################################
 #  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
@@ -33,22 +34,36 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from openerp import http
 
-# class AdvancedPayment(http.Controller):
-#     @http.route('/advanced_payment/advanced_payment/', auth='public')
-#     def index(self, **kw):
-#         return "Hello, world"
+{
+    'name': "Account report collection",
 
-#     @http.route('/advanced_payment/advanced_payment/objects/', auth='public')
-#     def list(self, **kw):
-#         return http.request.render('advanced_payment.listing', {
-#             'root': '/advanced_payment/advanced_payment',
-#             'objects': http.request.env['advanced_payment.advanced_payment'].search([]),
-#         })
+    'summary': """
+        Reportes para el modulo contable
+        """,
 
-#     @http.route('/advanced_payment/advanced_payment/objects/<model("advanced_payment.advanced_payment"):obj>/', auth='public')
-#     def object(self, obj, **kw):
-#         return http.request.render('advanced_payment.object', {
-#             'object': obj
-#         })
+    'description': """
+        Reportes en PDF:
+        1 - Imprecion de los asientos contables
+    """,
+
+    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
+    'website': "http://marcos.do",
+
+    'category': 'Localization',
+    'version': '2.0',
+
+    # any module necessary for this one to work correctly
+    'depends': ['base','account'],
+
+    # always loaded
+    'data': [
+        # 'security/ir.model.access.csv',
+        'views/reports.xml',
+        'views/templates.xml',
+    ],
+    # only loaded in demonstration mode
+    'demo': [
+        'demo/demo.xml',
+    ],
+}

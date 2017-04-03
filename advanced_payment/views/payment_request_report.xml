@@ -2,32 +2,6 @@
 <odoo>
     <data>
 
-        <template id="advanced_payemnt_internal_layout" inherit_id="report.internal_layout">
-            <xpath expr="//div[@class='header']" position="replace">
-                <div class="header">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
-                        </div>
-                        <div class="col-xs-6 text-center">
-                            <span t-esc="company.name"/>
-                        </div>
-                        <div class="col-xs-3 text-right">
-                            <ul class="list-inline">
-                                <li>
-                                    <span class="page"/>
-                                </li>
-                                <li>/</li>
-                                <li>
-                                    <span class="topage"/>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </xpath>
-        </template>
-
         <report
                 id="payment_request_report"
                 model="account.payment"
@@ -40,9 +14,9 @@
 
         <template id="payment_request_report_doc">
             <t t-call="report.html_container">
-                <t t-set="data_report_margin_top" t-value="20"/>
-                <t t-set="data_report_header_spacing" t-value="17"/>
-                <t t-set="data_report_dpi" t-value="300"/>
+                <!--<t t-set="data_report_margin_top" t-value="20"/>-->
+                <!--<t t-set="data_report_header_spacing" t-value="17"/>-->
+                <!--<t t-set="data_report_dpi" t-value="300"/>-->
                 <t t-foreach="docs" t-as="doc">
                     <t t-call="report.internal_layout">
                         <div class="page" style="font-size:10px">
