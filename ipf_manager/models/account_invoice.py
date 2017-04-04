@@ -104,7 +104,7 @@ class AccountInvoice(models.Model):
         invoice_dict["cashier"] = self.env.uid
         invoice_dict["subsidiary"] = subsidiary.id
         invoice_dict["client"] = self.partner_id.name
-        invoice_dict["rnc"] = self.partner_id.ref
+        invoice_dict["rnc"] = self.partner_id.vat
 
         invoice_items_list = []
         for line in self.invoice_line_ids:
