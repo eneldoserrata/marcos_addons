@@ -77,6 +77,9 @@ class MarcosApiTools(models.Model):
         if not invoice.journal_id.ncf_remote_validation:
             return True
 
+        if invoice.journal_id.purchase_fiscal_type in ['minor', 'informal']:
+            invoice.move_name = invoice.journal_id.sequence_id.next_by_id()
+
         if not is_ncf(invoice.move_name, invoice.type):
             return (100, u"Ncf invalido", u"El numero de comprobante fiscal no es valido "
                                           u"verifique de que no esta digitando un comprobante"
