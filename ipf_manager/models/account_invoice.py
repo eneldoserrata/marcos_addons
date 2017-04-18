@@ -174,7 +174,6 @@ class AccountInvoice(models.Model):
             invoice_dict.update(dict(host=ipf_printer.host, payments=payment_ids_list, invoice_id=self.id))
         else:
             invoice_dict.update(dict(host=ipf_printer.host, payments=payment_ids_list, invoice_id=self.id))
-
         return invoice_dict
 
 
