@@ -78,9 +78,9 @@ class MarcosApiTools(models.Model):
             return True
 
         if not is_ncf(invoice.move_name, invoice.type):
-            return (100, u"Ncf invalido", u"El numero de comprobante fiscal no es valido "
-                                          u"verifique de que no esta digitando un comprobante"
-                                          u"de consumidor final codigo 02 o revise si lo ha "
+            return (100, u"Ncf inválido", u"El número de comprobante fiscal no es válido "
+                                          u"verificar de que no está digitando un comprobante"
+                                          u"de consumidor final código 02 o revise si lo ha"
                                           u"digitado incorrectamente")
 
         elif not invoice.journal_id.purchase_type in ['exterior', 'import',
