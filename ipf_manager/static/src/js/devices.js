@@ -146,16 +146,21 @@ odoo.define('ipf_manager.devices', function (require) {
                         var itbis = tax[0].amount
                     }
 
+                    var nota = (typeof line.note === "undefined" ? "" : " "+line.note);
+                    var description = product.display_name + nota;
+                    var description_list = description.match(/.{1,21}/g);
+
 
                     var ifp_line = {
-                        description: product.display_name,
-                        extra_description: [line.note || ""],
+                        description: description_list.pop(),
+                        extra_descriptions: description_list,
                         quantity: line.qty,
                         price: line.price_unit || 0,
                         itbis: itbis,
                         discount: line.discount || false,
                         charges: false
                     };
+
                     ipf_invoice.items.push(ifp_line)
 
                 });
