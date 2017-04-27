@@ -38,6 +38,7 @@ from odoo import models, fields, exceptions
 
 import re
 
+
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
@@ -47,11 +48,10 @@ class AccountInvoice(models.Model):
         if self.amount_total == 0:
             raise exceptions.UserError("No se puede imprimir en la impresora fiscal una factura valor 0.")
 
-        ipf_printer = self.env["ipf.printer.config"].search([('subsidiary','=',self.shop_id.id)])
+        ipf_printer = self.env["ipf.printer.config"].search([('subsidiary', '=', self.shop_id.id),('user_ids','=',self.env.user.id)])
 
         if not ipf_printer:
-            raise exceptions.UserError("La sucursal para esta factura no tiene impresora fiscal asignada")
-
+            raise exceptions.UserError("Su usuario no tiene impresora fiscal asignada")
 
         invoice_dict = {}
         print_copy = ipf_printer.print_copy
@@ -99,7 +99,6 @@ class AccountInvoice(models.Model):
         else:
             invoice_dict["type"] = "nofiscal"
 
-
         invoice_dict["copy"] = print_copy
         invoice_dict["cashier"] = self.env.uid
         invoice_dict["subsidiary"] = subsidiary.id
@@ -112,7 +111,7 @@ class AccountInvoice(models.Model):
             description = re.sub(r'^\[[\s\d]+\]\s+', '', line.name).strip()
             description = re.sub(r'[^\w.]', ' ', description)
 
-            description_splited = [description[x:x+21].replace("\n","") for x in range(0,len(description),21)]
+            description_splited = [description[x:x + 21].replace("\n", "") for x in range(0, len(description), 21)]
 
             invoice_items_dict["description"] = description_splited.pop()
 
@@ -129,20 +128,23 @@ class AccountInvoice(models.Model):
             tax_id = line.invoice_line_tax_ids
 
             if not len(tax_id) == 1:
-                raise exceptions.UserError(u"Los productos de ventas deben de tener un impuesto asignado y nunca mas de uno revise el '%s'!" % (line.name))
+                raise exceptions.UserError(
+                    u"Los productos de ventas deben de tener un impuesto asignado y nunca mas de uno revise el '%s'!" % (
+                    line.name))
 
             tax_rate = int(tax_id.amount)
             tax_include = tax_id.price_include
             tax_except = tax_id.tax_except
 
             if not tax_rate in [18, 13, 11, 8, 5, 0]:
-                raise exceptions.UserError(u"Los productos de ventas contiene un porcentaje de impuesto inválido %s" % (line.name))
+                raise exceptions.UserError(
+                    u"Los productos de ventas contiene un porcentaje de impuesto inválido %s" % (line.name))
 
             invoice_items_dict["itbis"] = tax_rate
             if tax_include or tax_except:
                 invoice_items_dict["price"] = line.price_unit
             else:
-                invoice_items_dict["price"] = line.price_unit+(line.price_unit*(tax_id.amount/100))
+                invoice_items_dict["price"] = line.price_unit + (line.price_unit * (tax_id.amount / 100))
 
             if line.discount > 0:
                 invoice_items_dict["discount"] = line.discount
@@ -157,7 +159,8 @@ class AccountInvoice(models.Model):
             for payment in self.payment_move_line_ids:
                 if payment.credit:
                     payment_ids_dict = {}
-                    payment_ids_dict["type"] = payment.journal_id.ipf_payment_type or "Nota de credito {}".format(payment.name)
+                    payment_ids_dict["type"] = payment.journal_id.ipf_payment_type or "Nota de credito {}".format(
+                        payment.name)
                     payment_ids_dict["amount"] = payment.credit
                     payment_ids_list.append(payment_ids_dict)
                 else:
@@ -168,12 +171,8 @@ class AccountInvoice(models.Model):
         else:
             payment_ids_list.append(dict(type="other", amount=self.amount_total))
 
-
-
         if invoice_dict["type"] == "nofiscal":
             invoice_dict.update(dict(host=ipf_printer.host, payments=payment_ids_list, invoice_id=self.id))
         else:
             invoice_dict.update(dict(host=ipf_printer.host, payments=payment_ids_list, invoice_id=self.id))
         return invoice_dict
-
-
