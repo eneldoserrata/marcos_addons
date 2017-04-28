@@ -147,9 +147,8 @@ odoo.define('ipf_manager.devices', function (require) {
                     }
 
                     var nota = (typeof line.note === "undefined" ? "" : " "+line.note);
-                    var description = product.display_name + nota;
+                    var description = $.trim(product.display_name + nota);
                     var description_list = description.match(/.{1,21}/g);
-
 
                     var ifp_line = {
                         description: description_list.pop(),
