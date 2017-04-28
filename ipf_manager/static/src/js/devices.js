@@ -103,6 +103,9 @@ odoo.define('ipf_manager.devices', function (require) {
             console.log(order);
             var ipfProxy = new IpfApi();
 
+            var comments = $.trim(order.get_order_note() +" | " + self.pos.config.receipt_footer || '');
+            var comments_list = comments.match(/.{1,40}/g);
+
             return new Model('pos.order').call("get_fiscal_data", [order_name]).then(function (result) {
 
 
@@ -119,7 +122,7 @@ odoo.define('ipf_manager.devices', function (require) {
                     payments: [],
                     discount: false,
                     charges: false,
-                    comments: [self.pos.config.receipt_footer || ''],
+                    comments: comments_list,
                     host: self.pos.config.iface_fiscal_printer_host,
                     invoice_id: result.id
                 };
