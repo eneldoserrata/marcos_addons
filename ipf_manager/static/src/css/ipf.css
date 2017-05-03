@@ -1,0 +1,16 @@
+.ipf-report-button{
+    width: 90% !important;
+    text-align: left !important;
+    margin-right: 10px !important;
+    font-size: 20px !important;
+    padding-left: 10px !important;
+
+}
+.ipf_print_report {
+    width: 20% !important;
+    height: 445px !important;
+    margin: auto;
+    margin-top: 70px;
+    font-size: 15px !important;
+    background-color: #F0EEEE;
+}

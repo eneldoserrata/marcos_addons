@@ -190,9 +190,6 @@ odoo.define('ipf_manager.service', function (require) {
 
                 })
                 .fail(function (response) {
-                    console.log("========get_report========");
-                    console.log(response);
-                    console.log("========get_report========");
 
                     var res = false;
 

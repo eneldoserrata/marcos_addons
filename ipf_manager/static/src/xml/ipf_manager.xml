@@ -2,13 +2,41 @@
 <template>
 
     <t t-name="ipf_manager_button">
-        <button class="btn ipf-button"><i class="fa fa-print"/> Impresion fiscal</button>
+        <button class="btn ipf-button">
+            <i class="fa fa-print"/>
+            Impresion fiscal
+        </button>
     </t>
 
     <t t-extend="XmlReceipt">
         <t t-jquery="img" t-operation="after">
-            <ipfordername><t t-esc='receipt.name' /></ipfordername>
+            <ipfordername>
+                <t t-esc='receipt.name'/>
+            </ipfordername>
         </t>
+    </t>
+
+    <t t-name="IPFPrintReport">
+        <div class="modal-dialog">
+            <div class="popup ipf_print_report">
+                <p class="title">Impresora fiscal</p>
+                <div class='wk_ipf_data'>
+                    <p>
+                        Selecciones el informe deseado.
+                    </p>
+                    <div class="button ipf-report-button ipf-cierre-z"><i class="fa fa-print fa-1x"/> Cierre z</div>
+                    <div class="button ipf-report-button ipf-shift-change"><i class="fa fa-print fa-1x"/> Cambio de turno</div>
+                    <div class="button ipf-report-button ipf-report-x"><i class="fa fa-print fa-1x"/> Informe X</div>
+                    <div class="button ipf-report-button ipf-today-report"><i class="fa fa-desktop fa-1x"/> Informe de hoy</div>
+                    <div class="button ipf-report-button ipf-shift-report"><i class="fa fa-desktop fa-1x"/> Informe del turno</div>
+                </div>
+                <div class="footer">
+                    <div class="button cancel">
+                        Cancelar
+                    </div>
+                </div>
+            </div>
+        </div>
     </t>
 
 

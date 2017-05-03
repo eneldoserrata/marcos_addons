@@ -4,6 +4,8 @@ odoo.define('ipf_manager.devices', function (require) {
     var IpfApi = require('ipf_manager.service');
     var web_data = require('web.data');
     var Model = require('web.DataModel');
+    var gui = require('point_of_sale.gui');
+    var PopupWidget = require("point_of_sale.popups");
 
     devices.ProxyDevice.include({
         try_hard_to_connect: function (url, options) {
@@ -103,7 +105,7 @@ odoo.define('ipf_manager.devices', function (require) {
             console.log(order);
             var ipfProxy = new IpfApi();
 
-            var comments = $.trim(order.get_order_note() +" | " + self.pos.config.receipt_footer || '');
+            var comments = $.trim(order.get_order_note() + " | " + self.pos.config.receipt_footer || '');
             var comments_list = comments.match(/.{1,40}/g);
 
             return new Model('pos.order').call("get_fiscal_data", [order_name]).then(function (result) {
@@ -149,7 +151,7 @@ odoo.define('ipf_manager.devices', function (require) {
                         var itbis = tax[0].amount
                     }
 
-                    var nota = (typeof line.note === "undefined" ? "" : " "+line.note);
+                    var nota = (typeof line.note === "undefined" ? "" : " " + line.note);
                     var description = $.trim(product.display_name + nota);
                     var description_list = description.match(/.{1,21}/g);
 
@@ -214,7 +216,73 @@ odoo.define('ipf_manager.devices', function (require) {
             } else {
                 return (new $.Deferred()).reject();
             }
+        },
+        print_sale_details: function () {
+            this.pos.gui.show_popup('ipfPrintReport');
         }
     });
+
+
+    var IPFPrintReport = PopupWidget.extend({
+        template: 'IPFPrintReport',
+
+        events: _.extend({}, PopupWidget.prototype.events, {
+            'click .ipf-cierre-z': 'ipf_cierre_z',
+            'click .ipf-shift-change': 'ipf_shift_change',
+            'click .ipf-report-x': 'ipf_report_x',
+            'click .ipf-today-report': 'ipf_today_report',
+            'click .ipf-shift-report': 'ipf_shift_report'
+        }),
+        ipf_cierre_z: function () {
+            var self = this;
+            var ipfProxy = new IpfApi();
+            var context = new web_data.CompoundContext({
+                active_model: "ipf.printer.config",
+                active_id: self.pos.config.iface_fiscal_printer[0]
+            });
+            ipfProxy.get_z_close_print(context)
+        },
+        ipf_shift_change: function () {
+            var self = this;
+            var ipfProxy = new IpfApi();
+            var context = new web_data.CompoundContext({
+                active_model: "ipf.printer.config",
+                active_id: self.pos.config.iface_fiscal_printer[0]
+            });
+            ipfProxy.get_new_shift_print(context)
+
+        },
+        ipf_report_x: function () {
+            var self = this;
+            var ipfProxy = new IpfApi();
+            var context = new web_data.CompoundContext({
+                active_model: "ipf.printer.config",
+                active_id: self.pos.config.iface_fiscal_printer[0]
+            });
+            ipfProxy.get_x(context)
+
+        },
+        ipf_today_report: function () {
+            var self = this;
+            var ipfProxy = new IpfApi();
+            var context = new web_data.CompoundContext({
+                active_model: "ipf.printer.config",
+                active_id: self.pos.config.iface_fiscal_printer[0]
+            });
+            ipfProxy.get_information_day(context)
+
+        },
+        ipf_shift_report: function () {
+            var self = this;
+            var ipfProxy = new IpfApi();
+            var context = new web_data.CompoundContext({
+                active_model: "ipf.printer.config",
+                active_id: self.pos.config.iface_fiscal_printer[0]
+            });
+            ipfProxy.get_information_shift(context)
+        }
+    });
+
+    gui.define_popup({name: 'ipfPrintReport', widget: IPFPrintReport});
 
 });

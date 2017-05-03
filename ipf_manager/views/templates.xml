@@ -14,6 +14,7 @@
 
          <template id="ipf_manager_point_of_sale_assets_backend" name="ipf_manager_point_of_sale_assets_backend" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/ipf_manager/static/src/css/ipf.css"></link>
                 <script type="text/javascript" src="/ipf_manager/static/src/js/models.js"></script>
                 <script type="text/javascript" src="/ipf_manager/static/src/js/devices.js"></script>
             </xpath>
