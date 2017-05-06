@@ -122,7 +122,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 charges: false,
                 comments: comments_list,
                 host: self.pos.config.iface_fiscal_printer_host,
-                invoice_id: false
+                invoice_id: false,
+                total_invoice: 0,
             };
 
             order.orderlines.each(function (orderline) {
@@ -159,7 +160,7 @@ odoo.define('ipf_manager.devices', function (require) {
                     discount: line.discount || false,
                     charges: false
                 };
-
+                ipf_invoice.total_invoice += (line.price_unit*line.qty)
                 ipf_invoice.items.push(ifp_line)
 
             });
@@ -192,10 +193,15 @@ odoo.define('ipf_manager.devices', function (require) {
             var ipf_invoice = self.ipf_get_pos_data();
             var ipf_payment = {
                 type: "other",
-                amount: 1000.00,
+                amount: ipf_invoice.total_invoice,
                 description: "PRECUENTA"
             };
             ipf_invoice.payments.push(ipf_payment);
+
+
+            console.log("=============ipf_nofiscal_print=================");
+            console.log(ipf_invoice)
+            console.log("=============ipf_nofiscal_print=================");
             ipfProxy.print_receipt(ipf_invoice, context);
         },
         ipf_reprint: function () {
