@@ -21,45 +21,6 @@ odoo.define('ipf_manager.models', function (require) {
 
 
     });
-
-    // models.load_models({
-    //     model:  'account.journal',
-    //     fields: ['type', 'sequence', 'ipf_payment_type'],
-    //     domain: function(self,tmp){ return [['id','in',tmp.journals]]; },
-    //     loaded: function(self, journals){
-    //         var i;
-    //         self.journals = journals;
-    //
-    //         // associate the bank statements with their journals.
-    //         var cashregisters = self.cashregisters;
-    //         var ilen = cashregisters.length;
-    //         for(i = 0; i < ilen; i++){
-    //             for(var j = 0, jlen = journals.length; j < jlen; j++){
-    //                 if(cashregisters[i].journal_id[0] === journals[j].id){
-    //                     cashregisters[i].journal = journals[j];
-    //                 }
-    //             }
-    //         }
-    //
-    //         self.cashregisters_by_id = {};
-    //         for (i = 0; i < self.cashregisters.length; i++) {
-    //             self.cashregisters_by_id[self.cashregisters[i].id] = self.cashregisters[i];
-    //         }
-    //
-    //         self.cashregisters = self.cashregisters.sort(function(a,b){
-		// // prefer cashregisters to be first in the list
-		// if (a.journal.type == "cash" && b.journal.type != "cash") {
-		//     return -1;
-		// } else if (a.journal.type != "cash" && b.journal.type == "cash") {
-		//     return 1;
-		// } else {
-    //                 return a.journal.sequence - b.journal.sequence;
-		// }
-    //         });
-    //
-    //     },
-    // });
-
 });
 
 

@@ -699,22 +699,22 @@ odoo.define('ipf_manager.service', function (require) {
             if (!checkBrowserCompatibility()) {
                 return
             }
-            // bootbox.prompt({
-            //     title: "Sacar papel introdizca el numero de linas.",
-            //     value: 10,
-            //     callback: function (result) {
-            //         if (result === null) {
-            //             return
-            //         } else {
-            //             var context = new web_data.CompoundContext({
-            //                 active_model: self.field_manager.model,
-            //                 active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
-            //             });
-            //             var command = new ipfAPI();
-            //             command.get_advance_paper_number(context, result);
-            //         }
-            //     }
-            // });
+            bootbox.prompt({
+                title: "Sacar papel introdizca el numero de linas.",
+                value: 10,
+                callback: function (result) {
+                    if (result === null) {
+                        return
+                    } else {
+                        var context = new web_data.CompoundContext({
+                            active_model: self.field_manager.model,
+                            active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
+                        });
+                        var command = new ipfAPI();
+                        command.get_advance_paper_number(context, result);
+                    }
+                }
+            });
 
         }
     });
@@ -953,22 +953,22 @@ odoo.define('ipf_manager.service', function (require) {
             if (!checkBrowserCompatibility()) {
                 return
             }
-            // bootbox.prompt({
-            //     title: "Modificar cabezera.",
-            //     value: "",
-            //     callback: function (result) {
-            //         if (result === null) {
-            //             return
-            //         } else {
-            //             var context = new web_data.CompoundContext({
-            //                 active_model: self.field_manager.model,
-            //                 active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
-            //             });
-            //             var command = new ipfAPI();
-            //             command.post_document_header(context, {"text": result});
-            //         }
-            //     }
-            // });
+            bootbox.prompt({
+                title: "Modificar cabezera.",
+                value: "",
+                callback: function (result) {
+                    if (result === null) {
+                        return
+                    } else {
+                        var context = new web_data.CompoundContext({
+                            active_model: self.field_manager.model,
+                            active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
+                        });
+                        var command = new ipfAPI();
+                        command.post_document_header(context, {"text": result});
+                    }
+                }
+            });
         }
     });
 
@@ -981,9 +981,9 @@ odoo.define('ipf_manager.service', function (require) {
         },
         start: function () {
             this.$el.append("<button id='get_daily_book' class='btn btn-default btn-block'><div class='stat_button_icon fa fa-book'></div><div>Libro diario</div></button>");
-            // bootbox.setDefaults({
-            //     locale: "es"
-            // });
+            bootbox.setDefaults({
+                locale: "es"
+            });
         },
 
         get_daily_book: function () {
@@ -991,24 +991,24 @@ odoo.define('ipf_manager.service', function (require) {
             if (!checkBrowserCompatibility()) {
                 return
             }
-            // bootbox.prompt({
-            //     title: "Extracción de libro diario.",
-            //     value: new Date().toDateInputValue(),
-            //     inputType: "date",
-            //     size: "small",
-            //     callback: function (bookday) {
-            //         if (!bookday) {
-            //             return
-            //         } else {
-            //             var context = new web_data.CompoundContext({
-            //                 active_model: self.field_manager.model,
-            //                 active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
-            //             });
-            //             var command = new ipfAPI();
-            //             command.get_daily_book(context, bookday);
-            //         }
-            //     }
-            // });
+            bootbox.prompt({
+                title: "Extracción de libro diario.",
+                value: new Date().toDateInputValue(),
+                inputType: "date",
+                size: "small",
+                callback: function (bookday) {
+                    if (!bookday) {
+                        return
+                    } else {
+                        var context = new web_data.CompoundContext({
+                            active_model: self.field_manager.model,
+                            active_id: self.field_manager.datarecord.id || self.field_manager.dataset.context.id
+                        });
+                        var command = new ipfAPI();
+                        command.get_daily_book(context, bookday);
+                    }
+                }
+            });
         }
     });
 

@@ -104,7 +104,7 @@ odoo.define('ipf_manager.devices', function (require) {
             var order = self.pos.get_order();
             var partner = order.get_client();
 
-            var comments = $.trim(order.get_order_note() + " | " + self.pos.config.receipt_footer || '');
+            var comments = $.trim("==================NOTA==================" + order.name || "" +  order.get_order_note() || "" + self.pos.config.receipt_footer || '' + "========================================");
             var comments_list = comments.match(/.{1,40}/g);
 
             var ipf_invoice = {
@@ -197,11 +197,6 @@ odoo.define('ipf_manager.devices', function (require) {
                 description: "PRECUENTA"
             };
             ipf_invoice.payments.push(ipf_payment);
-
-
-            console.log("=============ipf_nofiscal_print=================");
-            console.log(ipf_invoice)
-            console.log("=============ipf_nofiscal_print=================");
             ipfProxy.print_receipt(ipf_invoice, context);
         },
         ipf_reprint: function () {
@@ -280,7 +275,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 active_model: "ipf.printer.config",
                 active_id: self.pos.config.iface_fiscal_printer[0]
             });
-            ipfProxy.get_z_close_print(context)
+            ipfProxy.get_z_close_print(context);
+            this.pos.gui.close_popup();
         },
         ipf_shift_change: function () {
             var self = this;
@@ -289,7 +285,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 active_model: "ipf.printer.config",
                 active_id: self.pos.config.iface_fiscal_printer[0]
             });
-            ipfProxy.get_new_shift_print(context)
+            ipfProxy.get_new_shift_print(context);
+            this.pos.gui.close_popup();
 
         },
         ipf_report_x: function () {
@@ -299,7 +296,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 active_model: "ipf.printer.config",
                 active_id: self.pos.config.iface_fiscal_printer[0]
             });
-            ipfProxy.get_x(context)
+            ipfProxy.get_x(context);
+            this.pos.gui.close_popup();
 
         },
         ipf_today_report: function () {
@@ -309,7 +307,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 active_model: "ipf.printer.config",
                 active_id: self.pos.config.iface_fiscal_printer[0]
             });
-            ipfProxy.get_information_day(context)
+            ipfProxy.get_information_day(context);
+            this.pos.gui.close_popup();
 
         },
         ipf_shift_report: function () {
@@ -319,7 +318,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 active_model: "ipf.printer.config",
                 active_id: self.pos.config.iface_fiscal_printer[0]
             });
-            ipfProxy.get_information_shift(context)
+            ipfProxy.get_information_shift(context);
+            this.pos.gui.close_popup();
         }
     });
 
