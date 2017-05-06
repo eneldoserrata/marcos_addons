@@ -6,6 +6,7 @@ odoo.define('ipf_manager.devices', function (require) {
     var Model = require('web.DataModel');
     var gui = require('point_of_sale.gui');
     var PopupWidget = require("point_of_sale.popups");
+    var screens = require('point_of_sale.screens');
 
     devices.ProxyDevice.include({
         try_hard_to_connect: function (url, options) {
@@ -98,89 +99,122 @@ odoo.define('ipf_manager.devices', function (require) {
             }
 
         },
-        get_ipf_data: function (order_name) {
+        ipf_get_pos_data: function () {
             var self = this;
-
             var order = self.pos.get_order();
-            console.log(order);
-            var ipfProxy = new IpfApi();
+            var partner = order.get_client();
 
             var comments = $.trim(order.get_order_note() + " | " + self.pos.config.receipt_footer || '');
             var comments_list = comments.match(/.{1,40}/g);
 
-            return new Model('pos.order').call("get_fiscal_data", [order_name]).then(function (result) {
+            var ipf_invoice = {
+                type: "nofiscal",
+                copy: 1,
+                cashier: self.pos.user.id,
+                subsidiary: self.pos.config.iface_fiscal_printer_subsidiary[0],
+                ncf: "Documento de no venta",
+                reference_ncf: "",
+                client: partner.name,
+                rnc: partner.vat,
+                items: [],
+                payments: [],
+                discount: false,
+                charges: false,
+                comments: comments_list,
+                host: self.pos.config.iface_fiscal_printer_host,
+                invoice_id: false
+            };
 
+            order.orderlines.each(function (orderline) {
+                var line = orderline.export_as_JSON();
+                var product = self.pos.db.get_product_by_id(line.product_id);
+                var tax = orderline.get_taxes();
 
-                var ipf_invoice = {
-                    type: result.fiscal_type,
-                    copy: self.pos.config.iface_fiscal_printer_copy,
-                    cashier: self.pos.user.id,
-                    subsidiary: self.pos.config.iface_fiscal_printer_subsidiary[0],
-                    ncf: result.ncf || "Documento de no venta",
-                    reference_ncf: result.origin || "",
-                    client: result.name,
-                    rnc: result.rnc,
-                    items: [],
-                    payments: [],
-                    discount: false,
-                    charges: false,
-                    comments: comments_list,
-                    host: self.pos.config.iface_fiscal_printer_host,
-                    invoice_id: result.id
+                if (tax.length != 1) {
+                    self.pos.gui.show_popup('error', {
+                        'title': 'Error en el impuesto del producto',
+                        'body': 'La impresora fiscal no admite productos con mas de un impuesto. [' + product.display_name + ']'
+                    });
+                    return
+                } else if (!$.inArray(tax, [0, 5, 8, 11, 13, 18])) {
+                    self.pos.gui.show_popup('error', {
+                        'title': 'Error en el impuesto del producto',
+                        'body': 'Tiene un porciento de ITBIS no admitido. [' + product.display_name + ']'
+                    });
+                    return
+                } else {
+                    var itbis = tax[0].amount
+                }
+
+                var nota = (typeof line.note === "undefined" ? "" : " " + line.note);
+                var description = $.trim(product.display_name + nota);
+                var description_list = description.match(/.{1,21}/g);
+
+                var ifp_line = {
+                    description: description_list.pop(),
+                    extra_descriptions: description_list,
+                    quantity: line.qty,
+                    price: line.price_unit || 0,
+                    itbis: itbis,
+                    discount: line.discount || false,
+                    charges: false
                 };
 
+                ipf_invoice.items.push(ifp_line)
 
-                order.orderlines.each(function (orderline) {
-                    var line = orderline.export_as_JSON();
-                    var product = self.pos.db.get_product_by_id(line.product_id);
-                    var tax = orderline.get_taxes();
-
-                    if (tax.length != 1) {
-                        self.pos.gui.show_popup('error', {
-                            'title': 'Error en el impuesto del producto',
-                            'body': 'La impresora fiscal no admite productos con mas de un impuesto. [' + product.display_name + ']'
-                        });
-                        return
-                    } else if (!$.inArray(tax, [0, 5, 8, 11, 13, 18])) {
-                        self.pos.gui.show_popup('error', {
-                            'title': 'Error en el impuesto del producto',
-                            'body': 'Tiene un porciento de ITBIS no admitido. [' + product.display_name + ']'
-                        });
-                        return
-                    } else {
-                        var itbis = tax[0].amount
-                    }
-
-                    var nota = (typeof line.note === "undefined" ? "" : " " + line.note);
-                    var description = $.trim(product.display_name + nota);
-                    var description_list = description.match(/.{1,21}/g);
-
-                    var ifp_line = {
-                        description: description_list.pop(),
-                        extra_descriptions: description_list,
-                        quantity: line.qty,
-                        price: line.price_unit || 0,
-                        itbis: itbis,
-                        discount: line.discount || false,
-                        charges: false
-                    };
-
-                    ipf_invoice.items.push(ifp_line)
-
-                });
+            });
 
 
-                order.paymentlines.each(function (paymentline) {
-                    var journal_type = paymentline.ipf_payment_type || "other";
-                    var ipf_payment = {
-                        type: journal_type,
-                        amount: paymentline.amount,
-                        description: false
-                    };
+            order.paymentlines.each(function (paymentline) {
+                var journal_type = paymentline.cashregister.journal.ipf_payment_type || "other";
+                var ipf_payment = {
+                    type: journal_type,
+                    amount: paymentline.amount,
+                    description: paymentline.name
+                };
 
-                    ipf_invoice.payments.push(ipf_payment)
-                });
+                ipf_invoice.payments.push(ipf_payment)
+            });
 
+
+            return ipf_invoice;
+
+
+        },
+        ipf_nofiscal_print: function () {
+            var self = this;
+            var order = self.pos.get_order();
+            var context = new web_data.CompoundContext({
+                active_model: false,
+                active_id: false
+            });
+            var ipfProxy = new IpfApi();
+            var ipf_invoice = self.ipf_get_pos_data();
+            var ipf_payment = {
+                type: "other",
+                amount: 1000.00,
+                description: "PRECUENTA"
+            };
+            ipf_invoice.payments.push(ipf_payment);
+            ipfProxy.print_receipt(ipf_invoice, context);
+        },
+        ipf_reprint: function () {
+
+        },
+        ipf_fiscal_print: function (order_name, fiscal_type) {
+            var self = this;
+            var order = self.pos.get_order();
+            var ipf_invoice = self.ipf_get_pos_data();
+
+
+            var ipfProxy = new IpfApi();
+
+            return new Model('pos.order').call("get_fiscal_data", [order.name]).then(function (result) {
+
+                ipf_invoice.type = result.fiscal_type;
+                ipf_invoice.ncf = result.ncf || "Documento de no venta";
+                ipf_invoice.reference_ncf = result.origin || "";
+                ipf_invoice.invoice_id = result.id;
                 return ipf_invoice
 
             }).done(function (ipf_invoice) {
@@ -209,7 +243,7 @@ odoo.define('ipf_manager.devices', function (require) {
                 if (self.pos.config.iface_fiscal_printer) {
                     var parse_xml_params = $.parseXML(params.receipt);
                     var order_name = $(parse_xml_params).find("ipfordername").text();
-                    return self.get_ipf_data(order_name);
+                    return self.ipf_fiscal_print(order_name, "fiscal");
                 } else {
                     return this.connection.rpc('/hw_proxy/' + name, params || {});
                 }
@@ -284,5 +318,22 @@ odoo.define('ipf_manager.devices', function (require) {
     });
 
     gui.define_popup({name: 'ipfPrintReport', widget: IPFPrintReport});
+
+
+    var IpfPrintBillButton = screens.ActionButtonWidget.extend({
+        template: 'IpfPrintBillButton',
+        button_click: function () {
+
+            this.pos.proxy.ipf_nofiscal_print()
+        }
+    });
+
+    screens.define_action_button({
+        'name': 'ipf_print_bill',
+        'widget': IpfPrintBillButton,
+        'condition': function () {
+            return this.pos.config.iface_fiscal_printer;
+        },
+    });
 
 });

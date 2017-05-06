@@ -24,11 +24,26 @@
                     <p>
                         Selecciones el informe deseado.
                     </p>
-                    <div class="button ipf-report-button ipf-cierre-z"><i class="fa fa-print fa-1x"/> Cierre z</div>
-                    <div class="button ipf-report-button ipf-shift-change"><i class="fa fa-print fa-1x"/> Cambio de turno</div>
-                    <div class="button ipf-report-button ipf-report-x"><i class="fa fa-print fa-1x"/> Informe X</div>
-                    <div class="button ipf-report-button ipf-today-report"><i class="fa fa-desktop fa-1x"/> Informe de hoy</div>
-                    <div class="button ipf-report-button ipf-shift-report"><i class="fa fa-desktop fa-1x"/> Informe del turno</div>
+                    <div class="button ipf-report-button ipf-cierre-z">
+                        <i class="fa fa-print fa-1x"/>
+                        Cierre z
+                    </div>
+                    <div class="button ipf-report-button ipf-shift-change">
+                        <i class="fa fa-print fa-1x"/>
+                        Cambio de turno
+                    </div>
+                    <div class="button ipf-report-button ipf-report-x">
+                        <i class="fa fa-print fa-1x"/>
+                        Informe X
+                    </div>
+                    <div class="button ipf-report-button ipf-today-report">
+                        <i class="fa fa-desktop fa-1x"/>
+                        Informe de hoy
+                    </div>
+                    <div class="button ipf-report-button ipf-shift-report">
+                        <i class="fa fa-desktop fa-1x"/>
+                        Informe del turno
+                    </div>
                 </div>
                 <div class="footer">
                     <div class="button cancel">
@@ -37,6 +52,13 @@
                 </div>
             </div>
         </div>
+    </t>
+
+    <t t-name="IpfPrintBillButton">
+        <span class="control-button order-printbill">
+            <i class="fa fa-print"></i>
+            Precuenta
+        </span>
     </t>
 
 

@@ -113,6 +113,7 @@ odoo.define('ipf_manager.service', function (require) {
             });
         },
         get_information_day: function (context) {
+
             var self = this;
             self.get_host(context).then(function (context) {
                 var url = self.host + "/information/day";
@@ -149,13 +150,14 @@ odoo.define('ipf_manager.service', function (require) {
                     "url": self.host + "/printer_information"
                 }).done(function (response) {
                     var aplitBookDay = bookday.split("-");
-                    var serial = JSON.parse(response).response.serial;
-                    var url = self.host + "/daily_book/" + serial + "/" + aplitBookDay[2] + "/" + aplitBookDay[1] + "/" + aplitBookDay[0];
+                    // var serial = JSON.parse(response).response.serial;
+                    var url = self.host + "/daily_book/" + "norequerido" + "/" + aplitBookDay[2] + "/" + aplitBookDay[1] + "/" + aplitBookDay[0];
+
                     self.get_book(url, serial, bookday, context);
                 }).fail(function (response) {
-                    console.log("=======get_host=========");
+                    console.log("=======get_daily_book error=========");
                     console.log(response);
-                    console.log("=======get_host=========");
+                    console.log("=======get_daily_book error=========");
                     var res = false;
 
                     if (response.responseText) {
@@ -177,6 +179,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         },
         get_report: function (url, type, from, context, data) {
+            openerp.web.blockUI();
             var self = this;
             if (data) {
                 var params = {"type": type, "url": url, "data": JSON.stringify(data)}
@@ -187,9 +190,10 @@ odoo.define('ipf_manager.service', function (require) {
                 .done(function (response) {
                     console.log(JSON.parse(response));
                     self.show_response(from, JSON.parse(response), context);
-
+                    openerp.web.unblockUI();
                 })
                 .fail(function (response) {
+                    openerp.web.unblockUI();
 
                     var res = false;
 
@@ -467,7 +471,6 @@ odoo.define('ipf_manager.service', function (require) {
                 contentType: "text/plain"
             }).done(function (response) {
                 self.save_book(response, serial, bookday, context);
-
             }).fail(function (response) {
                 openerp.web.unblockUI();
                 console.log(response);
@@ -511,13 +514,12 @@ odoo.define('ipf_manager.service', function (require) {
 
         },
         print_receipt: function (data, context) {
-
             var self = this;
             return $.ajax({
-                    type: 'POST',
-                    url: data.host + "/invoice",
-                    data: JSON.stringify(data)
-                })
+                type: 'POST',
+                url: data.host + "/invoice",
+                data: JSON.stringify(data)
+            })
                 .done(function (response) {
                     console.log(response);
                     var responseobj = JSON.parse(response);
@@ -529,7 +531,6 @@ odoo.define('ipf_manager.service', function (require) {
                     console.log("=======print_receipt fail=========");
                     console.log(response);
                     console.log("=======print_receipt fail=========");
-
                     if (response.responseText) {
                         var message = JSON.parse(response.responseText);
                         self.showDialog(message.status, message.message);
@@ -547,7 +548,7 @@ odoo.define('ipf_manager.service', function (require) {
                 })
         }
     });
-    
+
     var IpfsoftwareVersion = form_common.FormWidget.extend(form_common.ReinitializeWidgetMixin, {
         events: {
             "click #get_software_version": "get_software_version"
@@ -557,7 +558,7 @@ odoo.define('ipf_manager.service', function (require) {
         },
         get_software_version: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -581,7 +582,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_state: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -605,7 +606,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_printer_information: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -629,7 +630,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_advance_paper: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -653,7 +654,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_advance_paper_number: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             bootbox.prompt({
@@ -688,7 +689,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_cut_paper: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -714,7 +715,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_z_close: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -738,7 +739,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_z_close_print: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -762,7 +763,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_new_shift: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -786,7 +787,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_new_shift_print: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -810,7 +811,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_x: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -834,7 +835,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_information_day: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -858,7 +859,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_information_shift: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -882,7 +883,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         get_document_header: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -907,7 +908,7 @@ odoo.define('ipf_manager.service', function (require) {
 
         post_document_header: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             bootbox.prompt({
@@ -944,8 +945,8 @@ odoo.define('ipf_manager.service', function (require) {
         },
 
         get_daily_book: function () {
-           var self = this;
-            if (!checkBrowserCompatibility()){
+            var self = this;
+            if (!checkBrowserCompatibility()) {
                 return
             }
             bootbox.prompt({
@@ -980,7 +981,7 @@ odoo.define('ipf_manager.service', function (require) {
         },
         post_invoice: function () {
             var self = this;
-            if (!checkBrowserCompatibility()){
+            if (!checkBrowserCompatibility()) {
                 return
             }
             var context = new web_data.CompoundContext({
@@ -994,7 +995,6 @@ odoo.define('ipf_manager.service', function (require) {
 
     core.form_custom_registry.add("ipf_button_post_invoice", IpfPrinterPostInvoice);
 
-    
 
     return ipfAPI
 
