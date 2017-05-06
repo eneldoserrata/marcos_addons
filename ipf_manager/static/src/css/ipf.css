@@ -14,17 +14,3 @@
     font-size: 15px !important;
     background-color: #F0EEEE;
 }
-
-div.bootbox.modal.in {
-    position: fixed !important;
-    background: none !important;
-    padding: 0px !important;
-    box-shadow: 0px !important;
-    border-radius: 0px !important;
-    max-width: 600px;
-    max-height: 400px;
-    margin-top: -200px;
-    margin-left: -300px;
-    top: 50%;
-    left: 50%;
-}
