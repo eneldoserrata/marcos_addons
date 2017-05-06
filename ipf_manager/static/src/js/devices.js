@@ -149,6 +149,7 @@ odoo.define('ipf_manager.devices', function (require) {
 
                 var nota = (typeof line.note === "undefined" ? "" : " " + line.note);
                 var description = $.trim(product.display_name + nota);
+
                 var description_list = description.match(/.{1,21}/g);
 
                 var ifp_line = {
@@ -191,12 +192,9 @@ odoo.define('ipf_manager.devices', function (require) {
             });
             var ipfProxy = new IpfApi();
             var ipf_invoice = self.ipf_get_pos_data();
-            var ipf_payment = {
-                type: "other",
-                amount: ipf_invoice.total_invoice,
-                description: "PRECUENTA"
-            };
-            ipf_invoice.payments.push(ipf_payment);
+
+            ipf_invoice.payments = null
+            ipf_invoice.type = "quotation"
             ipfProxy.print_receipt(ipf_invoice, context);
         },
         ipf_reprint: function () {
