@@ -185,7 +185,6 @@ odoo.define('ipf_manager.devices', function (require) {
         },
         ipf_nofiscal_print: function () {
             var self = this;
-            var order = self.pos.get_order();
             var context = new web_data.CompoundContext({
                 active_model: false,
                 active_id: false
