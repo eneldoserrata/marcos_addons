@@ -1,5 +1,6 @@
 odoo.define('ipf_manager.devices', function (require) {
 
+
     var devices = require('point_of_sale.devices');
     var IpfApi = require('ipf_manager.service');
     var web_data = require('web.data');
