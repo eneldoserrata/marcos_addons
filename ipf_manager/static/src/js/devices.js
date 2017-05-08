@@ -197,9 +197,6 @@ odoo.define('ipf_manager.devices', function (require) {
             ipf_invoice.type = "quotation"
             ipfProxy.print_receipt(ipf_invoice, context);
         },
-        ipf_reprint: function () {
-
-        },
         ipf_fiscal_print: function (order_name, fiscal_type) {
             var self = this;
             var order = self.pos.get_order();
