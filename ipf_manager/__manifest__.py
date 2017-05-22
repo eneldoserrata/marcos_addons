@@ -49,7 +49,7 @@
     'website': "http://marcos.do",
     'category': 'Uncategorized',
     'version': '9.0',
-    'depends': ['base', 'web', 'account', 'ncf_manager','point_of_sale'],
+    'depends': ['base', 'web', 'account','point_of_sale'],
 
     # always loaded
     'data': [

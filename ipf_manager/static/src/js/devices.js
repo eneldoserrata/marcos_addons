@@ -110,7 +110,7 @@ odoo.define('ipf_manager.devices', function (require) {
 
             var ipf_invoice = {
                 type: "nofiscal",
-                copy: 1,
+                copy: self.pos.config.iface_fiscal_printer_copy,
                 cashier: self.pos.user.id,
                 subsidiary: self.pos.config.iface_fiscal_printer_subsidiary[0],
                 ncf: "Documento de no venta",
