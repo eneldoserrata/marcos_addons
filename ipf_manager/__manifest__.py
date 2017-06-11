@@ -66,8 +66,5 @@
     ],
     # only loaded in demonstration mode
     'qweb': ['static/src/xml/ipf_manager.xml'],
-    'demo': [
-        'demo/demo.xml',
-    ],
     'license': "Other proprietary"
 }

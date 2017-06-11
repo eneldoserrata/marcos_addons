@@ -66,10 +66,6 @@
         'views.xml',
         'data/data.xml'
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        # 'demo.xml',
-    ],
     "price": 200,
     'currency': 'EUR',
     'license': "Other proprietary",

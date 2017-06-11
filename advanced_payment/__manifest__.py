@@ -61,14 +61,9 @@
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
-        'views/templates.xml',
         "views/partner_invoice_move_report.xml",
         "views/payment_request_report.xml",
         "views/account_invoice_view.xml"
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
     ],
     'images': ['static/description/main.png'],
     "price": 500,
