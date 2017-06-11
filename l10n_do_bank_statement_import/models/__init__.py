@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-import res_bank
-import bank_statement_import
+from . import res_bank
+from . import bank_statement_import

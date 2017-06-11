@@ -31,7 +31,8 @@ class InheritedAccountBankStatementImport(models.TransientModel):
         total_amt = 0.00
         for transaction in ofx.account.statement.transactions:
             bank_account_id = partner_id = False
-            partner_bank = self.env['res.partner.bank'].search([('partner_id.name', '=', transaction.payee)], limit=1)
+            partner_bank = self.env['res.partner.bank'].search(
+                [('partner_id.name', '=', transaction.payee)], limit=1)
             if partner_bank:
                 bank_account_id = partner_bank.id
                 partner_id = partner_bank.partner_id.id
@@ -39,7 +40,8 @@ class InheritedAccountBankStatementImport(models.TransientModel):
                 'date': transaction.date,
                 'name': transaction.payee + (transaction.memo and ': ' + transaction.memo or ''),
                 'ref': u"{}: {}".format(int(transaction.id) - 1,
-                                        format_date(transaction.date, 'EEEE d', locale=locale)),
+                                        format_date(transaction.date,
+                                                    'EEEE d', locale=locale)),
                 'amount': transaction.amount,
                 'unique_import_id': "{}-{}".format(transaction.id,
                                                    transaction.date.strftime(DEFAULT_SERVER_DATE_FORMAT)),
@@ -53,8 +55,7 @@ class InheritedAccountBankStatementImport(models.TransientModel):
         min_date = min(dates)
         max_date = max(dates)
         vals_bank_statement = {
-            'name': "Del {} al {} de {}".format(min_date.strftime("%d"), max_date.strftime("%d"),
-                                                format_date(max_date, 'MMMM', locale=locale)),
+            'name': "Del {} al {} de {}".format(min_date.strftime("%d"), max_date.strftime("%d"), format_date(max_date, 'MMMM', locale=locale)),
             'transactions': transactions,
             'balance_start': float(ofx.account.statement.balance) - total_amt,
             'balance_end_real': ofx.account.statement.balance,

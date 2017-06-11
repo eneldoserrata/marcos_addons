@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) 
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,12 +31,12 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 
-from odoo import models, fields, api, exceptions, _, release
+from odoo import models, fields, api, exceptions, _
 
 import textwrap
 
@@ -54,7 +57,8 @@ class AccountPayment(models.Model):
 
                 if len(currency_set) > 2:
                     raise exceptions.ValidationError(
-                        "El mismo proveedor no puede facturar en mas de dos monedas diferentes.")
+                        u"El mismo proveedor no puede facturar en más de dos"
+                        " monedas diferentes.")
                 elif len(currency_set) == 2:
                     currency_set.remove(False)
                     self.rate_currency_id = currency_set.pop()
@@ -145,29 +149,52 @@ class AccountPayment(models.Model):
     def _check_is_base_currency(self):
         self.is_base_currency = self.currency_id.id == self.company_id.currency_id.id
 
-    move_type = fields.Selection([('auto', 'Automatic'), ('manual', 'Manual'), ('invoice', 'Pay bills')],
+    move_type = fields.Selection([('auto', 'Automatic'),
+                                 ('manual', 'Manual'),
+                                 ('invoice', 'Pay bills')],
                                  string=u"Method of accounting entries",
                                  default="auto", required=True, copy=False)
-    state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
-                              ('reconciled', 'Reconciled')], readonly=True, default='draft', copy=False,
+
+    state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'),
+                              ('posted', 'Posted'), ('sent', 'Sent'),
+                              ('reconciled', 'Reconciled')],
+                             readonly=True, default='draft', copy=False,
                              string="Status")
-    payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
-    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=1000)
+
+    payment_move_ids = fields.One2many("payment.move.line",
+                                       "payment_id", copy=False)
+
+    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id",
+                                          copy=False, limit=1000)
     rate = fields.Float("Tasa", digits=(16, 4))
+
     currency_diff_type = fields.Selection(
-        [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'), ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
-         ("none", "SIN DIFERENCIA CAMBIARIA")], compute="_calc_payment_amount", string="Tipo de diferencia")
+        [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'),
+         ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
+         ("none", "SIN DIFERENCIA CAMBIARIA")],
+        compute="_calc_payment_amount", string="Tipo de diferencia")
 
-    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id',
+    amount_currency = fields.Monetary("Importe divisa",
+                                      currency_field='rate_currency_id',
                                       compute="_calc_payment_amount")
-    rate_currency_id = fields.Many2one("res.currency", string="Divisa de cambio", compute="_calc_payment_amount")
-    payment_amount = fields.Monetary("Pago calculado", compute="_calc_payment_amount")
-    currency_diff = fields.Monetary("Diferencia cambiaria", compute="_calc_payment_amount")
 
-    invoice_payment_amount = fields.Float(compute="_calc_payment_amount", digit=(16.16))
+    rate_currency_id = fields.Many2one("res.currency",
+                                       string="Divisa de cambio",
+                                       compute="_calc_payment_amount")
+
+    payment_amount = fields.Monetary("Pago calculado",
+                                     compute="_calc_payment_amount")
+
+    currency_diff = fields.Monetary("Diferencia cambiaria",
+                                    compute="_calc_payment_amount")
+
+    invoice_payment_amount = fields.Float(compute="_calc_payment_amount",
+                                          digit=(16.16))
+
     invoice_payment_amount_currency = fields.Float(compute="_calc_payment_amount", digit=(16, 16))
 
-    floatcurrency_diff = fields.Float(compute="_calc_payment_amount", digits=(16, 8))
+    floatcurrency_diff = fields.Float(compute="_calc_payment_amount",
+                                      digits=(16, 8))
 
     is_base_currency = fields.Boolean(compute="_check_is_base_currency")
 
@@ -198,8 +225,7 @@ class AccountPayment(models.Model):
         manual_lines = [line for line in self.payment_move_ids if line.account_id.id not in account_id]
         rate = False
         if counterpart_aml_dict.get("amount_currency", False):
-            rate = counterpart_aml_dict["debit"] / counterpart_aml_dict["amount_currency"] if counterpart_aml_dict[
-                                                                                                  "debit"] > 0 else \
+            rate = counterpart_aml_dict["debit"] / counterpart_aml_dict["amount_currency"] if counterpart_aml_dict["debit"] > 0 else \
                 counterpart_aml_dict["credit"] / counterpart_aml_dict["amount_currency"]
         for line in manual_lines:
 
@@ -278,11 +304,9 @@ class AccountPayment(models.Model):
 
             if inv.currency_id:
                 if inv_credit > 0:
-                    counterpart_aml_dict.update({"amount_currency": abs(inv.amount / inv.invoice_rate) * -1,
-                                                 "currency_id": inv.currency_id.id})
+                    counterpart_aml_dict.update({"amount_currency": abs(inv.amount / inv.invoice_rate) * -1, "currency_id": inv.currency_id.id})
                 else:
-                    counterpart_aml_dict.update({"amount_currency": abs(inv.amount / inv.invoice_rate),
-                                                 "currency_id": inv.currency_id.id})
+                    counterpart_aml_dict.update({"amount_currency": abs(inv.amount / inv.invoice_rate), "currency_id": inv.currency_id.id})
             else:
                 counterpart_aml_dict.update({"amount_currency": False,
                                              "currency_id": False})
@@ -302,26 +326,22 @@ class AccountPayment(models.Model):
         if self.is_base_currency:
             if self.currency_diff:
                 if self.currency_diff > 0:
-                    liquidity_aml_dict.update({"amount_currency": False,
-                                               "currency_id": False,
-                                               "debit": credit_invoice_total - abs(
-                                                   self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total - abs(
-                                                   self.floatcurrency_diff) if self.payment_type == "outbound" else 0
-                                               })
+                    liquidity_aml_dict.update(
+                        {"amount_currency": False, "currency_id": False,
+                         "debit": credit_invoice_total - abs(self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
+                         "credit": debit_invoice_total - abs(self.floatcurrency_diff) if self.payment_type == "outbound" else 0})
                 else:
-                    liquidity_aml_dict.update({"amount_currency": False,
-                                               "currency_id": False,
-                                               "debit": credit_invoice_total + abs(
+                    liquidity_aml_dict.update(
+                        {"amount_currency": False,
+                         "currency_id": False,
+                         "debit": credit_invoice_total + abs(
                                                    self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total + abs(
-                                                   self.floatcurrency_diff) if self.payment_type == "outbound" else 0
-                                               })
+                         "credit": debit_invoice_total + abs(
+                                                   self.floatcurrency_diff) if self.payment_type == "outbound" else 0})
             else:
                 liquidity_aml_dict.update({"amount_currency": False,
                                            "currency_id": False,
                                            "debit": credit_invoice_total})
-
 
         else:
             if self.currency_diff:

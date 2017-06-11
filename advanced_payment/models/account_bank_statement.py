@@ -26,8 +26,7 @@ class AccountBankStatementLine(models.Model):
             elif st_line_currency == company_currency:
                 total_amount = self.amount_currency
             else:
-                total_amount = company_currency.with_context({'date': self.date}).compute(amount, statement_currency,
-                                                                                          round=True)
+                total_amount = company_currency.with_context({'date': self.date}).compute(amount, statement_currency, round=True)
                 # total_amount = statement_currency.with_context({'date': self.date}).compute(amount, company_currency,round=False)
             if (statement_currency != company_currency) or (st_line_currency != company_currency):
                 ratio = 1 / (total_amount / amount)
@@ -45,9 +44,7 @@ class AccountBankStatementLine(models.Model):
             'ref': self.ref,
             'move_id': move.id,
             'partner_id': self.partner_id and self.partner_id.id or False,
-            'account_id': amount >= 0 \
-                          and self.statement_id.journal_id.default_credit_account_id.id \
-                          or self.statement_id.journal_id.default_debit_account_id.id,
+            'account_id': amount >= 0 and self.statement_id.journal_id.default_credit_account_id.id or self.statement_id.journal_id.default_debit_account_id.id,
             'credit': amount < 0 and -amount or 0.0,
             'debit': amount > 0 and amount or 0.0,
             'statement_id': self.statement_id.id,
