@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) 
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,11 +31,10 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
-
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 
 from odoo import models, fields, api, exceptions
 import base64
@@ -55,26 +57,33 @@ class ipf_printer_config(models.Model):
 
     name = fields.Char("Descripcion", required=True)
     host = fields.Char("Host", required=True)
-    print_source = fields.Selection([('server','Desde el servidor'),('browser','Desde el navegador de internet')],
-                                    string="Fuente de impresion", default="browser", required=True,
-                                    help="""
-                                    Desde el navegador de internet: Los comandos seran enviados a la impresora desde
-                                    su navegador de internet google Chrome con la extencion de marcos instalada y activada,
-                                     (Solo funciona con google Chrome).
-                                     <br/>
-                                     Desde el servidor: Los comandos seran enviados al servidor de odoo y este enviara
-                                     los comandos de impresion a la impresora fiscal, debe de tener en cuanta la configuracion
-                                     de router en caso de tener Odoo hosteado en la nube.
-                                    """)
-    user_ids = fields.Many2many('res.users', string="Usuarios", required=True, domain=_user_ids_filter)
+    print_source = fields.Selection(
+        [('server', 'Desde el servidor'),
+         ('browser', 'Desde el navegador de internet')],
+        string="Fuente de impresion", default="browser", required=True,
+        help="""Desde el navegador de internet: Los comandos seran enviados a la impresora desde su navegador de internet google Chrome con la extencion de marcos instalada y activada, (Solo funciona con google Chrome).
+            Desde el servidor: Los comandos seran enviados al servidor de odoo y este enviara los comandos de impresion a la impresora fiscal, debe de tener en cuanta la configuracion de router en caso de tener Odoo hosteado en la nube.""")
+
+    user_ids = fields.Many2many('res.users', string="Usuarios",
+                                required=True, domain=_user_ids_filter)
+
     print_copy = fields.Boolean("Imprimir con copia", default=False)
-    subsidiary = fields.Many2one("shop.ncf.config", string="Sucursal", required=True)
-    daily_book_ids = fields.One2many("ipf.daily.book", "printer_id", string="Libros diarios")
-    state = fields.Selection([("deactivate", "Desactivada"), ("active", "Activa")], default="deactivate")
+
+    subsidiary = fields.Many2one("shop.ncf.config", string="Sucursal",
+                                 required=True)
+
+    daily_book_ids = fields.One2many("ipf.daily.book", "printer_id",
+                                     string="Libros diarios")
+
+    state = fields.Selection(
+        [("deactivate", "Desactivada"),
+         ("active", "Activa")], default="deactivate")
+
     serial = fields.Char("Serial de la impresora", readonly=True)
 
     def set_book_totals(self, book):
-        book_header_sun = [0, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
+        book_header_sun = [0, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+                           0.00, 0.00]
         daily_book_row = base64.b64decode(book.book).split("\n")
 
         for row in daily_book_row:
@@ -112,15 +121,20 @@ class ipf_printer_config(models.Model):
     def save_book(self, new_book, serial, bookday):
         printer_id = self.get_ipf_host(get_id=True)
         date = bookday.split("-")
-        filename = "LV{}{}{}.000".format(date[0][2:4],date[1],date[2])
+        filename = "LV{}{}{}.000".format(date[0][2:4], date[1], date[2])
 
-        book = self.env["ipf.daily.book"].search([('serial', '=', serial), ('date', '=', bookday)])
+        book = self.env["ipf.daily.book"].search([('serial', '=', serial),
+                                                 ('date', '=', bookday)])
         if book:
             book.unlink()
 
-        values = {"printer_id": printer_id, "date": bookday, "book": base64.b64encode(new_book), "serial": serial, "filename": filename}
+        values = {"printer_id": printer_id,
+                  "date": bookday,
+                  "book": base64.b64encode(new_book),
+                  "serial": serial,
+                  "filename": filename}
 
-        new_book = self.env["ipf.daily.book"].create(values);
+        new_book = self.env["ipf.daily.book"].create(values)
 
         self.set_book_totals(new_book)
 
@@ -181,26 +195,51 @@ class ipf_printer_config(models.Model):
         pass
 
 
-
 class ipf_daily_book(models.Model):
     _name = "ipf.daily.book"
     _order = "date"
 
-    printer_id = fields.Many2one("ipf.printer.config", string="Printer", readonly=True)
-    subsidiary = fields.Many2one("", string="Sucursal", related="printer_id.subsidiary")
+    printer_id = fields.Many2one("ipf.printer.config",
+                                 string="Printer", readonly=True)
+
+    subsidiary = fields.Many2one("", string="Sucursal",
+                                 related="printer_id.subsidiary")
+
     date = fields.Date("Fecha", readonly=True)
+
     serial = fields.Char("Serial", readonly=True)
+
     book = fields.Binary("Libro diario", readonly=True)
+
     filename = fields.Char("file name", readonly=True)
 
-    doc_qty = fields.Integer("Transacciones", digits=dp.get_precision('Account'))
+    doc_qty = fields.Integer("Transacciones",
+                             digits=dp.get_precision('Account'))
+
     total = fields.Float("Total", digits=dp.get_precision('Account'))
-    total_tax = fields.Float("Total Itbis", digits=dp.get_precision('Account'))
-    final_total = fields.Float("Final total", digits=dp.get_precision('Account'))
-    final_total_tax = fields.Float("Final Itbis total", digits=dp.get_precision('Account'))
-    fiscal_total = fields.Float("Fiscal total", digits=dp.get_precision('Account'))
-    fiscal_total_tax= fields.Float("Fiscal Itbis total", digits=dp.get_precision('Account'))
-    ncfinal_total = fields.Float("NC final total", digits=dp.get_precision('Account'))
-    ncfinal_total_tax = fields.Float("NC final Itbis total", digits=dp.get_precision('Account'))
-    ncfiscal_total = fields.Float("NC fiscal total", digits=dp.get_precision('Account'))
-    ncfiscal_total_tax = fields.Float("NC fiscal Itbis total", digits=dp.get_precision('Account'  ))
+
+    total_tax = fields.Float("Total ITBIS", digits=dp.get_precision('Account'))
+
+    final_total = fields.Float("Final Total",
+                               digits=dp.get_precision('Account'))
+
+    final_total_tax = fields.Float("Final ITBIS total",
+                                   digits=dp.get_precision('Account'))
+
+    fiscal_total = fields.Float("Fiscal Total",
+                                digits=dp.get_precision('Account'))
+
+    fiscal_total_tax = fields.Float("Fiscal ITBIS Total",
+                                    digits=dp.get_precision('Account'))
+
+    ncfinal_total = fields.Float("NC Final Total",
+                                 digits=dp.get_precision('Account'))
+
+    ncfinal_total_tax = fields.Float("NC Final ITBIS Total",
+                                     digits=dp.get_precision('Account'))
+
+    ncfiscal_total = fields.Float("NC Fiscal Total",
+                                  digits=dp.get_precision('Account'))
+
+    ncfiscal_total_tax = fields.Float("NC Fiscal ITBIS Total",
+                                      digits=dp.get_precision('Account'))

@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) 
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -28,12 +31,11 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
-from odoo import models, api, _, fields
-from odoo.exceptions import UserError
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+from odoo import models, api, fields
 
 
 class AccountInvoiceCancel(models.TransientModel):
@@ -45,17 +47,17 @@ class AccountInvoiceCancel(models.TransientModel):
     _inherit = "account.invoice.cancel"
     _description = "Cancel the Selected Invoices"
 
-    anulation_type = fields.Selection([
-        ("01", u"01 - DETERIORO DE FACTURA PRE-IMPRESA"),
-        ("02", u"02 - ERRORES DE IMPRESIÓN (FACTURA PRE-IMPRESA)"),
-        ("03", u"03 - IMPRESIÓN DEFECTUOSA"),
-        ("04", u"04 - DUPLICIDAD DE FACTURA"),
-        ("05", u"05 - CORRECCIÓN DE LA INFORMACIÓN"),
-        ("06", u"06 - CAMBIO DE PRODUCTOS"),
-        ("07", u"07 - DEVOLUCIÓN DE PRODUCTOS"),
-        ("08", u"08 - OMISIÓN DE PRODUCTOS"),
-        ("09", u"09 - ERRORES EN SECUENCIA DE NCF")
-    ], string=u"Tipo de anulación", required=True)
+    anulation_type = fields.Selection(
+        [("01", u"01 - Deterioro de Factura Pre-impresa"),
+         ("02", u"02 - Errores de Impresión (Factura Pre-impresa)"),
+         ("03", u"03 - Impresión Defectuosa"),
+         ("04", u"04 - Duplicidad de Factura"),
+         ("05", u"05 - Corrección de La Información"),
+         ("06", u"06 - Cambio de Productos"),
+         ("07", u"07 - Devolución de Productos"),
+         ("08", u"08 - Omisión de Productos"),
+         ("09", u"09 - Errores en Secuencia de NCF")],
+        string=u"Tipo de anulación", requiered=True)
 
     @api.multi
     def invoice_cancel(self):

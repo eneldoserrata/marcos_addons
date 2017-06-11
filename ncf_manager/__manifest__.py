@@ -21,7 +21,7 @@
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account', 'account_invoice_change_currency',
-                'web_sheet_full_width', 'marcos_api_tools', 'save_readonly_fields','l10n_do'],
+                'marcos_api_tools', 'l10n_do'],
 
     # always loaded
     'data': [
@@ -34,17 +34,11 @@
         'views/shop_view.xml',
         'views/account_invoice_view.xml',
         'views/account_view.xml',
-        'views/views.xml',
-        'views/templates.xml',
         'views/dgii_exterior_view.xml',
         'views/dgii_purchase_view.xml',
         'views/dgii_sale_view.xml',
         'views/dgii_cancel_view.xml',
         'views/res_view.xml',
         'data/setup_ncf.xml'
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
     ],
 }

@@ -28,7 +28,6 @@ class MarcosApiTools(models.Model):
             config_parameter.create({"key": "api_marcos", "value": "http://api.marcos.do"})
 
     def get_marcos_api_request_params(self):
-
         config_parameter = self.env['ir.config_parameter'].sudo()
         http_proxy = config_parameter.get_param("http_proxy")
         https_proxy = config_parameter.get_param("https_proxy")
@@ -50,7 +49,8 @@ class MarcosApiTools(models.Model):
         return (1, api_marcos, proxies)
 
     def rnc_cedula_validation(self, fiscal_id):
-        invalid_fiscal_id_message = (500, u"RNC/Cédula invalido", u"El número de RNC/C´ula no es valido.")
+        invalid_fiscal_id_message = (500, u"RNC/Cédula invalido",
+                                     u"El número de RNC/Cédula no es valido.")
         if not is_identification(fiscal_id):
             return invalid_fiscal_id_message
         else:
@@ -60,9 +60,10 @@ class MarcosApiTools(models.Model):
                 if res.status_code == 200:
                     dgii_data = res.json()
                     dgii_data["vat"] = dgii_data['rnc']
-                    dgii_data[
-                        "comment"] = u"Nombre Comercial: {}, regimen de pago: {},  estatus: {}, categoria: {}".format(
-                        dgii_data['comercial_name'], dgii_data.get('payment_regimen', ""), dgii_data['status'],
+                    dgii_data["comment"] = u"Nombre Comercial: {}, Régimen de Pago: {}, Estatus: {}, Categoría: {}".format(
+                        dgii_data['comercial_name'],
+                        dgii_data.get('payment_regimen', ""),
+                        dgii_data['status'],
                         dgii_data['category'])
                     if len(fiscal_id) == 9:
                         dgii_data.update({"company_type": u"company"})
@@ -78,45 +79,61 @@ class MarcosApiTools(models.Model):
             return True
 
         if not is_ncf(invoice.move_name, invoice.type):
-            return (100, u"Ncf inválido", u"El número de comprobante fiscal no es válido "
-                                          u"verificar de que no está digitando un comprobante"
-                                          u"de consumidor final código 02 o revise si lo ha"
-                                          u"digitado incorrectamente")
+            return (100, u"NCF Inválido",
+                    u"El número de comprobante {} no es válido, verifique"
+                    u" si no está digitando un comprobante de Consumidor"
+                    u" Final (Código 02) o revise si no lo ha digitado"
+                    " de forma correcta".format(invoice.move_name))
 
         elif not invoice.journal_id.purchase_type in ['exterior', 'import',
                                                       'others'] and invoice.journal_id.type == "purchase":
 
             if invoice.id:
-                inv_in_draft = self.env["account.invoice"].search_count([('id', '!=', invoice.id),
-                                                                         ('partner_id', '=', invoice.partner_id.id),
-                                                                         ('move_name', '=', invoice.move_name),
-                                                                         ('state', 'in', ('draft', 'cancel'))])
+                inv_in_draft = self.env["account.invoice"].search_count(
+                                [('id', '!=', invoice.id),
+                                 ('partner_id', '=', invoice.partner_id.id),
+                                 ('move_name', '=', invoice.move_name),
+                                 ('state', 'in', ('draft', 'cancel'))])
             else:
-                inv_in_draft = self.env["account.invoice"].search_count([('partner_id', '=', invoice.partner_id.id),
-                                                                         ('move_name', '=', invoice.move_name),
-                                                                         ('state', 'in', ('draft', 'cancel'))])
+                inv_in_draft = self.env["account.invoice"].search_count(
+                                [('partner_id', '=', invoice.partner_id.id),
+                                 ('move_name', '=', invoice.move_name),
+                                 ('state', 'in', ('draft', 'cancel'))])
 
             if inv_in_draft:
-                return (200, u"Ncf duplicado", u"El número de comprobante fiscal digitado para este proveedor \n"
-                                               u"ya se encuentra en una factura en borrador o cancelada.")
+                return (200, u"NCF Duplicado",
+                        u"El número de comprobante fiscal {} ya se encuentra"
+                        " registrado con este mismo proveedor en una factura"
+                        " en borrador o cancelada".format(invoice.move_name))
 
             inv_exist = self.env["account.invoice"].search_count(
-                [('partner_id', '=', invoice.partner_id.id), ('number', '=', invoice.move_name),
+                [('partner_id', '=', invoice.partner_id.id),
+                 ('number', '=', invoice.move_name),
                  ('state', 'in', ('open', 'paid'))])
             if inv_exist:
-                return (300, u"Ncf duplicado", u"Este número de comprobante ya fue registrado para este proveedor!")
+                return (300, u"NCF Duplicado",
+                        u"Este número de comprobante fiscal {} ya se encuentra"
+                        " registrado con este mismo proveedor".format(
+                                                            invoice.move_name))
 
             if invoice.journal_id.ncf_remote_validation:
                 request_params = self.get_marcos_api_request_params()
                 if request_params[0] == 1:
-                    res = requests.get(
-                        '{}/ncf/{}/{}'.format(request_params[1], invoice.partner_id.vat, invoice.move_name),
-                        proxies=request_params[2])
-                    if res.status_code == 200 and not res.json().get("valid", False) == True:
-                        return (500, u"Ncf invalido", u"El numero de comprobante fiscal no es valido! "
-                                                      u"no paso la validacion en DGII, Verifique que el NCF y el RNC del "
-                                                      u"proveedor esten correctamente digitados, si es de proveedor informal o de "
-                                                      u"gasto menor vefifique si debe solicitar nuevos numero.")
+                    res = requests.get('{}/ncf/{}/{}'.format(
+                                        request_params[1],
+                                        invoice.partner_id.vat,
+                                        invoice.move_name),
+                                       proxies=request_params[2])
+                    if res.status_code == 200 and res.json().get("valid", False) is False:
+                        return (500, u"NCF Inválido",
+                                u"¡El número de comprobante {} del proveedor"
+                                u" {} no es válido! No pasó la validación en"
+                                " DGII. Verifique que el NCF y el RNC del"
+                                u" proveedor estén correctamente"
+                                u" digitados, o si los números de ese NCF se"
+                                " le agotaron al proveedor".format(
+                                                    invoice.move_name,
+                                                    invoice.partner_id.name))
 
         return True
 
@@ -128,4 +145,6 @@ class MarcosApiTools(models.Model):
     def central_bank_rates(self):
         request_params = self.get_marcos_api_request_params()
         if request_params[0] == 1:
-            return requests.get("{}/central_bank_rates".format(request_params[1], proxies=request_params[2])).json()
+            return requests.get("{}/central_bank_rates".format(
+                                    request_params[1],
+                                    proxies=request_params[2])).json()

@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
+###############################################################################
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL.
+#  (<https://marcos.do/>) 
 #  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
 #
 # This software and associated files (the "Software") may only be used
-# (nobody can redistribute (or sell) your module once they have bought it, unless you gave them your consent)
+# (nobody can redistribute (or sell) your module once they have bought it,
+# unless you gave them your consent)
 # if you have purchased a valid license
 # from the authors, typically via Odoo Apps, or if you have received a written
 # agreement from the authors of the Software (see the COPYRIGHT file).
 #
 # You may develop Odoo modules that use the Software as a library (typically
-# by depending on it, importing it and using its resources), but without copying
-# any source code or material from the Software. You may distribute those
-# modules under the license of your choice, provided that this license is
+# by depending on it, importing it and using its resources), but without
+# copying any source code or material from the Software. You may distribute
+# those modules under the license of your choice, provided that this license is
 # compatible with the terms of the Odoo Proprietary License (For example:
 # LGPL, MIT, or proprietary licenses similar to this one).
 #
-# It is forbidden to publish, distribute, sublicense, or sell copies of the Software
-# or modified copies of the Software.
+# It is forbidden to publish, distribute, sublicense, or sell copies of the
+# Softwar or modified copies of the Software.
 #
 # The above copyright notice and this permission notice must be included in all
 # copies or substantial portions of the Software.
@@ -29,13 +31,13 @@
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-########################################################################################################################
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 from lxml import etree
 
-from odoo import models, fields, api, exceptions
+from odoo import models, fields, api
 
 import re
 
@@ -47,8 +49,10 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    payment_tax_on_606 = fields.Boolean(u"Para el 606 declarar retenciones al pago")
-    country_id = fields.Many2one('res.country', compute='_compute_address', inverse='_inverse_country',
+    payment_tax_on_606 = fields.Boolean("Reportar retenciones del 606 al pago")
+
+    country_id = fields.Many2one('res.country', compute='_compute_address',
+                                 inverse='_inverse_country',
                                  string="Country", default=62)
 
 
@@ -64,40 +68,36 @@ class ResPartner(models.Model):
             else:
                 rec.fiscal_info_required = False
 
-            if not rec.vat:
-                rec.vat_readonly = False
-            else:
-                rec.vat_readonly = True
+    sale_fiscal_type = fields.Selection(
+        [("final", u"Consumidor Final"),
+         ("fiscal", u"Para Crédito Fiscal"),
+         ("gov", u"Gubernamental"),
+         ("special", u"Regímenes Especiales"),
+         ("unico", u"Único Ingreso")],
+        string="Tipo de comprobante", default="final")
 
-    sale_fiscal_type = fields.Selection([
-        ("final", u"Consumidor final"),
-        ("fiscal", u"Para credito fiscal"),
-        ("gov", u"Gubernamental"),
-        ("special", u"Regimenes especiales"),
-        ("unico", u"Unico ingreso")
-    ], string="Tipo de comprobante", default="final")
-
-    purchase_fiscal_type = fields.Selection([
-        ('01', u'01 - Gastos de personal'),
-        ('02', u'02 - Gastos por trabajo, suministros y servicios'),
-        ('03', u'03 - Arrendamientos'),
-        ('04', u'04 - Gastos de Activos Fijos'),
-        ('05', u'05 - Gastos de Representación'),
-        ('06', u'06 - Otras Deducciones Admitidas'),
-        ('07', u'07 - Gastos Financieros'),
-        ('08', u'08 - Gastos Extraordinarios'),
-        ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
-        ('10', u'10 - Adquisiciones de Activos'),
-        ('11', u'11 - Gastos de Seguro')
-    ], string=u"Tipo de gasto")
+    purchase_fiscal_type = fields.Selection(
+        [('01', u'01 - Gastos de Personal'),
+         ('02', u'02 - Gastos por Trabajo, Suministros y Servicios'),
+         ('03', u'03 - Arrendamientos'),
+         ('04', u'04 - Gastos de Activos Fijos'),
+         ('05', u'05 - Gastos de Representación'),
+         ('06', u'06 - Otras Deducciones Admitidas'),
+         ('07', u'07 - Gastos Financieros'),
+         ('08', u'08 - Gastos Extraordinarios'),
+         ('09', u'09 - Compras y Gastos que forman parte del Costo de Venta'),
+         ('10', u'10 - Adquisiciones de Activos'),
+         ('11', u'11 - Gastos de Seguro')],
+        string=u"Tipo de gasto")
 
     fiscal_info_required = fields.Boolean(compute=_fiscal_info_required)
-    vat_readonly = fields.Boolean(compute=_fiscal_info_required)
-    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict', default=62)
+    country_id = fields.Many2one('res.country', string='Country',
+                                 ondelete='restrict', default=62)
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
-        res = super(ResPartner, self).name_search(name, args=args, operator=operator, limit=100)
+        res = super(ResPartner, self).name_search(name, args=args,
+                                                  operator=operator, limit=100)
         if not res and name:
             if len(name) in (9, 11):
                 partners = self.search([('vat', '=', name)])
@@ -138,10 +138,10 @@ class ResPartner(models.Model):
     @api.multi
     def write(self, vals):
         validation = self.validate_vat_or_name(vals)
-        if not isinstance(validation, dict) and self:
-            raise exceptions.ValidationError(
-                u"Ya existe un contacto registra    do con esta identificación a nombre de {}!".format(vals.name))
-        elif isinstance(validation, dict) and self:
+        # if not isinstance(validation, dict) and self:
+        #     raise exceptions.ValidationError(
+        #         u"Ya existe un contacto registrado con esta identificación a nombre de {}!".format(vals.name))
+        if isinstance(validation, dict) and self:
             vals = validation
         return super(ResPartner, self).write(vals)
 
@@ -175,19 +175,3 @@ class ResPartner(models.Model):
     def onchange_sale_fiscal_type(self):
         if self.sale_fiscal_type == "special":
             self.property_account_position_id = self.env.ref("ncf_manager.ncf_manager_special_fiscal_position")
-        else:
-            self.property_account_position_id = False
-
-    @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        result = super(ResPartner, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar,
-                                                         submenu=submenu)
-        if view_type == 'form' and result.get("name", False) == "res.partner.form":
-            arch = etree.fromstring(result['arch'])
-            name_field = arch.xpath("//field[@name='name']")
-            for field in name_field:
-                field.set(u"placeholder", u"Nombre, RNC o Cédula")
-
-            result["arch"] = etree.tostring(arch)
-
-        return result
