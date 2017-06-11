@@ -71,14 +71,16 @@ class ResPartner(models.Model):
     def vat_is_unique(self, fiscal_id):
         partner = self.search([('vat', '=', fiscal_id)])
         if partner:
-            raise exceptions.UserError(u"Ya fue registrada una empresa con este numero de RNC/Cédula")
+            raise exceptions.UserError(u"Ya fue registrada una empresa con"
+                                       u" este número de RNC/Cédula")
         return False
 
     def get_rnc(self, fiscal_id):
         config_parameter = self.env['ir.config_parameter'].sudo()
         api_marcos = config_parameter.get_param("api_marcos")
         if not api_marcos:
-            raise exceptions.MissingError(u"Debe configurar la URL de validacón en línea")
+            raise exceptions.MissingError(u"Debe configurar la URL de la "
+                                          u"validacón en línea")
 
         http_proxy = config_parameter.get_param("http_proxy")
         https_proxy = config_parameter.get_param("https_proxy")
@@ -152,7 +154,8 @@ class ResPartner(models.Model):
             if self.env["account.invoice"].search_count(
                                             [('partner_id', '=', 'self.id')]):
                 raise exceptions.UserError(
-                    u"No puede cambiar el RNC/Cédula ya que este cliente o proveedor tiene facturas.")
+                    u"No puede cambiar el RNC/Cédula ya que este cliente o"
+                    u" proveedor tiene facturas.")
             self.check_vals(self.vat)
 
     @api.model
