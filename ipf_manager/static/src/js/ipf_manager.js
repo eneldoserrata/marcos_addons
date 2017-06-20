@@ -588,8 +588,7 @@ odoo.define('ipf_manager.service', function (require) {
                         return response;
                     })
             }
-        })
-    ;
+        });
 
     var IpfsoftwareVersion = form_common.FormWidget.extend(form_common.ReinitializeWidgetMixin, {
         events: {
