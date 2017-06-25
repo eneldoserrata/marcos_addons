@@ -6,21 +6,11 @@
         <template id="marcos_api_tools_assets_backend" name="marcos_api_tools_assets_backend"
                   inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/ipf_manager/static/src/libs/bootbox.min.js"></script>
-                <script type="text/javascript" src="/ipf_manager/static/src/libs/tingle.min.js"></script>
+                <link rel="stylesheet" href="/marcos_api_tools/static/src/libs/tingle.min.css"></link>
+                <script type="text/javascript" src="/marcos_api_tools/static/src/libs/tingle.min.js"></script>
+                <script type="text/javascript" src="/marcos_api_tools/static/src/libs/bootbox.min.js"></script>
             </xpath>
         </template>
-
-        <template id="marcos_api_tools_point_of_sale_assets_backend"
-                  name="marcos_api_tools_point_of_sale_assets_backend"
-                  inherit_id="point_of_sale.assets">
-            <xpath expr="." position="inside">
-
-                <link rel="stylesheet" href="/ipf_manager/static/src/libs/tingle.min.css"></link>
-                <script type="text/javascript" src="/ipf_manager/static/src/libs/tingle.min.js"></script>
-            </xpath>
-        </template>
-
 
     </data>
 </odoo>
