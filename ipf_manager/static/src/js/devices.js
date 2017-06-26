@@ -226,6 +226,7 @@ odoo.define('ipf_manager.devices', function (require) {
         },
         message: function (name, params) {
             var self = this;
+            var order = self.pos.get_order();
 
             if (self.pos.config.iface_fiscal_printer) {
                 var r = params.receipt;
@@ -235,6 +236,7 @@ odoo.define('ipf_manager.devices', function (require) {
                     callbacks[i](params);
                 }
             }
+
             if (this.get('status').status !== 'disconnected') {
                 if (self.pos.config.iface_fiscal_printer) {
                     var parse_xml_params = $.parseXML(params.receipt);
@@ -244,6 +246,7 @@ odoo.define('ipf_manager.devices', function (require) {
                     return this.connection.rpc('/hw_proxy/' + name, params || {});
                 }
             } else {
+                new Model('pos.order').call("get_fiscal_data", [order.name]);
                 return (new $.Deferred()).reject();
             }
         },
