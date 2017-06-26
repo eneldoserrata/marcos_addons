@@ -55,7 +55,7 @@ class ipf_printer_config(models.Model):
 
     name = fields.Char("Descripcion", required=True)
     host = fields.Char("Host", required=True)
-    print_source = fields.Selection([('server','Desde el servidor'),('browser','Desde el navegador de internet')],
+    print_source = fields.Selection([('server', 'Desde el servidor'), ('browser', 'Desde el navegador de internet')],
                                     string="Fuente de impresion", default="browser", required=True,
                                     help="""
                                     Desde el navegador de internet: Los comandos seran enviados a la impresora desde
@@ -112,13 +112,14 @@ class ipf_printer_config(models.Model):
     def save_book(self, new_book, serial, bookday):
         printer_id = self.get_ipf_host(get_id=True)
         date = bookday.split("-")
-        filename = "LV{}{}{}.000".format(date[0][2:4],date[1],date[2])
+        filename = "LV{}{}{}.000".format(date[0][2:4], date[1], date[2])
 
         book = self.env["ipf.daily.book"].search([('serial', '=', serial), ('date', '=', bookday)])
         if book:
             book.unlink()
 
-        values = {"printer_id": printer_id, "date": bookday, "book": base64.b64encode(new_book), "serial": serial, "filename": filename}
+        values = {"printer_id": printer_id, "date": bookday, "book": base64.b64encode(new_book), "serial": serial,
+                  "filename": filename}
 
         new_book = self.env["ipf.daily.book"].create(values);
 
@@ -127,7 +128,8 @@ class ipf_printer_config(models.Model):
         return True
 
     def ncf_fiscal_position_exception(self, partner_name):
-        raise exceptions.UserError(u"El tipo de comprobante no corresponde a la posicion fical del cliente '%s'!" % (partner_name))
+        raise exceptions.UserError(
+            u"El tipo de comprobante no corresponde a la posicion fical del cliente '%s'!" % (partner_name))
 
     @api.model
     def get_user_printer(self):
@@ -174,11 +176,6 @@ class ipf_printer_config(models.Model):
             if invoice_id:
                 return invoice_id.get_ipf_dict()
 
-    @api.model
-    def ipf_print_nofiscal(self):
-        pass
-
-
 
 class ipf_daily_book(models.Model):
     _name = "ipf.daily.book"
@@ -197,8 +194,8 @@ class ipf_daily_book(models.Model):
     final_total = fields.Float("Final total", digits=dp.get_precision('Account'))
     final_total_tax = fields.Float("Final Itbis total", digits=dp.get_precision('Account'))
     fiscal_total = fields.Float("Fiscal total", digits=dp.get_precision('Account'))
-    fiscal_total_tax= fields.Float("Fiscal Itbis total", digits=dp.get_precision('Account'))
+    fiscal_total_tax = fields.Float("Fiscal Itbis total", digits=dp.get_precision('Account'))
     ncfinal_total = fields.Float("NC final total", digits=dp.get_precision('Account'))
     ncfinal_total_tax = fields.Float("NC final Itbis total", digits=dp.get_precision('Account'))
     ncfiscal_total = fields.Float("NC fiscal total", digits=dp.get_precision('Account'))
-    ncfiscal_total_tax = fields.Float("NC fiscal Itbis total", digits=dp.get_precision('Account'  ))
+    ncfiscal_total_tax = fields.Float("NC fiscal Itbis total", digits=dp.get_precision('Account'))
