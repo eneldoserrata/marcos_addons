@@ -5,6 +5,7 @@
 
         <template id="ipf_manager_assets_backend" name="ipf_manager_assets_backend" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
+                <script type="text/javascript" src="/ipf_manager/static/src/libs/bootbox.min.js"></script>
                 <script type="text/javascript" src="/ipf_manager/static/src/js/ipf_manager.js"></script>
             </xpath>
         </template>
