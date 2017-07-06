@@ -297,7 +297,3 @@ class DgiiPurchaseReportline(models.Model):
     ITBIS_RETENIDO = fields.Float("ITBIS Retenido")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
     RETENCION_RENTA = fields.Float(u"Retención Renta")
-
-
-
-

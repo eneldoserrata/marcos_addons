@@ -102,6 +102,7 @@ class DgiiSaleReport(models.Model):
         lines = []
         line_number = 1
         for inv in invoices:
+            number = inv.number.replace(' ', '')
 
             LINE = line_number
 
@@ -110,19 +111,19 @@ class DgiiSaleReport(models.Model):
                 TIPO_IDENTIFICACION = "3"
             else:
                 if not inv.partner_id.vat:
-                    raise exceptions.UserError(u"El cliente para la factura {} no tiene RNC/Cédula.".format(inv.number))
+                    raise exceptions.UserError(u"El cliente para la factura {} no tiene RNC/Cédula.".format(number))
                 RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
                 TIPO_IDENTIFICACION = "1" if len(str(RNC_CEDULA).strip()) == 9 else "2"
 
-            if not self.env['marcos.api.tools'].is_ncf(inv.number, inv.type):
-                raise exceptions.ValidationError(u"El número de NCF o el RNC/Cédula del clienten para el comprobante {} no es valido!".format(inv.number))
+            if not self.env['marcos.api.tools'].is_ncf(number, inv.type):
+                raise exceptions.ValidationError(u"El número de NCF o el RNC/Cédula del clienten para el comprobante {} no es valido!".format(number))
 
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
             if inv.type == "out_invoice":
-                NUMERO_COMPROBANTE_FISCAL = inv.number
+                NUMERO_COMPROBANTE_FISCAL = number
             elif inv.type == "out_refund":
-                NUMERO_COMPROBANTE_FISCAL = inv.number
+                NUMERO_COMPROBANTE_FISCAL = number
                 NUMERO_COMPROBANTE_MODIFICADO = inv.origin
 
             FECHA_COMPROBANTE = inv.date_invoice
@@ -241,7 +242,3 @@ class DgiiSaleReportline(models.Model):
     FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
-
-
-
-

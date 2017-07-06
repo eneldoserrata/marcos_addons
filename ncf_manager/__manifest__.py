@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "ncf_manager",
+    'name': "Comprobantes fiscales RD",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Localizacion Para Republica Dominicana
+        Implementacion de numeros de comprobantes fiscales""",
 
     'description': """
-        Long description of module's purpose
+        Permite administrar y configurar comprobantes fiscales ademas de
+        generar los reportes 606,607,608 y 609
     """,
 
-    'author': "My Company",
-    'website': "http://www.yourcompany.com",
+    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
+    'website': "http://marcos.do",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Localization',
+    'version': '3.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account', 'account_invoice_change_currency',
@@ -43,8 +44,5 @@
         'views/res_view.xml',
         'data/setup_ncf.xml'
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
+    'license': "Other proprietary",
 }
