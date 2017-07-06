@@ -272,7 +272,13 @@ class AccountPayment(models.Model):
             inv_debit = inv.amount if credit > 0 else 0
 
             counterpart_aml_dict = self._get_shared_move_line_vals(inv_debit, inv_credit, amount_currency, move.id,
-                                                                   False)
+                                                                   inv)
+
+            #TODO FAST FIX because some company partner do not get find_accounting_partner have to check this
+            if not counterpart_aml_dict.get("partner_id", False):
+                counterpart_aml_dict.update({"partner_id": self.partner_id.id})
+            #ENDTODO
+
             counterpart_aml_dict.update(self._get_counterpart_move_line_vals(inv.move_line_id.invoice_id))
             counterpart_aml_dict.update({'currency_id': currency_id})
 
@@ -288,6 +294,8 @@ class AccountPayment(models.Model):
                                              "currency_id": False})
 
             counterpart_aml = aml_obj.create(counterpart_aml_dict)
+
+
             inv.move_line_id.invoice_id.register_payment(counterpart_aml)
 
             debit_invoice_total += counterpart_aml.debit
@@ -398,8 +406,6 @@ class AccountPayment(models.Model):
             writeoff_line['currency_id'] = self.currency_id.id if not self.is_base_currency else False
             writeoff_line['payment_id'] = self.id
             aml_obj.create(writeoff_line)
-
-        print [(l.account_id.code, l.account_id.name, l.debit, l.credit, l.amount_currency) for l in move.line_ids]
 
         move.post()
         return move
