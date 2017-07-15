@@ -8,7 +8,6 @@
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
 
-
                 <button name="post" position="replace">
                     <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar"
                             type="object"/>
@@ -16,6 +15,11 @@
                             string="Imprimir Solicitud" type="object" context="{'rate_currency_id': rate_currency_id}"/>
                     <button name="post" class="oe_highlight" states="request" string="Confirm" type="object"/>
                 </button>
+
+
+                <field name="communication" position="attributes">
+                    <attribute name="required">1</attribute>
+                </field>
 
 
                 <field name="state" position="replace">
@@ -93,20 +97,24 @@
                             <field name="partner_id" invisible="0"
                                    domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
                                    groups="analytic.group_analytic_accounting"/>
-                            <field name="product_id" groups="analytic.group_analytic_accounting"/>
+                            <!--<field name="product_id" groups="analytic.group_analytic_accounting"/>-->
                             <field name="account_id" domain="[('deprecated', '=', False)]"/>
                             <field name="name"/>
-                            <field name="analytic_account_id" groups="analytic.group_analytic_accounting"
-                                   domain="[('account_type', '=', 'normal')]"/>
+                            <!--<field name="analytic_account_id" groups="analytic.group_analytic_accounting"-->
+                                   <!--domain="[('account_type', '=', 'normal')]"/>-->
                             <field name="debit" sum="Total Debit"/>
                             <field name="credit" sum="Total Credit"/>
                         </tree>
                     </field>
 
                 </sheet>
+                <form>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
             </field>
         </record>
-
-
     </data>
 </odoo>

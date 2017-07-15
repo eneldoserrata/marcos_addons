@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <report
+                id="payment_request_report"
+                model="account.payment"
+                string="Pago"
+                report_type="qweb-pdf"
+                name="advanced_payment.payment_request_report_doc"
+                file="advanced_payment.payment_request_report_doc"
+                attachment_use="False"
+        />
+
+        <template id="payment_request_report_doc">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-if="not o and doc">
+                        <t t-set="o" t-value="doc"/>
+                    </t>
+                    <t t-if="o and 'company_id' in o">
+                        <t t-set="company" t-value="o.company_id"></t>
+                    </t>
+                    <t t-if="not o or not 'company_id' in o">
+                        <t t-set="company" t-value="res_company"></t>
+                    </t>
+                    <div class="header">
+                        <table class="table table-condensed">
+                            <tr>
+                                <td colspan="2">
+                                    <h4>
+                                        <strong>
+                                            <span t-field="doc.company_id.name"/>
+                                        </strong>
+                                    </h4>
+                                </td>
+                                <td>
+                                    <h4>
+                                        <strong class="text-right">
+                                            <t t-if="doc.payment_type == 'outbound'">PAGO</t>
+                                            <t t-if="doc.payment_type == 'inbound'">RECIBO</t>
+                                            <t t-if="doc.payment_type == 'transfer'">TRANSFERENCIA INTERNA</t>
+                                            <span t-field="doc.name"/>
+                                        </strong>
+                                    </h4>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <strong><span t-field="doc.partner_type"/>:
+                                    </strong>
+                                    <span t-field="doc.partner_id.name"/>
+                                </td>
+                                <td>
+                                    <strong class="text-right">Fecha:</strong>
+                                    <span t-field="doc.payment_date"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <strong>Método de pago:</strong>
+                                    <span t-field="doc.journal_id.name"/>
+                                </td>
+                                <td>
+                                    <strong class="text-right">Monto:</strong>
+                                    <span t-field="doc.amount"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="page">
+                        <t t-if="doc.move_type == 'auto'">
+                            <div class="panel panel-default">
+                                <!-- Default panel contents -->
+                                <div class="panel-heading">
+                                    <strong>
+                                        <div class="panel-heading text-center">CONCEPTO
+                                            <t t-if="doc.check_number">| CHEQUE No.:
+                                                <span t-field="doc.check_number"/>
+                                            </t>
+                                        </div>
+                                    </strong>
+                                </div>
+                                <div class="panel-body">
+                                    <strong>
+                                        <t t-if="doc.check_name">A NOMBRE DE:
+                                            <span t-field="doc.check_name"/>
+                                        </t>
+                                    </strong>
+                                    <blockquote>
+                                        <span t-field="doc.communication"/>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="doc.move_type == 'manual'">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">CONCEPTO
+                                    <t t-if="doc.check_number">| CHEQUE No.:
+                                        <span t-field="doc.check_number"/>
+                                    </t>
+                                </div>
+                                <div class="panel-body">
+                                    <span t-field="doc.communication"/>
+                                </div>
+
+                                <table class="table table-bordered table-condensed">
+                                    <tr>
+                                        <th>Cuenta</th>
+                                        <th>Nombre</th>
+                                        <th>Etiqueta</th>
+                                        <th>Débito</th>
+                                        <th>Crédito</th>
+                                    </tr>
+                                    <t t-foreach="doc.payment_move_ids" t-as="move_id">
+                                        <tr>
+                                            <td>
+                                                <span t-field="move_id.account_id.code"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.account_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.debit"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.credit"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                </table>
+                            </div>
+                        </t>
+                        <t t-if="doc.move_type == 'invoice'">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">CONCEPTO
+                                    <t t-if="doc.check_number">| CHEQUE No.:
+                                        <span t-field="doc.check_number"/>
+                                    </t>
+                                </div>
+                                <div class="panel-body">
+                                    <span t-field="doc.communication"/>
+                                </div>
+                                <table class="table table-bordered table-condensed">
+                                    <tr>
+                                        <th>Cuenta</th>
+                                        <th>Ref</th>
+                                        <th>Fecha</th>
+                                        <th>Pagado</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                    <t t-foreach="doc.payment_invoice_ids" t-as="move_id">
+                                        <tr>
+                                            <td>
+                                                <span t-field="move_id.move_line_id.account_id.code"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.move_line_id.invoice_id.number"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="move_id.move_date"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="move_id.amount"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="move_id.balance"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                </table>
+                            </div>
+                        </t>
+
+                        <!--<t t-if="doc.move_type != 'manual'">-->
+                        <!--<t t-if="doc.partner_type == 'supplier'">-->
+                        <!--<table class="table table-bordered table-condensed">-->
+                        <!--<tr>-->
+                        <!--<td>Cuenta</td>-->
+                        <!--<td>Nombre</td>-->
+                        <!--<td>Débito</td>-->
+                        <!--<td>Crédito</td>-->
+                        <!--</tr>-->
+                        <!--<t t-foreach="doc.move_line_ids" t-as="move_line">-->
+                        <!--<tr>-->
+                        <!--<td>-->
+                        <!--<span t-field="move_line.account_id.code"/>-->
+                        <!--</td>-->
+                        <!--<td>-->
+                        <!--<span t-field="move_line.account_id.name"/>-->
+                        <!--</td>-->
+                        <!--<td>-->
+                        <!--<span t-field="move_line.debit"/>-->
+                        <!--</td>-->
+                        <!--<td>-->
+                        <!--<span t-field="move_line.credit"/>-->
+                        <!--</td>-->
+                        <!--</tr>-->
+                        <!--</t>-->
+                        <!--</table>-->
+                        <!--</t>-->
+                        <!--</t>-->
+                        <br/>
+                        <br/>
+                        <div class="pull-left">Recibido por:____________________________</div>
+                        <div class="pull-right">Creado por:
+                            <span t-field="doc.create_uid.name"/>
+                        </div>
+                    </div>
+
+                    <t t-call="report.external_layout_footer"/>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

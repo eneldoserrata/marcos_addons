@@ -39,7 +39,8 @@ import textwrap
 
 
 class AccountPayment(models.Model):
-    _inherit = "account.payment"
+    _name = 'account.payment'
+    _inherit = ['account.payment', 'mail.thread', 'ir.needaction_mixin', 'utm.mixin']
 
     @api.depends("rate")
     @api.one
@@ -83,7 +84,7 @@ class AccountPayment(models.Model):
                 else:
                     self.amount_currency = sum([rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
                     self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (
-                    self.invoice_payment_amount_currency * self.rate)) / self.rate
+                        self.invoice_payment_amount_currency * self.rate)) / self.rate
 
             if self.currency_diff > 0:
                 self.currency_diff_type = "out" if self.payment_type == "inbound" else "in"
@@ -111,13 +112,13 @@ class AccountPayment(models.Model):
                 self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
         else:
             self.amount = self.invoice_payment_amount_currency + (
-            sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             if self.currency_diff > 0:
                 self.amount = self.payment_amount + (
-                sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                    sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             elif self.currency_diff < 0:
                 self.amount = self.payment_amount + (
-                sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                    sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
 
         if update_communication:
             full_payment = []
@@ -274,10 +275,10 @@ class AccountPayment(models.Model):
             counterpart_aml_dict = self._get_shared_move_line_vals(inv_debit, inv_credit, amount_currency, move.id,
                                                                    inv)
 
-            #TODO FAST FIX because some company partner do not get find_accounting_partner have to check this
+            # TODO FAST FIX because some company partner do not get find_accounting_partner have to check this
             if not counterpart_aml_dict.get("partner_id", False):
                 counterpart_aml_dict.update({"partner_id": self.partner_id.id})
-            #ENDTODO
+            # ENDTODO
 
             counterpart_aml_dict.update(self._get_counterpart_move_line_vals(inv.move_line_id.invoice_id))
             counterpart_aml_dict.update({'currency_id': currency_id})
@@ -293,8 +294,8 @@ class AccountPayment(models.Model):
                 counterpart_aml_dict.update({"amount_currency": False,
                                              "currency_id": False})
 
+            counterpart_aml_dict.update({"invoice_id": inv.move_line_id.invoice_id.id})
             counterpart_aml = aml_obj.create(counterpart_aml_dict)
-
 
             inv.move_line_id.invoice_id.register_payment(counterpart_aml)
 
@@ -358,8 +359,8 @@ class AccountPayment(models.Model):
                                                    self.currency_diff * self.rate) if self.payment_type == "outbound" else 0})
             else:
                 liquidity_aml_dict.update({
-                                              "amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
-                                              "currency_id": self.currency_id.id})
+                    "amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
+                    "currency_id": self.currency_id.id})
 
         if not liquidity_aml_dict.get("account_id", False):
             raise exceptions.ValidationError("De diario de pago no tiene cuenta asignada.")
@@ -573,10 +574,8 @@ class AccountPayment(models.Model):
     @api.onchange("move_type")
     def onchange_move_type(self):
         if self.move_type == "manual":
-
             self.rate_currency_id = False
             if self.journal_id:
-
                 if self.payment_type == "outbound":
                     first_move = self.env["payment.move.line"].create(
                         {"account_id": self.journal_id.default_credit_account_id.id, "credit": self.amount})
@@ -586,8 +585,6 @@ class AccountPayment(models.Model):
                     first_move = self.env["payment.move.line"].create(
                         {"account_id": self.journal_id.default_debit_account_id.id, "debit": self.amount})
                     self.payment_move_ids = first_move
-                    # elif self.move_type == "invoice":
-                    #     self.payment_invoice_ids = self.update_invoice()
 
     @api.multi
     def update_invoice(self):
@@ -691,6 +688,7 @@ class AccountPayment(models.Model):
 
 class PaymentInvoiceLine(models.Model):
     _name = "payment.invoice.line"
+    _order = "move_date desc"
 
     @api.one
     @api.depends("move_line_id")
@@ -720,10 +718,11 @@ class PaymentInvoiceLine(models.Model):
     balance = fields.Monetary("Balance", compute="_render_amount_sing", currency_field='company_currency_id')
 
     amount_currency = fields.Monetary("Divisa", compute="_render_amount_sing", currency_field='currency_id')
+    invoice_rate = fields.Float("Tasa", compute="_get_invoice_rate", digits=(16, 4))
     amount = fields.Monetary("To pay", default=0.0, currency_field='company_currency_id')
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state", readonly=True)
-    invoice_rate = fields.Float("Tasa", compute="_get_invoice_rate", digits=(16, 4))
+
 
     @api.onchange('amount')
     def onchange_amount(self):
@@ -756,19 +755,3 @@ class PaymentMoveLine(models.Model):
 
     debit = fields.Monetary(string="Debit", default=0.0, currency_field="currency_id")
     credit = fields.Monetary(string="Credit", default=0.0, currency_field="currency_id")
-
-
-class PaymentRquestReport(models.AbstractModel):
-    _name = 'report.advanced_payment.payment_request_report_doc'
-
-    @api.multi
-    def render_html(self, data=None):
-        report_obj = self.env['report']
-        report = report_obj._get_report_from_name('advanced_payment.payment_request_report_doc')
-        payments = self.env["account.payment"].browse(self._ids)
-        docargs = {
-            'doc_ids': self._ids,
-            'doc_model': report.model,
-            'docs': payments,
-        }
-        return report_obj.render('advanced_payment.payment_request_report_doc', docargs)
