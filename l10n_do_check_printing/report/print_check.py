@@ -39,12 +39,12 @@ from openerp import models, api
 class PrintCheck(models.AbstractModel):
     _name = 'report.l10n_do_check_printing.check_print_report'
 
-    @api.multi
-    def render_html(self, data=None):
+    @api.model
+    def render_html(self, docids, data=None):
         report_obj = self.env['report']
         report = report_obj._get_report_from_name('l10n_do_check_printing.check_print_report')
 
-        payment_ids = self.env[report.model].browse(self._ids)
+        payment_ids = self.env[report.model].browse(docids)
 
         payments = []
         for payment in payment_ids:
@@ -59,7 +59,7 @@ class PrintCheck(models.AbstractModel):
 
 
         docargs = {
-            u"doc_ids": self._ids,
+            u"doc_ids": docids,
             u"doc_model": report.model,
             u"docs": payments
         }
