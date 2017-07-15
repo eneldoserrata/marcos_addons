@@ -190,6 +190,7 @@ odoo.define('ipf_manager.service', function (require) {
                     }).done(function (response) {
                         var aplitBookDay = bookday.split("-");
                         // var serial = JSON.parse(response).response.serial;
+                        var serial = "noserial";
                         var url = self.host + "/daily_book/" + "norequerido" + "/" + aplitBookDay[2] + "/" + aplitBookDay[1] + "/" + aplitBookDay[0];
 
                         self.get_book(url, serial, bookday, context);
