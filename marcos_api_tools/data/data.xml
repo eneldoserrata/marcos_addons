@@ -4,5 +4,16 @@
 
         <function model="marcos.api.tools" name="setup"/>
 
+        <record model="ir.cron" id="update_usd_rate">
+            <field name='name'>Atualizar tasas USD</field>
+            <field name='interval_number'>1</field>
+            <field name='interval_type'>days</field>
+            <field name="numbercall">-5</field>
+            <field name="active">True</field>
+            <field name="model">marcos.api.tools</field>
+            <field name="function">cron_auto_update_rates</field>
+            <field name="args">()</field>
+        </record>
+
     </data>
 </odoo>
