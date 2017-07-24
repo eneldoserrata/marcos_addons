@@ -34,11 +34,28 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from odoo import models,fields
+from odoo import models,fields, api
 
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    pay_to = fields.Many2one("res.partner", string="Pagar a", readonly=True, states={'draft': [('readonly', False)]},
-                             copy=False)
+    pay_to = fields.Many2one("res.partner", string="Pagar a", copy=False)
+
+    @api.onchange("pay_to")
+    def onchange_pay_to(self):
+        if self.pay_to:
+            self.account_id = self.pay_to.property_account_payable_id.id
+        else:
+            self.account_id = self.partner_id.property_account_payable_id.id
+
+
+    @api.multi
+    def finalize_invoice_move_lines(self, move_lines):
+
+        if self.pay_to:
+            for move_line in move_lines:
+                if move_line[2].get("account_id") == self.account_id.id:
+                    move_line[2].update({"partner_id": self.pay_to.id})
+
+        return move_lines

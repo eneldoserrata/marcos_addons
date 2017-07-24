@@ -602,17 +602,17 @@ class AccountPayment(models.Model):
 
             to_reconciled_move_lines = []
 
-            open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
-                                                               ('pay_to', '=', rec.partner_id.id),
-                                                               ('journal_id.type', '=', journal_type),
-                                                               ('type', '=', invoice_type)])
+            # open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
+            #                                                    ('pay_to', '=', rec.partner_id.id),
+            #                                                    ('journal_id.type', '=', journal_type),
+            #                                                    ('type', '=', invoice_type)])
 
-            if not open_invoice:
-                open_invoice += self.env["account.invoice"].search([('state', '=', 'open'),
-                                                                    ('partner_id', '=', rec.partner_id.id),
-                                                                    ('journal_id.type', '=', journal_type),
-                                                                    ('pay_to', '=', False),
-                                                                    ('type', '=', invoice_type)])
+            # if not open_invoice:
+            open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
+                                                               ('partner_id', '=', rec.partner_id.id),
+                                                               ('journal_id.type', '=', journal_type),
+                                                               # ('pay_to', '=', False),
+                                                               ('type', '=', invoice_type)])
 
             inv_ids = [inv.id for inv in open_invoice]
 
@@ -695,7 +695,15 @@ class PaymentInvoiceLine(models.Model):
     def _render_amount_sing(self):
         self.net = abs(self.move_line_id.balance)
         self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis)
-        self.balance = abs(self.move_line_id.amount_residual)
+
+        isr_retention = 0
+        if self.move_line_id.invoice_id.journal_id.purchase_type == "informal":
+            tax_retention = self.move_line_id.invoice_id.tax_line_ids.filtered(
+                lambda r: r.tax_id.purchase_tax_type in ("isr","ritbis"))
+            isr_retention = sum([tax.amount for tax in tax_retention])
+
+        self.balance = abs(self.move_line_id.amount_residual) - abs(isr_retention)
+
         self.amount_currency = abs(self.move_line_id.amount_currency)
 
     @api.one
@@ -722,7 +730,6 @@ class PaymentInvoiceLine(models.Model):
     amount = fields.Monetary("To pay", default=0.0, currency_field='company_currency_id')
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state", readonly=True)
-
 
     @api.onchange('amount')
     def onchange_amount(self):

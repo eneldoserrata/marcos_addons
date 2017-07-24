@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
 
                 <field name="move_id" position="after">
-                    <field name="pay_to"/>
+                    <field name="pay_to" attrs="{'readonly': [('state','!=','draft')]}"/>
                 </field>
 
             </field>
