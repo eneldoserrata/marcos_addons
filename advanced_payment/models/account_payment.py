@@ -173,6 +173,10 @@ class AccountPayment(models.Model):
     is_base_currency = fields.Boolean(compute="_check_is_base_currency")
 
     def _create_payment_entry_manual(self, amount):
+
+        if self._context.get("active_model", False) == "account.invoice":
+            return super(AccountPayment, self)._create_payment_entry_manual(amount)
+
         manual_debit = round(sum([line.debit for line in self.payment_move_ids]), 2)
         manual_credit = round(sum([line.credit for line in self.payment_move_ids]), 2)
         if manual_credit != manual_debit:
@@ -439,6 +443,8 @@ class AccountPayment(models.Model):
 
     @api.multi
     def post(self):
+        if self._context.get("active_model", False) == "account.invoice":
+            return super(AccountPayment, self).post()
 
         for rec in self:
             if rec.move_type == "auto":
