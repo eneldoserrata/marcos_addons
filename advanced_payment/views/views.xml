@@ -16,11 +16,11 @@
                     <button name="post" class="oe_highlight" states="request" string="Confirm" type="object"/>
                 </button>
 
+                <field name="communication" position="replace"/>
 
-                <field name="communication" position="attributes">
-                    <attribute name="required">[('state','!=','draft')]</attribute>
+                <field name="payment_date" position="after">
+                    <field name="communication" attrs="{'required': [('amount','>',0)]}"/>
                 </field>
-
 
                 <field name="state" position="replace">
                     <field name="state" widget="statusbar" statusbar_visible="request,posted,reconciled"/>
