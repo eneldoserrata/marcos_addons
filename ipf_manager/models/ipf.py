@@ -157,11 +157,10 @@ class ipf_printer_config(models.Model):
 
         id = values[0]
         nif = values[1]
-
         if self._context.get("active_model", False) == "pos.order" and nif:
-            self.env["pos.order"].browse(id).write({"fiscal_nif": nif})
+            self._cr.execute("update pos_order set fiscal_nif = '{}' where id = {}".format(nif, id))
         elif nif:
-            self.env["account.invoice"].browse(id).write({"fiscal_nif": nif})
+            self._cr.execute("update account_invoice set fiscal_nif = '{}' where id = {}".format(nif, id))
 
         return True
 
