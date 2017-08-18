@@ -105,7 +105,7 @@ odoo.define('ipf_manager.devices', function (require) {
             var order = self.pos.get_order();
             var partner = order.get_client();
 
-            var comments = $.trim("==================NOTA==================" + order.name || "" +  order.get_order_note() || "" + self.pos.config.receipt_footer || '' + "========================================");
+            var comments = $.trim("==================NOTA==================" + order.name || "" + order.get_order_note() || "" + self.pos.config.receipt_footer || '' + "========================================");
             var comments_list = comments.match(/.{1,40}/g);
 
             var ipf_invoice = {
@@ -126,6 +126,8 @@ odoo.define('ipf_manager.devices', function (require) {
                 invoice_id: false,
                 total_invoice: 0,
             };
+
+            var fractions = self.pos.get("fractions");
 
             order.orderlines.each(function (orderline) {
                 var line = orderline.export_as_JSON();
@@ -149,20 +151,34 @@ odoo.define('ipf_manager.devices', function (require) {
                 }
 
                 var nota = (typeof line.note === "undefined" ? "" : " " + line.note);
-                var description = $.trim(product.display_name + nota);
+
+                var quantity = line.qty;
+                var price = line.price_unit || 0;
+                var fraction_name = "";
+
+                if (quantity < 1 && fractions != undefined) {
+                    price = quantity * price;
+                    _.each(fractions, function (fraction) {
+                        if (fraction.qty == quantity) {
+                            quantity = 1;
+                            fraction_name = fraction.name + " ";
+                        }
+                    })
+                }
+                var description = $.trim(fraction_name + product.display_name + nota);
 
                 var description_list = description.match(/.{1,21}/g);
 
                 var ifp_line = {
                     description: description_list.pop(),
                     extra_descriptions: description_list,
-                    quantity: line.qty,
-                    price: line.price_unit || 0,
+                    quantity: quantity,
+                    price: price,
                     itbis: itbis,
                     discount: line.discount || false,
                     charges: false
                 };
-                ipf_invoice.total_invoice += (line.price_unit*line.qty)
+                ipf_invoice.total_invoice += (line.price_unit * line.qty)
                 ipf_invoice.items.push(ifp_line)
 
             });
