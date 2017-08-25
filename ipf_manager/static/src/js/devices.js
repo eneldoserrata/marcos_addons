@@ -157,13 +157,15 @@ odoo.define('ipf_manager.devices', function (require) {
                 var fraction_name = "";
 
                 if (quantity < 1 && fractions != undefined) {
-                    price = quantity * price;
                     _.each(fractions, function (fraction) {
                         if (fraction.qty == quantity) {
-                            quantity = 1;
                             fraction_name = fraction.name + " ";
+                        } else {
+                            fraction_name = quantity + " ";
                         }
-                    })
+                    });
+                    price = quantity * price;
+                    quantity = 1;
                 }
                 var description = $.trim(fraction_name + product.display_name + nota);
 
