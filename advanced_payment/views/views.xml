@@ -68,7 +68,7 @@
                            options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
-                              decoration-warning="balance &gt; amount" limit="1000" create="false" editable="true"
+                              decoration-warning="balance &gt; amount" create="false" editable="true"
                               delete="true">
                             <field name="state" invisible="1"/>
                             <button name="full_pay" type="object" string="Pagar" icon="fa-check"

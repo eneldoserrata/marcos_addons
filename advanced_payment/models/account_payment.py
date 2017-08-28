@@ -153,7 +153,7 @@ class AccountPayment(models.Model):
                               ('reconciled', 'Reconciled')], readonly=True, default='draft', copy=False,
                              string="Status")
     payment_move_ids = fields.One2many("payment.move.line", "payment_id", copy=False)
-    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False, limit=200)
+    payment_invoice_ids = fields.One2many("payment.invoice.line", "payment_id", copy=False)
     rate = fields.Float("Tasa", digits=(16, 4))
     currency_diff_type = fields.Selection(
         [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'), ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
