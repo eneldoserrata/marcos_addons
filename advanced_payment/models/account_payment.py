@@ -47,9 +47,11 @@ class AccountPayment(models.Model):
     def _calc_payment_amount(self):
         if self.move_type == "invoice":
 
+            payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
+
             if self.is_base_currency:
                 currency_set = set()
-                for inv in self.payment_invoice_ids:
+                for inv in payment_invoice_ids:
                     if inv.amount:
                         currency_set.add(inv.currency_id.id)
 
@@ -65,15 +67,15 @@ class AccountPayment(models.Model):
                 self.rate_currency_id = self.company_id.currency_id.id
 
             # Total a pagar en moneda local
-            self.invoice_payment_amount = sum([rec.amount for rec in self.payment_invoice_ids])
+            self.invoice_payment_amount = sum([rec.amount for rec in payment_invoice_ids])
 
             # Total a pagar en moneda extrangera
             self.invoice_payment_amount_currency = sum(
-                [rec.amount / rec.invoice_rate for rec in self.payment_invoice_ids if rec.invoice_rate])
+                [rec.amount / rec.invoice_rate for rec in payment_invoice_ids if rec.invoice_rate])
 
             # Total a pagar de la moneda extrangera en moneda local
             invoice_payment_amount_currency_local = sum(
-                [rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
+                [rec.amount for rec in payment_invoice_ids if rec.currency_id])
 
             if self.rate_currency_id:
                 if self.is_base_currency:
