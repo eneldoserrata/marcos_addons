@@ -103,27 +103,28 @@ class AccountPayment(models.Model):
 
     @api.multi
     def amount_total(self, update_communication=True):
+        payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
         if self.is_base_currency:
             if self.currency_diff > 0:
                 self.amount = self.invoice_payment_amount - abs(self.currency_diff)
             elif self.currency_diff < 0:
                 self.amount = self.invoice_payment_amount + abs(self.currency_diff)
             else:
-                self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
+                self.amount = sum([rec.amount for rec in payment_invoice_ids])
         else:
             self.amount = self.invoice_payment_amount_currency + (
-                sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
             if self.currency_diff > 0:
                 self.amount = self.payment_amount + (
-                    sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                    sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
             elif self.currency_diff < 0:
                 self.amount = self.payment_amount + (
-                    sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                    sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
 
         if update_communication:
             full_payment = []
             partinal_payment = []
-            for rec in self.payment_invoice_ids:
+            for rec in payment_invoice_ids:
                 if rec.move_line_id:
                     if rec.amount == rec.balance:
                         full_payment.append(rec.move_line_id.invoice_id.number[-4:])
@@ -171,6 +172,11 @@ class AccountPayment(models.Model):
     floatcurrency_diff = fields.Float(compute="_calc_payment_amount", digits=(16, 8))
 
     is_base_currency = fields.Boolean(compute="_check_is_base_currency")
+    invoice_payemnt_discount = fields.Char(u"Descuento a pronto pago",
+                                           help=u"Este descuento se aplica al subtotal y no afecta el impuesto"
+                                                u"tambien puede colocar varios descuentos separados por una coma en los casos"
+                                                u"que sea un 5% de descuento y luego un 3% que puede ocurrir"
+                                                u"en algunos casos.")
 
     def _create_payment_entry_manual(self, amount):
 
@@ -248,12 +254,15 @@ class AccountPayment(models.Model):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
         """
+
         # Remove uneed invoice lines
         [inv.unlink() for inv in self.payment_invoice_ids if inv.amount == 0]
 
+        payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
+
         # add inovices to payment
         self.invoice_ids = self.env["account.invoice"].browse(
-            [m_line.move_line_id.invoice_id.id for m_line in self.payment_invoice_ids])
+            [m_line.move_line_id.invoice_id.id for m_line in payment_invoice_ids])
 
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
 
@@ -270,7 +279,7 @@ class AccountPayment(models.Model):
         debit_invoice_total = 0
         credit_invoice_total = 0
 
-        for inv in self.payment_invoice_ids:
+        for inv in payment_invoice_ids:
 
             # Write line corresponding to invoice payment
             inv_credit = inv.amount if debit > 0 else 0
@@ -499,12 +508,14 @@ class AccountPayment(models.Model):
                 rec.amount_total(update_communication=False)
                 [inv_line.unlink() for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
 
-                if not rec.payment_invoice_ids:
+                payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
+
+                if not payment_invoice_ids:
                     raise exceptions.ValidationError("Debe espesificar los montos a pagar por facturas.")
 
                 currency_ids = set()
 
-                for inv in rec.payment_invoice_ids:
+                for inv in payment_invoice_ids:
                     currency_ids.add(inv.currency_id.id)
 
                 if len(currency_ids) > 1 and not self.rate_currency_id:
@@ -516,6 +527,7 @@ class AccountPayment(models.Model):
 
     def reset_move_type(self):
         self.move_type = "auto"
+        self.payment_invoice_ids.unlink()
 
     @api.onchange("payment_invoice_ids")
     def onchange_payment_invoice_ids(self):
@@ -641,7 +653,8 @@ class AccountPayment(models.Model):
             move_ids = [move.id for move in to_reconciled_move_lines]
             to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
             rec.payment_invoice_ids += to_reconciled_move_lines
-            # [inv_line.unlink() for inv_line in rec.payment_invoice_ids if not inv_line.move_line_id or inv_line.balance == 0]
+            [inv_line.unlink() for inv_line in rec.payment_invoice_ids if
+             not inv_line.move_line_id or inv_line.balance == 0]
         return rec.payment_invoice_ids
 
     @api.onchange('partner_id')
@@ -658,7 +671,8 @@ class AccountPayment(models.Model):
     @api.multi
     def unpay_all(self):
         for rec in self:
-            for line in rec.payment_invoice_ids:
+            payment_invoice_ids = rec.payment_invoice_ids.filtered(lambda x: x.amount > 0)
+            for line in payment_invoice_ids:
                 line.unfull_pay()
         return self.amount_total()
 
@@ -694,29 +708,29 @@ class AccountPayment(models.Model):
 
 class PaymentInvoiceLine(models.Model):
     _name = "payment.invoice.line"
-    _order = "move_date desc"
+    _order = "move_date asc"
 
     @api.one
     @api.depends("move_line_id")
     def _render_amount_sing(self):
         self.net = abs(self.move_line_id.balance)
-        self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis)
+        self.balance_cash_basis = self.currency_id.round(abs(self.move_line_id.balance_cash_basis))
 
         isr_retention = 0
         if self.move_line_id.invoice_id.journal_id.purchase_type == "informal":
             tax_retention = self.move_line_id.invoice_id.tax_line_ids.filtered(
-                lambda r: r.tax_id.purchase_tax_type in ("isr","ritbis"))
+                lambda r: r.tax_id.purchase_tax_type in ("isr", "ritbis"))
             isr_retention = sum([tax.amount for tax in tax_retention])
 
-        self.balance = abs(self.move_line_id.amount_residual) - abs(isr_retention)
+        self.balance = self.currency_id.round(abs(self.move_line_id.amount_residual) - abs(isr_retention))
 
-        self.amount_currency = abs(self.move_line_id.amount_currency)
+        self.amount_currency = self.currency_id.round(abs(self.move_line_id.amount_currency))
 
     @api.one
     @api.depends("move_line_id")
     def _get_invoice_rate(self):
         if self.amount_currency:
-            self.invoice_rate = self.net / self.amount_currency
+            self.invoice_rate = self.currency_id.round(self.net / self.amount_currency)
 
     payment_id = fields.Many2one("account.payment")
     move_line_id = fields.Many2one("account.move.line", string="Factura", readonly=True)
@@ -746,7 +760,29 @@ class PaymentInvoiceLine(models.Model):
 
     @api.one
     def full_pay(self):
-        self.amount = self.balance
+        if self.payment_id.invoice_payemnt_discount:
+            try:
+                amount_untaxed = 0
+                amount_tax = 0
+                for line in self.move_line_id.move_id.line_ids:
+                    if line.product_id:
+                        amount_untaxed += abs(line.credit + line.debit)
+                    if line.tax_line_id:
+                        amount_tax += abs(line.credit + line.debit)
+
+                discounts = self.payment_id.invoice_payemnt_discount.split(",")
+                for discount in discounts:
+
+                    desc = float(discount) / 100
+                    amount_dicount = amount_untaxed * desc
+                    amount_untaxed -= amount_dicount
+
+                self.amount = self.currency_id.round(amount_untaxed+amount_tax)
+
+            except:
+                raise exceptions.ValidationError(u"El descuento digitado no es valido")
+        else:
+            self.amount = self.balance
 
     @api.one
     def unfull_pay(self):

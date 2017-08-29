@@ -33,6 +33,7 @@
                         <group col="4" colspan="3">
 
                             <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="invoice_payemnt_discount" attrs="{'readonly': [('state','!=','draft')], 'invisible': [('move_type','!=','invoice')]}"/>
                             <newline/>
 
                             <field name="rate_currency_id" attrs="{'invisible': [('id','=', False)]}"/>
