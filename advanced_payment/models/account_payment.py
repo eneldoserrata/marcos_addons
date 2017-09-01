@@ -66,16 +66,21 @@ class AccountPayment(models.Model):
             else:
                 self.rate_currency_id = self.company_id.currency_id.id
 
-            # Total a pagar en moneda local
-            self.invoice_payment_amount = sum([rec.amount for rec in payment_invoice_ids])
+            self.invoice_payment_amount = 0
+            self.invoice_payment_amount_currency = 0
+            invoice_payment_amount_currency_local = 0
+            for rec in payment_invoice_ids:
 
-            # Total a pagar en moneda extrangera
-            self.invoice_payment_amount_currency = sum(
-                [rec.amount / rec.invoice_rate for rec in payment_invoice_ids if rec.invoice_rate])
+                # Total a pagar en moneda local
+                self.invoice_payment_amount += rec.amount
 
-            # Total a pagar de la moneda extrangera en moneda local
-            invoice_payment_amount_currency_local = sum(
-                [rec.amount for rec in payment_invoice_ids if rec.currency_id])
+                # Total a pagar en moneda extrangera
+                if rec.invoice_rate:
+                    self.invoice_payment_amount_currency += rec.amount / rec.invoice_rate
+
+                # Total a pagar de la moneda extrangera en moneda local
+                if rec.currency_id:
+                    invoice_payment_amount_currency_local += rec.amount
 
             if self.rate_currency_id:
                 if self.is_base_currency:
@@ -105,44 +110,49 @@ class AccountPayment(models.Model):
 
     @api.multi
     def amount_total(self, update_communication=True):
+        # self.payment_amount_currency
         payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
-        if self.is_base_currency:
-            if self.currency_diff > 0:
-                self.amount = self.invoice_payment_amount - abs(self.currency_diff)
-            elif self.currency_diff < 0:
-                self.amount = self.invoice_payment_amount + abs(self.currency_diff)
-            else:
-                self.amount = sum([rec.amount for rec in payment_invoice_ids])
-        else:
-            self.amount = self.invoice_payment_amount_currency + (
-                sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
-            if self.currency_diff > 0:
-                self.amount = self.payment_amount + (
-                    sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
-            elif self.currency_diff < 0:
-                self.amount = self.payment_amount + (
-                    sum([rec.amount for rec in payment_invoice_ids if not rec.currency_id]) / self.rate)
+        self.amount = 0
+        self.amount_currency = 0
+        full_payment = []
+        partinal_payment = []
+        communication = ""
+        for rec in payment_invoice_ids:
 
-        if update_communication:
-            full_payment = []
-            partinal_payment = []
-            for rec in payment_invoice_ids:
+            if self.is_base_currency:
+                if self.currency_diff > 0:
+                    self.amount += self.invoice_payment_amount - abs(self.currency_diff)
+                elif self.currency_diff < 0:
+                    self.amount += self.invoice_payment_amount + abs(self.currency_diff)
+                else:
+                    self.amount += rec.amount
+            else:
+                if self.currency_diff <> 0:
+                    self.amount += self.payment_amount
+                    if not rec.currency_id:
+                        self.amount += rec.amount / self.rate
+                else:
+                    self.amount += self.invoice_payment_amount_currency
+                    if not rec.currency_id:
+                        self.amount += rec.amount / self.rate
+
+            if rec.rec.payment_amount_currency > 0:
+                self.amount_currency += rec.payment_amount_currency
+
+            if update_communication:
                 if rec.move_line_id:
                     if rec.amount == rec.balance:
                         full_payment.append(rec.move_line_id.invoice_id.number[-4:])
                     elif rec.amount < rec.balance and rec.amount > 0:
                         partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
 
-            communication = ""
+        if full_payment:
+            communication += "PAGO FAC: {} ".format(",".join(full_payment))
+        if partinal_payment:
+            communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
 
-            if full_payment:
-                communication += "PAGO FAC: {} ".format(",".join(full_payment))
-            if partinal_payment:
-                communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
-
-            communication = textwrap.fill(communication, 60)
-
-            self.communication = communication
+        communication = textwrap.fill(communication, 60)
+        self.communication = communication
 
     @api.depends("currency_id")
     @api.one
@@ -535,9 +545,9 @@ class AccountPayment(models.Model):
     def onchange_payment_invoice_ids(self):
         self.amount_total()
 
-    @api.onchange("amount_currency", "rate")
-    def onchange_amount_currency_rate(self):
-        self.amount_total()
+    # @api.onchange("amount_currency", "rate")
+    # def onchange_amount_currency_rate(self):
+    #     self.amount_total()
 
     @api.onchange("currency_id")
     def onchange_currency_id(self):
@@ -631,7 +641,7 @@ class AccountPayment(models.Model):
                 open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
                                                                    ('partner_id', '=', rec.partner_id.id),
                                                                    ('journal_id.type', '=', journal_type),
-                                                                   # ('pay_to', '=', False),
+                                                                   ('pay_to', '=', False),
                                                                    ('type', '=', invoice_type)])
 
             inv_ids = [inv.id for inv in open_invoice]
@@ -754,6 +764,7 @@ class PaymentInvoiceLine(models.Model):
     amount = fields.Monetary("To pay", default=0.0, currency_field='company_currency_id')
     state = fields.Selection([('draft', 'Draft'), ('request', 'Solicitud'), ('posted', 'Posted'), ('sent', 'Sent'),
                               ('reconciled', 'Reconciled')], related="payment_id.state", readonly=True)
+    payment_amount_currency = fields.Monetary("Pago en divisa secundaria", currency_field='currency_id')
 
     @api.onchange('amount')
     def onchange_amount(self):
@@ -769,19 +780,29 @@ class PaymentInvoiceLine(models.Model):
                 amount_untaxed = 0
                 amount_tax = 0
                 for line in self.move_line_id.move_id.line_ids:
-                    if line.product_id:
-                        amount_untaxed += abs(line.credit + line.debit)
-                    if line.tax_line_id:
-                        amount_tax += abs(line.credit + line.debit)
 
+                    if line.product_id:
+                        if not line.amount_currency <> 0:
+                            amount_untaxed += abs(line.credit + line.debit)
+                        else:
+                            amount_untaxed += abs(line.amount_currency)
+
+                    if line.tax_line_id:
+                        if not line.amount_currency <> 0:
+                            amount_tax += abs(line.credit + line.debit)
+                        else:
+                            amount_tax += abs(line.amount_currency)
                 discounts = self.payment_id.invoice_payemnt_discount.split(",")
                 for discount in discounts:
-
                     desc = float(discount) / 100
                     amount_dicount = amount_untaxed * desc
                     amount_untaxed -= amount_dicount
 
-                self.amount = self.currency_id.round(amount_untaxed+amount_tax)
+                if not self.currency_id:
+                    self.amount = self.currency_id.round(amount_untaxed + amount_tax)
+                else:
+                    self.amount = self.currency_id.round(amount_untaxed + amount_tax) * self.payment_id.rate
+                    self.payment_amount_currency = self.currency_id.round(amount_untaxed + amount_tax)
 
             except:
                 raise exceptions.ValidationError(u"El descuento digitado no es valido")
