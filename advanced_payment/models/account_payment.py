@@ -622,17 +622,17 @@ class AccountPayment(models.Model):
 
             to_reconciled_move_lines = []
 
-            # open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
-            #                                                    ('pay_to', '=', rec.partner_id.id),
-            #                                                    ('journal_id.type', '=', journal_type),
-            #                                                    ('type', '=', invoice_type)])
-
-            # if not open_invoice:
             open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
-                                                               ('partner_id', '=', rec.partner_id.id),
+                                                               ('pay_to', '=', rec.partner_id.id),
                                                                ('journal_id.type', '=', journal_type),
-                                                               # ('pay_to', '=', False),
                                                                ('type', '=', invoice_type)])
+
+            if not open_invoice:
+                open_invoice = self.env["account.invoice"].search([('state', '=', 'open'),
+                                                                   ('partner_id', '=', rec.partner_id.id),
+                                                                   ('journal_id.type', '=', journal_type),
+                                                                   # ('pay_to', '=', False),
+                                                                   ('type', '=', invoice_type)])
 
             inv_ids = [inv.id for inv in open_invoice]
 
@@ -641,7 +641,6 @@ class AccountPayment(models.Model):
                     'value': {"move_type": "auto"},
                     'warning': {'title': "Warning", 'message': _("No existen facturas pendientes.")},
                 }
-
             rows = self.env['account.move.line'].search([('invoice_id', 'in', inv_ids),
                                                          ('account_id.reconcile', '=', True),
                                                          ('reconciled', '=', False)])
@@ -653,10 +652,13 @@ class AccountPayment(models.Model):
                     to_reconciled_move_lines.append(rec.payment_invoice_ids.create({'move_line_id': row.id}))
 
             move_ids = [move.id for move in to_reconciled_move_lines]
+
             to_reconciled_move_lines = rec.payment_invoice_ids.browse(move_ids)
+
             rec.payment_invoice_ids += to_reconciled_move_lines
-            [inv_line.unlink() for inv_line in rec.payment_invoice_ids if
-             not inv_line.move_line_id or inv_line.balance == 0]
+
+            # [inv_line.unlink() for inv_line in rec.payment_invoice_ids if not inv_line.move_line_id or inv_line.balance == 0]
+
         return rec.payment_invoice_ids
 
     @api.onchange('partner_id')
