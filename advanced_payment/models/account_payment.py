@@ -136,7 +136,7 @@ class AccountPayment(models.Model):
                     if not rec.currency_id:
                         self.amount += rec.amount / self.rate
 
-            if rec.rec.payment_amount_currency > 0:
+            if rec.payment_amount_currency > 0:
                 self.amount_currency += rec.payment_amount_currency
 
             if update_communication:
