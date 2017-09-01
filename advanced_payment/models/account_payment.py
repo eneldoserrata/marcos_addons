@@ -726,7 +726,7 @@ class PaymentInvoiceLine(models.Model):
                 lambda r: r.tax_id.purchase_tax_type in ("isr", "ritbis"))
             isr_retention = sum([tax.amount for tax in tax_retention])
 
-        self.balance = self.currency_id.round(abs(self.move_line_id.amount_residual) - abs(isr_retention))
+        self.balance = abs(self.move_line_id.amount_residual) - abs(isr_retention)
 
         self.amount_currency = self.currency_id.round(abs(self.move_line_id.amount_currency))
 
