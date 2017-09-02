@@ -146,12 +146,13 @@ class AccountPayment(models.Model):
                     elif rec.amount < rec.balance and rec.amount > 0:
                         partinal_payment.append(rec.move_line_id.invoice_id.number[-4:])
 
-        if full_payment:
-            communication += "PAGO FAC: {} ".format(",".join(full_payment))
-        if partinal_payment:
-            communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
+                if full_payment:
+                    communication += "PAGO FAC: {} ".format(",".join(full_payment))
+                if partinal_payment:
+                    communication += "ABONO FAC: {} ".format(",".join(partinal_payment))
 
-        communication = textwrap.fill(communication, 60)
+                communication = textwrap.fill(communication, 60)
+
         self.communication = communication
 
     @api.depends("currency_id")
