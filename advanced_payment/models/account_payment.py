@@ -501,6 +501,8 @@ class AccountPayment(models.Model):
     @api.multi
     def post(self):
 
+        import pdb;pdb.set_trace()
+
         if self._context.get("active_model", False) == "account.invoice":
             return super(AccountPayment, self).post()
 
