@@ -49,7 +49,7 @@
     # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
     # for the full list
     'category': 'Accounting & Finance',
-    'version': '0.1',
+    'version': '0.2',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account', 'report'],
@@ -58,15 +58,12 @@
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
-        'views/templates.xml',
-        "views/partner_invoice_move_report.xml",
+        "reports/partner_invoice_move_report.xml",
         "reports/payment_request_report.xml",
-        "views/account_invoice_view.xml"
+        "views/account_invoice_view.xml",
+        "data/payment_email_template.xml"
     ],
     # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
     'images': ['static/description/main.png'],
     "price": 500,
     'currency': 'EUR',

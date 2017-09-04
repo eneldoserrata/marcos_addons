@@ -120,12 +120,7 @@ class AccountPayment(models.Model):
         for rec in payment_invoice_ids:
 
             if self.is_base_currency:
-                if self.currency_diff > 0:
-                    self.amount += self.invoice_payment_amount - abs(self.currency_diff)
-                elif self.currency_diff < 0:
-                    self.amount += self.invoice_payment_amount + abs(self.currency_diff)
-                else:
-                    self.amount += rec.amount
+                self.amount += rec.amount
             else:
                 if self.currency_diff <> 0:
                     self.amount += self.payment_amount
@@ -154,6 +149,10 @@ class AccountPayment(models.Model):
                 communication = textwrap.fill(communication, 60)
 
         self.communication = communication
+        # if self.currency_diff > 0:
+        #     self.amount += self.invoice_payment_amount - abs(self.currency_diff)
+        # elif self.currency_diff < 0:
+        #     self.amount += self.invoice_payment_amount + abs(self.currency_diff)
 
     @api.depends("currency_id")
     @api.one
@@ -269,7 +268,8 @@ class AccountPayment(models.Model):
         """
 
         # Remove uneed invoice lines
-        [inv.unlink() for inv in self.payment_invoice_ids if inv.amount == 0]
+        payment_invoice_ids_no_pay = self.payment_invoice_ids.filtered(lambda x: x.amount == 0)
+        payment_invoice_ids_no_pay.unlink()
 
         payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
 
@@ -464,7 +464,43 @@ class AccountPayment(models.Model):
                 sequence_code)
 
     @api.multi
+    def action_receipt_sent(self):
+
+        self.ensure_one()
+        template = self.env.ref('advanced_payment.email_template_edi_payment_order', False)
+        compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
+        ctx = dict(
+            default_model='account.payment',
+            default_res_id=self.id,
+            default_use_template=bool(template),
+            default_template_id=template and template.id or False,
+            default_composition_mode='comment',
+            mark_invoice_as_sent=True,
+        )
+        return {
+            'name': _('Compose Email'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form.id, 'form')],
+            'view_id': compose_form.id,
+            'target': 'new',
+            'context': ctx,
+        }
+
+
+    @api.multi
+    def mail_post(self):
+        if self.partner_id.email:
+            template_id = self.env.ref('advanced_payment.email_template_edi_payment_order')
+            mail_id = template_id.send_mail(self.id, True, email_values={"email_to": self.partner_id.email, "partner_ids": []})
+            return True
+
+
+    @api.multi
     def post(self):
+
         if self._context.get("active_model", False) == "account.invoice":
             return super(AccountPayment, self).post()
 
@@ -487,6 +523,7 @@ class AccountPayment(models.Model):
                 amount = rec.amount * (rec.payment_type in ('outbound', 'transfer') and -1 or 1)
                 rec._create_payment_entry_invoice(amount)
                 rec.state = 'posted'
+        self.mail_post()
 
     @api.multi
     def payment_request(self):
@@ -518,10 +555,19 @@ class AccountPayment(models.Model):
 
                 rec.state = 'request'
             elif rec.move_type == "invoice":
-                rec.amount_total(update_communication=False)
-                [inv_line.unlink() for inv_line in rec.payment_invoice_ids if inv_line.amount == 0]
+
+                no_payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount == 0)
+                no_payment_invoice_ids.unlink()
+
 
                 payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
+
+                for inv_line in payment_invoice_ids:
+                    for line in inv_line.move_line_id.move_id.line_ids:
+                        if not line.partner_id:
+                            line.partner_id = self.partner_id.id
+
+                rec.amount_total(update_communication=False)
 
                 if not payment_invoice_ids:
                     raise exceptions.ValidationError("Debe espesificar los montos a pagar por facturas.")
@@ -538,9 +584,10 @@ class AccountPayment(models.Model):
                 rec.state = 'request'
             rec.set_payment_name()
 
+    @api.model
     def reset_move_type(self):
-        self.move_type = "auto"
         self.payment_invoice_ids.unlink()
+        self.payment_move_ids.unlink()
 
     @api.onchange("payment_invoice_ids")
     def onchange_payment_invoice_ids(self):
@@ -604,6 +651,7 @@ class AccountPayment(models.Model):
 
     @api.onchange("move_type")
     def onchange_move_type(self):
+        self.reset_move_type()
         if self.move_type == "manual":
             self.rate_currency_id = False
             if self.journal_id:
@@ -830,3 +878,10 @@ class PaymentMoveLine(models.Model):
 
     debit = fields.Monetary(string="Debit", default=0.0, currency_field="currency_id")
     credit = fields.Monetary(string="Credit", default=0.0, currency_field="currency_id")
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    send_payment_order = fields.Boolean(string='Enviar pago por correo',
+                                        help='Marque esta casilla si desea enviar los pago a este cliente o proveedor mientras valida un pago. Esto enviará el email con el informe del pago al cliente / proveedor al momento de validarlo.')

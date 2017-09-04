@@ -9,6 +9,9 @@
             <field name="arch" type="xml">
 
                 <button name="post" position="replace">
+                    <button name="action_receipt_sent" class="oe_highlight" states="request,posted,send,reconciled" string="Enviar por correo"
+                            type="object" icon="fa-paper-plane"/>
+
                     <button name="payment_request" class="oe_highlight" states="draft" string="Solicitar"
                             type="object"/>
                     <button name="payment_request_print" class="oe_highlight" states="request"
@@ -19,7 +22,7 @@
                 <field name="communication" position="replace"/>
 
                 <field name="payment_date" position="after">
-                    <field name="communication" attrs="{'required': [('amount','>',0)]}"/>
+                    <field name="communication"/>
                 </field>
 
                 <field name="state" position="replace">
@@ -31,9 +34,9 @@
                     <field name="is_base_currency" invisible="1"/>
                     <group attrs="{'invisible': [('payment_type','in',('transfer'))]}" col="4">
                         <group col="4" colspan="3">
-
                             <field name="move_type" attrs="{'readonly': [('state','!=','draft')]}"/>
-                            <field name="invoice_payemnt_discount" attrs="{'readonly': [('state','!=','draft')], 'invisible': [('move_type','!=','invoice')]}"/>
+                            <field name="invoice_payemnt_discount"
+                                   attrs="{'readonly': [('state','!=','draft')], 'invisible': [('move_type','!=','invoice')]}"/>
                             <newline/>
 
                             <field name="rate_currency_id" attrs="{'invisible': [('id','=', False)]}"/>
@@ -102,7 +105,7 @@
                             <field name="account_id" domain="[('deprecated', '=', False)]"/>
                             <field name="name"/>
                             <!--<field name="analytic_account_id" groups="analytic.group_analytic_accounting"-->
-                                   <!--domain="[('account_type', '=', 'normal')]"/>-->
+                            <!--domain="[('account_type', '=', 'normal')]"/>-->
                             <field name="debit" sum="Total Debit"/>
                             <field name="credit" sum="Total Credit"/>
                         </tree>
@@ -115,6 +118,18 @@
                         <field name="message_ids" widget="mail_thread"/>
                     </div>
                 </form>
+            </field>
+        </record>
+
+
+        <record id="customer_form_inherit_payment_order" model="ir.ui.view">
+            <field name='name'>customer.form.inherit.payment.order</field>
+            <field name='model'>res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name='arch' type='xml'>
+                <xpath expr="//field[@name='credit']" position="after">
+                    <field name="send_payment_order"/>
+                </xpath>
             </field>
         </record>
     </data>
