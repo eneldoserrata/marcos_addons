@@ -42,7 +42,7 @@ class AccountPayment(models.Model):
     _name = 'account.payment'
     _inherit = ['account.payment', 'mail.thread', 'ir.needaction_mixin', 'utm.mixin']
 
-    @api.depends("rate")
+
     @api.one
     def _calc_payment_amount(self):
         if self.move_type == "invoice":
@@ -589,9 +589,9 @@ class AccountPayment(models.Model):
         self.payment_invoice_ids.unlink()
         self.payment_move_ids.unlink()
 
-    @api.onchange("payment_invoice_ids")
-    def onchange_payment_invoice_ids(self):
-        self.amount_total()
+    # @api.onchange("payment_invoice_ids")
+    # def onchange_payment_invoice_ids(self):
+    #     self.amount_total()
 
     # @api.onchange("amount_currency", "rate")
     # def onchange_amount_currency_rate(self):
