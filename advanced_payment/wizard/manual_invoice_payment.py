@@ -48,14 +48,14 @@ class ManualPaymentWizard(models.TransientModel):
         if active_id:
             inv = self.env["payment.invoice.line"].browse(active_id)
             res.update({"currency_id": inv.currency_id.id,
-                        "line_id": inv.id})
+                        "line_id": inv.id,
+                        "move_line_id": inv.move_line_id.name_get()[0][1]})
         return res
 
     currency_id = fields.Many2one("res.currency", string="Moneda", readonly=1)
     amount = fields.Monetary("Importe", currency_field="currency_id")
     line_id = fields.Many2one("payment.invoice.line")
-    move_line_id = fields.Many2one("account.move.line", string="Factura", readonly=True,
-                                   related="line_id.move_line_id")
+    move_line_id = fields.Char( string="Factura", readonly=True)
 
     @api.multi
     def apply_manual_payment(self):

@@ -142,7 +142,7 @@ class AccountPayment(models.Model):
         lines_amount = 0
         currency_set = set()
         if update_communication:
-            self.communication = "PAGO A FACTUTA(S) "
+            self.communication = "PAGO A FACTUTA(S)"
 
         payment_invoice_ids = self.payment_invoice_ids.filtered(lambda x: x.amount > 0)
         for line in payment_invoice_ids:
@@ -150,7 +150,7 @@ class AccountPayment(models.Model):
             lines_amount += line.amount
 
             if update_communication:
-                self.communication += " {}|{},".format(line.move_line_id.invoice_id.number,line.move_line_id.invoice_id.reference)
+                self.communication += " {},".format(str(line.move_line_id.name_get()[0][1]))
 
         if self.rate_currency_id:
             if self.currency_id == self.rate_currency_id:
