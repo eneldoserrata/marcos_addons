@@ -122,7 +122,7 @@ class AccountPayment(models.Model):
     currency_diff_type = fields.Selection(
         [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'), ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
          ("none", "SIN DIFERENCIA CAMBIARIA")], compute="_calc_payment_amount", string=u"Tipo de diferencia")
-    rate_currency_id = fields.Many2one("res.currency", string=u"Divisa de facturas")
+    rate_currency_id = fields.Many2one("res.currency", string=u"Divisa de facturas", search=[('id','!=',lambda x: x.env.user.company_id.currency_id.id)])
 
     amount_currency = fields.Float(u"Pago(s)", compute="_calc_payment_amount", digits=(12, 6))
 

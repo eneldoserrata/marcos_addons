@@ -145,7 +145,7 @@
                                 <div class="panel-body">
                                     <span t-field="doc.communication"/>
                                 </div>
-                                <table class="table table-bordered table-condensed" t-if="doc.rate_currency_id == False">
+                                <table class="table table-bordered table-condensed" t-if="not doc.rate_currency_id">
                                     <tr>
                                         <th>Cuenta</th>
                                         <th>Ref</th>
@@ -174,7 +174,7 @@
                                     </t>
 
                                 </table>
-                                <table class="table table-bordered table-condensed" t-if="doc.rate_currency_id != False">
+                                <table class="table table-bordered table-condensed" t-if="doc.rate_currency_id">
                                     <t t-set="currency_total" t-value="0"/>
                                     <tr>
                                         <th>Cuenta</th>
