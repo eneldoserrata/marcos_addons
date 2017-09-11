@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 ########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -32,41 +33,5 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Advanced payment",
 
-    'summary': """
-        This module allows you to add functionality to apply partial payments on invoices and manual accounting entries from the form of payments""",
-
-    'description': """
-        Long description of module's purpose
-    """,
-
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Accounting & Finance',
-    'version': '0.2',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'report'],
-
-    # always loaded
-    'data': [
-        'security/ir.model.access.csv',
-        'views/views.xml',
-        "reports/partner_invoice_move_report.xml",
-        "reports/payment_request_report.xml",
-        "views/account_invoice_view.xml",
-        "data/payment_email_template.xml",
-        "wizard/manual_invoice_payment_view.xml"
-    ],
-    # only loaded in demonstration mode
-    'images': ['static/description/main.png'],
-    "price": 500,
-    'currency': 'EUR',
-    'license': "Other proprietary"
-}
+import manual_invoice_payment

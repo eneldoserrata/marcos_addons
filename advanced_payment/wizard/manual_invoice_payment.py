@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 ########################################################################################################################
-#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>) #  Write by Eneldo Serrata (eneldo@marcos.do)
+#  Copyright (c) 2015 - Marcos Organizador de Negocios SRL. (<https://marcos.do/>)
+#  Write by Eneldo Serrata (eneldo@marcos.do)
 #  See LICENSE file for full copyright and licensing details.
 #
 # Odoo Proprietary License v1.0
@@ -32,41 +33,35 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-{
-    'name': "Advanced payment",
 
-    'summary': """
-        This module allows you to add functionality to apply partial payments on invoices and manual accounting entries from the form of payments""",
 
-    'description': """
-        Long description of module's purpose
-    """,
+from odoo import models, fields, api, exceptions
 
-    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
-    'website': "http://marcos.do",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Accounting & Finance',
-    'version': '0.2',
+class ManualPaymentWizard(models.TransientModel):
+    _name = "manual.payment.wizard"
+    
+    @api.model
+    def default_get(self, fields):
+        res = super(ManualPaymentWizard, self).default_get(fields)
+        active_id = self._context.get("active_id", False)
+        if active_id:
+            inv = self.env["payment.invoice.line"].browse(active_id)
+            res.update({"currency_id": inv.currency_id.id,
+                        "line_id": inv.id})
+        return res
 
-    # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'report'],
+    currency_id = fields.Many2one("res.currency", string="Moneda", readonly=1)
+    amount = fields.Monetary("Importe", currency_field="currency_id")
+    line_id = fields.Many2one("payment.invoice.line")
+    move_line_id = fields.Many2one("account.move.line", string="Factura", readonly=True,
+                                   related="line_id.move_line_id")
 
-    # always loaded
-    'data': [
-        'security/ir.model.access.csv',
-        'views/views.xml',
-        "reports/partner_invoice_move_report.xml",
-        "reports/payment_request_report.xml",
-        "views/account_invoice_view.xml",
-        "data/payment_email_template.xml",
-        "wizard/manual_invoice_payment_view.xml"
-    ],
-    # only loaded in demonstration mode
-    'images': ['static/description/main.png'],
-    "price": 500,
-    'currency': 'EUR',
-    'license': "Other proprietary"
-}
+    @api.multi
+    def apply_manual_payment(self):
+        if self.line_id.amount_currency > 0:
+            self.line_id.amount = self.amount*self.line_id.invoice_rate
+        else:
+            self.line_id.amount = self.amount
+
+        self.line_id.payment_compute_auto = False

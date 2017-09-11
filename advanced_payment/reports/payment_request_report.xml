@@ -145,7 +145,7 @@
                                 <div class="panel-body">
                                     <span t-field="doc.communication"/>
                                 </div>
-                                <table class="table table-bordered table-condensed">
+                                <table class="table table-bordered table-condensed" t-if="doc.rate_currency_id == False">
                                     <tr>
                                         <th>Cuenta</th>
                                         <th>Ref</th>
@@ -165,13 +165,48 @@
                                                 <span t-field="move_id.move_date"/>
                                             </td>
                                             <td class="text-right">
-                                                <span t-field="move_id.amount"/>
+                                                <span t-field="move_id.amount" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/>
                                             </td>
                                             <td class="text-right">
-                                                <span t-field="move_id.balance"/>
+                                                <span t-field="move_id.balance" t-options="{'widget': 'monetary', 'display_currency': company.currency_id}"/>
                                             </td>
                                         </tr>
                                     </t>
+
+                                </table>
+                                <table class="table table-bordered table-condensed" t-if="doc.rate_currency_id != False">
+                                    <t t-set="currency_total" t-value="0"/>
+                                    <tr>
+                                        <th>Cuenta</th>
+                                        <th>Ref</th>
+                                        <th>Fecha</th>
+                                        <th>Pagado</th>
+                                    </tr>
+                                    <t t-foreach="doc.payment_invoice_ids" t-as="move_id">
+                                        <t t-set="currency_total" t-value="currency_total+(move_id.amount/move_id.invoice_rate)"/>
+                                        <tr>
+                                            <td>
+                                                <span t-field="move_id.move_line_id.account_id.code"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="move_id.move_line_id.invoice_id.number"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="move_id.move_date"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-if="move_id.invoice_rate > 0">
+                                                    <span t-esc="move_id.amount/move_id.invoice_rate" t-options="{'widget': 'monetary', 'display_currency': move_id.currency_id}"/>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td colspan="2"></td>
+                                        <td class="text-right">TOTAL PAGADO:</td>
+                                        <td class="text-right"><span t-esc="currency_total" t-options="{'widget': 'monetary', 'display_currency': doc.rate_currency_id}"/></td>
+
+                                    </tr>
 
                                 </table>
                             </div>

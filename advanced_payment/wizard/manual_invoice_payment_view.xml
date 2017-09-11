@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="manual_payment_wizard_form" model="ir.ui.view">
+            <field name="name">manual_payment_wizard_form</field>
+            <field name="model">manual.payment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <group col="2">
+                        <field name="move_line_id"/>
+                        <field name="currency_id" attrs="{'invisible': [('currency_id','=',False)]}"/>
+                        <field name="amount" default_focus="1"/>
+                    </group>
+                    <footer>
+                        <button name="apply_manual_payment" string="Aplicar" type="object" class="oe_highlight" context="{'payment_compute_auto': False}"/>
+                        or
+                        <button string="Cancelar" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="manual_payment_wizard_action" model="ir.actions.act_window">
+            <field name="name">Pago manual de factura</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">manual.payment.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="manual_payment_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+
+
+
+    </data>
+</odoo>
