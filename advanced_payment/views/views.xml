@@ -41,7 +41,8 @@
                         <field name="rate_currency_id"
                                attrs="{'invisible': [('move_type','!=', 'invoice')]}"/>
                         <field name="invoice_payemnt_discount"
-                               attrs="{'readonly': [('state','!=','draft')], 'invisible': [('move_type','!=','invoice')]}" on_change="0"/>
+                               attrs="{'readonly': [('state','!=','draft')], 'invisible': [('move_type','!=','invoice')]}"
+                               on_change="0"/>
                     </group>
                     <group col="2"
                            attrs="{'invisible': [('move_type','!=','invoice'),('rate_currency_id','!=', 'currency_id')]}">
@@ -60,10 +61,10 @@
                             <field name="rate"
                                    attrs="{'invisible': ['|',('move_type','!=','invoice'),('rate_currency_id','=', False)], 'required': [('rate_currency_id','!=', False)], 'readonly': [('state','!=','draft')]}"/>
                             <!--<html>-->
-                                <!--<div class="alert alert-danger" role="alert" colspan="2">-->
-                                    <!--<strong>IMPORTANTE:</strong>-->
-                                    <!--Los pago a facturas definidos de forma manual deben ser en la moneda base a la tasa de la trasaccion.-->
-                                <!--</div>-->
+                            <!--<div class="alert alert-danger" role="alert" colspan="2">-->
+                            <!--<strong>IMPORTANTE:</strong>-->
+                            <!--Los pago a facturas definidos de forma manual deben ser en la moneda base a la tasa de la trasaccion.-->
+                            <!--</div>-->
                             <!--</html>-->
                         </group>
                     </group>
@@ -90,7 +91,8 @@
                         </tr>
                     </table>
                     <field name="payment_invoice_ids"
-                           attrs="{'invisible': [('move_type','!=','invoice')],'readonly': [('state','!=','draft')]}" readonly="0"
+                           attrs="{'invisible': [('move_type','!=','invoice')],'readonly': [('state','!=','draft')]}"
+                           readonly="0"
                            options="{'reload_whole_on_button': false}">
                         <tree decoration-success="(balance == amount)"
                               decoration-danger="(amount == 0)"
@@ -151,6 +153,13 @@
                     <field name="send_payment_order"/>
                 </xpath>
             </field>
+        </record>
+
+
+        <record id="account.action_manual_reconciliation" model="ir.actions.client">
+            <field name="name">Manual Reconciliation</field>
+            <field name="tag">manual_reconciliation_view</field>
+            <field name="context">{'partner_ids': [5030120]}</field>
         </record>
     </data>
 </odoo>

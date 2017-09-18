@@ -540,7 +540,7 @@ odoo.define('ipf_manager.service', function (require) {
                             openerp.web.unblockUI()
                         });
                 } else {
-                    openerp.web.unblockUI()
+                    openerp.web.unblockUI();
                     self.showDialog("Extraccion libro diario", "No hay datos disponibles para esta fecha.");
                 }
             }
