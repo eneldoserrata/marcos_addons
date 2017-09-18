@@ -691,7 +691,7 @@ class PaymentInvoiceLine(models.Model):
                 self.amount_currency = abs(self.move_line_id.amount_currency)
 
                 if self.amount_currency and self.balance:
-                    self.invoice_rate = abs(self.balance / self.amount_currency)
+                    self.invoice_rate = abs(self.inv_amount / self.amount_currency)
                     if self.invoice_rate:
                         self.amount_currency_pay = abs(self.computed_payemnt() / self.invoice_rate)
 
