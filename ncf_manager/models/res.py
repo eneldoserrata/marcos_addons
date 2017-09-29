@@ -139,11 +139,12 @@ class ResPartner(models.Model):
     def write(self, vals):
         if vals.get("name", False):
             partner_id = self.search([('name', '=', vals["name"])])
-            if partner_id:
-                raise exceptions.ValidationError(
-                    u"Ya existe un contacto registrado con este nombre de {}! incluir otro apellido o informacion"
-                    u"adicional si está seguro que es otro diferente al que ya esxite".format(
-                        vals["name"]))
+            if not self._context.get("job_uuid", False):
+                if partner_id:
+                    raise exceptions.ValidationError(
+                        u"Ya existe un contacto registrado con este nombre de {}! incluir otro apellido o informacion"
+                        u"adicional si está seguro que es otro diferente al que ya esxite".format(
+                            vals["name"]))
 
         for rec in self:
             if vals.get("parent_id", False) or rec.parent_id:
@@ -165,11 +166,12 @@ class ResPartner(models.Model):
 
         if vals.get("name", False):
             partner_id = self.search([('name', '=', vals["name"])])
-            if partner_id:
-                raise exceptions.ValidationError(
-                    u"Ya existe un contacto registrado con este nombre de {}! incluir otro apellido o informacion"
-                    u"adicional si está seguro que es otro diferente al que ya esxite".format(
-                        vals["name"]))
+            if not self._context.get("job_uuid", False):
+                if partner_id:
+                    raise exceptions.ValidationError(
+                        u"Ya existe un contacto registrado con este nombre de {}! incluir otro apellido o informacion"
+                        u"adicional si está seguro que es otro diferente al que ya esxite".format(
+                            vals["name"]))
 
         vals = self.validate_vat_or_name(vals)
         if not vals:
