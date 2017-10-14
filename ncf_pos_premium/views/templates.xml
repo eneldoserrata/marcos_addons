@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="pos_base_assets" name="pos_base assets" inherit_id="point_of_sale.assets">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/ncf_pos_premium/static/src/css/bus.css"/>
+            <link rel="stylesheet" href="/ncf_pos_premium/static/src/css/pos_orders.css"/>
+            <link rel="stylesheet" href="/ncf_pos_premium/static/src/css/pos_order_return.css"/>
+            <link rel="stylesheet" href="/ncf_pos_premium/static/src/css/delivery_screen.css"/>
+
+
+
+            <link rel="stylesheet" href="/marcos_api_tools/static/src/libs/tingle.min.css"></link>
+            <script type="text/javascript" src="/marcos_api_tools/static/src/libs/tingle.min.js"></script>
+            <script type="text/javascript" src="/marcos_api_tools/static/src/libs/bootbox.min.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/libs/js/jquery.collapse.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/libs/js/jquery.collapse_storage.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/libs/js/jquery.collapse_cookie_storage.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/libs/js/jquery.collapse_cookie_storage.js"></script>
+
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/bus.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/db.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/keyboard.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/models.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/chrome.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/popups.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/screens.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/sale_order.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/lock.js"></script>
+            <script type="text/javascript" src="/ncf_pos_premium/static/src/js/delivery_screen.js"></script>
+
+
+        </xpath>
+    </template>
+
+</odoo>

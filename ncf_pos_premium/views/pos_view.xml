@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id='pos_return_order_inherit_product_template_view' model='ir.ui.view'>
+            <field name='name'>product.product.return</field>
+            <field name='model'>product.template</field>
+            <field name='inherit_id' ref='point_of_sale.product_template_form_view'/>
+            <field name='arch' type='xml'>
+                <field name='available_in_pos' position='after'>
+                    <field name='not_returnable' id='not_returnable'/>
+                </field>
+            </field>
+        </record>
+
+        <record id='pos_return_order_inherit_pos_order_view' model='ir.ui.view'>
+            <field name="name">pos.order.return</field>
+            <field name='model'>pos.order</field>
+            <field name='inherit_id' ref='point_of_sale.view_pos_pos_form'/>
+            <field name="arch" type="xml">
+
+                <header>
+                    <button name="%(ncf_pos_premium.fix_payment_mistake_wizard_action)d" string="Corrección de pagos"
+                            type="action" states="paid,invoiced" context="{'pos_session_id' : session_id}"/>
+                </header>
+
+
+                <field name='partner_id' position='after'>
+                    <field name='is_return_order' invisible='True'/>
+                    <field name='return_order_id' readonly='True'
+                           attrs="{'invisible':[('is_return_order','!=',True)]}"/>
+                    <field name='return_status' readonly='True' attrs="{'invisible':[('is_return_order','=',True)]}"/>
+                    <field name="invoice_id" readonly="True" attrs="{'invisible':[('invoice_id','=',False)]}"/>
+                    <field name="move_name" readonly="True" attrs="{'invisible':[('invoice_id','!=',False)]}"/>
+
+                </field>
+
+                <field name="statement_ids" position="after">
+                    <group string="Pago con notas de crédito">
+                        <field name="refund_payments" colspan="4" nolabel="1" readonly="1"/>
+                    </group>
+                </field>
+
+                <field name="price_subtotal_incl" position="after">
+                    <field name="create_uid"/>
+                </field>
+
+                <field name="product_id" position="after">
+                    <field name="order_line_note"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="view_pos_order_tree" model="ir.ui.view">
+            <field name="name">view_pos_order_tree</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+            <field name="arch" type="xml">
+
+                <field name="name" position="replace"/>
+                <field name="pos_reference" position="replace">
+                    <field name="invoice_id"/>
+                </field>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

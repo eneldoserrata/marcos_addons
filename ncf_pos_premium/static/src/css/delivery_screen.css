@@ -1,0 +1,192 @@
+  .kitchen_room{
+	float: right;
+    color: #DDD;
+    font-size: 40px;
+    margin-right: 32px;
+    line-height: 48px;
+    font-style: italic;
+}
+
+.box {
+  position: relative;
+  border: 1px solid #BBB;
+  background: #EEE;
+}
+.ribbon {
+  position: absolute;
+  right: -5px; top: -5px;
+  z-index: 1;
+  overflow: hidden;
+  width: 75px; height: 75px;
+  text-align: right;
+}
+.ribbon span {
+  font-size: 10px;
+  font-weight: bold;
+  color: #FFF;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 20px;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  width: 100px;
+  display: block;
+  box-shadow: 0 3px 10px -5px rgba(0, 0, 0, 1);
+  position: absolute;
+  top: 19px; right: -21px;
+}
+.ribbon span::before {
+  content: "";
+  position: absolute; left: 0px; top: 100%;
+  z-index: -1;
+  border-left: 3px solid #79A70A;
+  border-right: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-top: 3px solid #79A70A;
+}
+.ribbon span::after {
+  content: "";
+  position: absolute; right: 0px; top: 100%;
+  z-index: -1;
+  border-left: 3px solid transparent;
+  border-right: 3px solid #79A70A;
+  border-bottom: 3px solid transparent;
+  border-top: 3px solid #79A70A;
+}
+
+
+/*.kitchen_table {
+  border-collapse: separate;
+  border-spacing: 20px 0;
+}
+
+.kitchen_td {
+  padding: 8px 0;
+}*/
+
+.pos_original_view{
+    font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial !important;
+}
+ul.wizard {
+    padding: 0;
+    margin-top: 20px;
+    list-style: none outside none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+}
+/*.pull-right {
+    float: right !important;
+}
+.pull-right {
+    float: right;
+}*/
+ul.wizard li:first-child {
+    padding-left: 15px;
+    border-radius: 4px 0 0 4px;
+}
+ul.wizard li.text-primary {
+    background: #f1f6fc;
+}
+ul.wizard li {
+    border: 1px solid #d4d4d4;
+    border-right-width: 0;
+    position: relative;
+    float: left;
+    padding: 0 10px 0 20px;
+    margin: 0;
+    line-height: 38px;
+    background: #fbfbfb;
+}
+.text-primary {
+    color: #428bca;
+}
+
+ul.wizard li .chevron {
+    position: absolute;
+    top: 0;
+    right: -10px;
+    z-index: 1;
+    display: block;
+    border: 20px solid transparent;
+    border-right: 0;
+    border-left: 10px solid #d4d4d4;
+}
+
+.table_header_wv{
+  background: gainsboro;
+    font-size: 14px;
+}
+
+.button_draft,.button_cooked,.button_delivered{
+  cursor: pointer;
+}
+
+.wv_print{
+  font-size: 20px !important;
+}
+
+ul.order_line_wizard {
+    padding: 0;
+    margin-top: 10px;
+    list-style: none outside none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+    -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.065);
+}
+/*.pull-right {
+    float: right !important;
+}
+.pull-right {
+    float: right;
+}*/
+ul.order_line_wizard li:first-child {
+    padding-left: 15px;
+    border-radius: 4px 0 0 4px;
+}
+ul.order_line_wizard li.text-primary {
+    background: #f1f6fc;
+}
+ul.order_line_wizard li {
+    border: 1px solid #d4d4d4;
+    border-right-width: 0;
+    position: relative;
+    float: left;
+    padding: 0 10px 0 20px;
+    margin: 0;
+    line-height: 24px;
+    background: #fbfbfb;
+}
+.text-primary {
+    color: #428bca;
+}
+
+ul.order_line_wizard li .chevron {
+    position: absolute;
+    top: 0;
+    right: -10px;
+    z-index: 1;
+    display: block;
+    border: 12px solid transparent;
+    border-right: 0;
+    border-left: 10px solid #d4d4d4;
+}
+
+.kitchen_room{
+  float: right;
+    color: #DDD;
+    font-size: 40px;
+    margin-right: 32px;
+    line-height: 48px;
+    font-style: italic;
+}
+
+.pos .order .orderline {
+    padding-bottom: 29px !important;
+    }

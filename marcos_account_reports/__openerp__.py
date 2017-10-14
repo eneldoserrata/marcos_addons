@@ -54,7 +54,7 @@
     'version': '2.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account'],
+    'depends': ['base', 'account'],
 
     # always loaded
     'data': [
@@ -66,4 +66,5 @@
     'demo': [
         'demo/demo.xml',
     ],
+    'installable': False
 }

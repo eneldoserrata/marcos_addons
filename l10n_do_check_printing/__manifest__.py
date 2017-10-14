@@ -47,7 +47,7 @@
         Puede configurar la salida (distribución, información trozos, etc.) en los entornos de la empresa, y gestionar el
         cheques de numeración (si utiliza cheques preimpresos sin números) en la configuración de diario.
     """,
-    'depends' : ['account_check_printing','ncf_manager'],
+    'depends': ['account_check_printing', 'ncf_manager'],
     'data': [
         'security/ir.model.access.csv',
         'report/paper_data.xml',
@@ -58,5 +58,6 @@
     ],
     'installable': True,
     'auto_install': False,
-    'license': "Other proprietary"
+    'license': "Other proprietary",
+    "price": 100,
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- ACCOUNT JOURNAL -->
+        <record id="inherit_view_account_journal_pos_user_form1" model="ir.ui.view">
+            <field name="name">inherit_bi_account_journal_form</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="journal_user" position="after">
+                    <field name="credit"/>
+                </field>
+            </field>
+        </record>
+
+
+    </data>
+</openerp>
+

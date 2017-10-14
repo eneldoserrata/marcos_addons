@@ -34,5 +34,6 @@
     ],
     'qweb': [
 
-    ]
+    ],
+    'installable': False
 }

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template">
+    <t t-name="KitchenScreenWidget">
+        <div class='screen'>
+            <div class="kitchen_screen">
+                <div t-foreach="widget.pos.get_order_list()" t-as="data" class="pos-sale-ticket pos_original_view box"
+                     style="width: 90%;" t-if="data.orderlines.length > 0">
+                    <div class="ribbon">
+                        <t t-if="data.order_priority == 0">
+                            <span style="background: linear-gradient(#9BC90D 0%, #79A70A 100%);">Normal</span>
+                        </t>
+                        <t t-if="data.order_priority == 1">
+                            <span style="background: linear-gradient(#0D47A1 0%, #2196F3 100%);">Tranquilo</span>
+                        </t>
+                        <t t-if="data.order_priority == 2">
+                            <span style="background: linear-gradient(#B71C1C 0%, #D50000 100%);">Urgente</span>
+                        </t>
+                    </div>
+                    <div class="pos-center-align">
+                        <h2>
+                            <t t-esc="data.sequence_number"/>
+                        </h2>
+                    </div>
+                    <h3>
+                        <t t-if='data.get("client")'>
+                            <t t-set="client" t-value="data.get('client')"/>
+                            <t t-if="client.name">
+                                <b>Cliente :</b>
+                                <t t-esc="client.name"/>&#160;&#160;&#160;&#160;
+                            </t>
+                            <t t-if="client.phone">
+                                <b>Telefono :</b>
+                                <t t-esc="client.phone"/>&#160;&#160;&#160;&#160;
+                            </t>
+                        </t>
+                        <t t-if="data.floor_name">
+                            <b>AREA :</b>
+                            <t t-esc="data.floor_name"/>&#160;&#160;&#160;&#160;
+                        </t>
+                        <t t-if="data.table_name">
+                            <b>MESA :</b>
+                            <t t-esc="data.table_name"/>&#160;&#160;&#160;&#160;
+                        </t>
+                    </h3>
+                    <t t-set='total' t-value='0'/>
+                    <table class='receipt-orderlines kitchen_table'>
+                        <colgroup>
+                            <col width='10%'/>
+                            <col width='25%'/>
+                            <col width='20%'/>
+                            <col width='15%'/>
+                            <col width='30%'/>
+                        </colgroup>
+                        <tr class="table_header_wv">
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Nota</th>
+                            <th class="pos-right-align">Cantidad</th>
+                            <th class="pos-right-align">Estado</th>
+                        </tr>
+                        <t t-set='wv_line_id' t-value='0'/>
+                        <tr t-foreach="data.orderlines.models" t-as="orderline">
+                            <td>
+                                <img t-attf-src="/web/binary/image?model=product.product&amp;field=image_medium&amp;id=#{orderline.product.id}"
+                                     style="width: 70px;height: 70px;"/>
+                            </td>
+                            <td class="kitchen_td">
+                                <t t-esc="orderline.product.name"/>
+                                <br/>
+                            </td>
+                            <td>
+                                <t t-if="orderline.note">
+                                    <t t-esc="orderline.note"/>
+                                </t>
+                            </td>
+                            <td class="pos-right-align">
+                                <t t-esc="orderline.quantity"/>
+                                <t t-set='total' t-value='total + orderline.quantity'/>
+                            </td>
+                            <td class="pos-right-align">
+                                <!-- <button>Cooked</button> -->
+                                <ul class="wizard pull-right">
+                                    <li t-attf-class="button_draft #{ orderline.order_line_status == 0 ? 'text-primary' : 'text-muted' }">
+                                        Pendiente
+                                        <span class="chevron"></span>
+                                    </li>
+                                    <li t-attf-class="button_cooked #{ orderline.order_line_status == 1 ? 'text-primary' : 'text-muted' }"
+                                        t-att-data-uid="data.uid" t-att-data-orderline_id="wv_line_id"
+                                        t-att-data-id="wvid">Preparando
+                                        <span class="chevron"></span>
+                                    </li>
+                                    <li t-attf-class="button_delivered #{ orderline.order_line_status == 2 ? 'text-primary' : 'text-muted' }"
+                                        t-att-data-uid="data.uid" t-att-data-orderline_id="wv_line_id"
+                                        t-att-data-id="wvid">Listo
+                                        <span class="chevron"></span>
+                                    </li>
+                                </ul>
+                            </td>
+                            <t t-set='wv_line_id' t-value='wv_line_id + 1'/>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="pos-right-align">-----</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="pos-right-align">Total Qty:
+                                <t t-esc='total'/>
+                            </td>
+                            <td class="pos-right-align">
+                                <button class="wv_print" t-att-data-id="wvid">Print</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </t>
+
+    <t t-extend="Orderline">
+        <t t-jquery=".info-list" t-operation="append">
+            <!--<t t-if="line.wvget_note()">-->
+            <!--<li class="info orderline-note">-->
+            <!--<i class='fa fa-tag'/><t t-esc="line.wvget_note()" />-->
+            <!--</li>-->
+            <!--</t>-->
+            <ul class="order_line_wizard">
+                <li t-attf-class="button_draft #{ line.order_line_status == 0 ? 'text-primary' : 'text-muted' }">
+                    Pendiente
+                    <span class="chevron"></span>
+                </li>
+                <li t-attf-class="button_cooked #{ line.order_line_status == 1 ? 'text-primary' : 'text-muted' }">
+                    Preparando
+                    <span class="chevron"></span>
+                </li>
+                <li t-attf-class="button_delivered #{ line.order_line_status == 2 ? 'text-primary' : 'text-muted' }">
+                    Listo
+                    <span class="chevron"></span>
+                </li>
+            </ul>
+        </t>
+    </t>
+
+    <t t-name="XmlKitchenReceipt">
+        <receipt align='center' width='40' value-thousands-separator=''>
+            <div font='b'>
+                <t t-if='data.name'>
+                    <div>
+                        <t t-esc='data.name'/>
+                    </div>
+                </t>
+                <t t-set='partner' t-value='widget.get_partner_by_id(data.partner_id)'/>
+                <t t-if="partner">
+                    <t t-if='partner.name'>
+                        <div>Name:
+                            <t t-esc="partner.name"/>
+                        </div>
+                    </t>
+                    <t t-if='partner.phone'>
+                        <div>Phone :
+                            <t t-esc="partner.phone"/>
+                        </div>
+                    </t>
+                </t>
+                <t t-if='data.floor_name'>
+                    <div>Floor:
+                        <t t-esc='data.floor_name'/>
+                    </div>
+                </t>
+                <t t-if='data.table_name'>
+                    <div>Table:
+                        <t t-esc='data.table_name'/>
+                    </div>
+                </t>
+            </div>
+            <br/>
+            <br/>
+
+            <!-- Orderlines -->
+
+            <div class='orderlines' line-ratio='0.6'>
+                <t t-set='total' t-value='0'/>
+                <t t-foreach='data.lines' t-as='orderline'>
+                    <t t-set='total' t-value='total + orderline[2].qty'/>
+                    <line>
+                        <left>
+                            <t t-esc="widget.get_product_by_id(orderline[2].product_id)"/>
+                        </left>
+                        <right>
+                            <t t-esc="orderline[2].qty"/>
+                        </right>
+                    </line>
+                </t>
+            </div>
+            <line>
+                <left>Total Qty</left>
+                <right>
+                    <t t-esc='total'/>
+                </right>
+            </line>
+        </receipt>
+    </t>
+
+
+    <t t-name="WVOrderPriorityeButton">
+        <div class='control-button'>
+            <i class="fa fa-flag" aria-hidden="true"></i>
+            Prioridad
+        </div>
+    </t>
+
+    <t t-extend="OrderSelectorWidget">
+        <t t-jquery=".order-selector" t-operation="replace">
+            <div class="order-selector">
+                <t t-if='widget.pos.config.pos_kitchen_view'>
+                    <div class="kitchen_room">
+                        PEDIDOS
+                    </div>
+                </t>
+                <t t-if="! widget.pos.config.pos_kitchen_view">
+                    <div class="order-selector">
+                        <span class="orders touch-scrollable">
+                            <t t-foreach="widget.pos.get_order_list()" t-as="order">
+                                <t t-if='order === widget.pos.get_order()'>
+                                    <span class="order-button select-order selected" t-att-data-uid="order.uid">
+                                        <span class='order-sequence'>
+                                            <t t-esc='order.sequence_number'/>
+                                            <span t-if="order.session_short_name" style="font-size: 9px;">
+                                                <t t-esc="order.session_short_name"/>
+                                            </span>
+                                        </span>
+                                        <t t-esc="moment(order.creation_date).format('hh:mm')"/>
+                                    </span>
+                                </t>
+                                <t t-if='order !== widget.pos.get_order()'>
+                                    <span class="order-button select-order" t-att-data-uid="order.uid">
+                                        <span class='order-sequence'>
+                                            <t t-esc='order.sequence_number'/>
+                                            <span t-if="order.session_short_name" style="font-size: 9px;">
+                                                <t t-esc="order.session_short_name"/>
+                                            </span>
+                                        </span>
+                                    </span>
+                                </t>
+                            </t>
+                        </span>
+                        <span class="order-button square neworder-button">
+                            <i class='fa fa-plus'/>
+                        </span>
+                        <span class="order-button square deleteorder-button">
+                            <i class='fa fa-minus'/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </t>
+</templates>

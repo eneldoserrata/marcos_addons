@@ -36,10 +36,15 @@
     'name': "Advanced payment",
 
     'summary': """
-        This module allows you to add functionality to apply partial payments on invoices and manual accounting entries from the form of payments""",
+        Este módulo permite aplicar pago de múltiples formas extendiendo la funcionalidad nativa de Odoo.
+        """,
 
     'description': """
-        Long description of module's purpose
+        1-Multi moneda con diferencia cambiaria.
+        2-Descuentos a pronto pago.
+        3-Abono Facturas
+        4-Pago multiple de facturas.
+        5-Varias formas de pagos.
     """,
 
     'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
@@ -49,7 +54,7 @@
     # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
     # for the full list
     'category': 'Accounting & Finance',
-    'version': '0.2',
+    'version': '10.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account', 'report'],

@@ -28,5 +28,7 @@
         # 'security/ir.model.access.csv',
         'views/bank_view.xml'
     ],
+    "price": 100,
+
     # only loaded in demonstration mode
 }

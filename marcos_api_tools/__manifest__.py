@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "marcos_api_tools",
+    'name': "Marcos API",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Integracion para evaluación de NCF, RNC y consultas de tasas de cambio en Bancos Dominicanos.
+        """,
 
     'description': """
-        Long description of module's purpose
+        Marcos ofrese una Api (http://api.marcos.do/) de forma gratuita que permite validacion de con la DGII de NCF y RNC ademas de consultas de tasas de cmabio en los banco Dominicanos incluyendo Las tasas publicadas por el Banco Central.
     """,
 
-    'author': "My Company",
-    'website': "http://www.yourcompany.com",
+    'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
+    'website': "http://marcos.do",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Localization',
+    'version': '10.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base'],
@@ -33,4 +30,7 @@
     'demo': [
         'demo/demo.xml',
     ],
+    'price': 20,
+    'currency': 'EUR',
+    'license': 'Other proprietary'
 }

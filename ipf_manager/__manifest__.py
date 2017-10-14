@@ -48,7 +48,7 @@
     'author': "Marcos Organizador de Negocios SRL - Write by Eneldo Serrata",
     'website': "http://marcos.do",
     'category': 'Uncategorized',
-    'version': '9.0',
+    'version': '10.0',
     'depends': ['base', 'web', 'account','point_of_sale','marcos_api_tools'],
 
     # always loaded
@@ -66,5 +66,6 @@
     'demo': [
         'demo/demo.xml',
     ],
-    'license': "Other proprietary"
+    'license': "Other proprietary",
+    "price": 50,
 }
