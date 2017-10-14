@@ -43,4 +43,5 @@
         'static/src/xml/ncf_pos.xml',
         'static/src/xml/pos.xml',
     ],
+    'installable': False
 }
