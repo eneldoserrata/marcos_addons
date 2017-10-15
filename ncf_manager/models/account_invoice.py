@@ -234,7 +234,11 @@ class AccountInvoice(models.Model):
             elif rec.type in (
                     "in_invoice", "in_refund") and rec.journal_id.purchase_type == "normal" and not rec.partner_id.vat:
                 msg = u"El proveedor no tiene RNC y es requerido para este tipo de compra."
-
+            elif rec.type in (
+                    "in_invoice", "in_refund") and rec.journal_id.purchase_type == "normal" and rec.partner_id.vat:
+                ncf_validation_result = self.env["marcos.api.tools"].invoice_ncf_validation(self)
+                if ncf_validation_result != True:
+                    msg = ncf_validation_result[2]
             if msg:
                 raise exceptions.ValidationError(msg)
 
