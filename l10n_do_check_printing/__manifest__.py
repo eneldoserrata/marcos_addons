@@ -59,5 +59,6 @@
     'installable': True,
     'auto_install': False,
     'license': "Other proprietary",
-    "price": 100,
+    'currency': 'EUR',
+    "price": 100
 }

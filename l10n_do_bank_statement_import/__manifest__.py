@@ -21,13 +21,14 @@
     'version': '1,0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account_bank_statement_import'],
+    'depends': ['base', 'account_bank_statement_import'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/bank_view.xml'
     ],
+    'currency': 'EUR',
     "price": 100,
 
     # only loaded in demonstration mode
