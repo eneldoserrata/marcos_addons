@@ -51,7 +51,7 @@
     'version': '10.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'marcos_api_tools', 'l10n_do', 'sale'],
+    'depends': ['base', 'account','account_accountant','marcos_api_tools', 'l10n_do', 'sale'],
 
     # always loaded
     'data': [
