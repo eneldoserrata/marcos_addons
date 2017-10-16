@@ -68,4 +68,5 @@
     ],
     'license': "Other proprietary",
     "price": 50,
+    'currency': 'USD'
 }

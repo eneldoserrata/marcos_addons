@@ -68,7 +68,7 @@
         # 'demo.xml',
     ],
     "price": 200,
-    'currency': 'EUR',
+    'currency': 'USD',
     'license': "Other proprietary",
     'installable': False
 }

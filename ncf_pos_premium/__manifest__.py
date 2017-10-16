@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 {
     'name': "NCF POS Premium",
 
@@ -60,6 +61,6 @@
     "auto_install": False,
     "installable": True,
     'price': 2000,
-    'currency': 'EUR',
+    'currency': 'USD',
     'license': 'Other proprietary'
 }
