@@ -31,6 +31,6 @@
         'demo/demo.xml',
     ],
     'price': 20,
-    'currency': 'USD',
+    'currency': 'EUR',
     'license': 'Other proprietary'
 }

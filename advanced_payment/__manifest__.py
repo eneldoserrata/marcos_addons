@@ -72,6 +72,6 @@
     # only loaded in demonstration mode
     'images': ['static/description/main.png'],
     "price": 500,
-    'currency': 'USD',
+    'currency': 'EUR',
     'license': "Other proprietary"
 }

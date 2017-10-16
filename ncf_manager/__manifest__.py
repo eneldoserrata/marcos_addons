@@ -74,6 +74,6 @@
     'demo': [],
     'images': 'static/description/main.png',
     'price': 2000,
-    'currency': 'USD',
+    'currency': 'EUR',
     'license': 'Other proprietary'
 }

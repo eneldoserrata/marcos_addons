@@ -52,7 +52,7 @@
     # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
     # for the full list
     'category': 'Localization',
-    'version': '9.0',
+    'version': '10.0',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'account'],
@@ -68,7 +68,7 @@
         # 'demo.xml',
     ],
     "price": 200,
-    'currency': 'USD',
+    'currency': 'EUR',
     'license': "Other proprietary",
     'installable': False
 }

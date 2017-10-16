@@ -61,6 +61,6 @@
     "auto_install": False,
     "installable": True,
     'price': 2000,
-    'currency': 'USD',
+    'currency': 'EUR',
     'license': 'Other proprietary'
 }
