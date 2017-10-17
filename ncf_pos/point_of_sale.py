@@ -605,6 +605,7 @@ class PosOrder(models.Model):
                     res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA CON VALOR FISCAL"})
                 elif fiscal_code == "02":
                     res.update({"fiscal_type": "final", "fiscal_type_name": "FACTURA PARA CONSUMIDOR FINAL"})
+
                 if fiscal_code == "14":
                     res.update({"fiscal_type": "fiscal", "fiscal_type_name": "FACTURA GUBERNAMENTAL"})
                 elif fiscal_code == "15":
