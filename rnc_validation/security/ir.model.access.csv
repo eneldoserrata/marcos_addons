@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rnc_validation_rnc_validation,rnc_validation.rnc_validation,model_rnc_validation_rnc_validation,,1,0,0,0
