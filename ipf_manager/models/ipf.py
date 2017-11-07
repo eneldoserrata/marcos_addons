@@ -127,10 +127,6 @@ class ipf_printer_config(models.Model):
 
         return True
 
-    def ncf_fiscal_position_exception(self, partner_name):
-        raise exceptions.UserError(
-            u"El tipo de comprobante no corresponde a la posicion fical del cliente '%s'!" % (partner_name))
-
     @api.model
     def get_user_printer(self):
         return self.search([("user_ids", "=", self.env.uid)])

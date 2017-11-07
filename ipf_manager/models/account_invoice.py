@@ -44,6 +44,10 @@ class AccountInvoice(models.Model):
 
     fiscal_nif = fields.Char("NIF", default="false", copy=False)
 
+    def ncf_fiscal_position_exception(self, partner_name):
+        raise exceptions.UserError(
+            u"El tipo de comprobante no corresponde a la posicion fical del cliente '%s'!" % (partner_name))
+
     def get_ipf_dict(self):
         if self.amount_total == 0:
             raise exceptions.UserError("No se puede imprimir en la impresora fiscal una factura valor 0.")
