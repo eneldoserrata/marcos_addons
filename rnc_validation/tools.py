@@ -496,11 +496,7 @@ excepcionesRNC = ['501478442', '501463232', '501479252', '501832602', '501477322
 
 
 def is_identification(value):
-    """
-    Valida las identificaciones fiscales de la República Dominicana
-    Cédula de identidad personal y Registro nacional del contribuyente
-    :param value: recibe una cédula o RNC
-    """
+  
     if not value:
         return False
     if len(value) > 0:
@@ -525,29 +521,7 @@ def is_identification(value):
 
 
 def is_ncf(value, type):
-    u"""
-    Valida estructura del Número de Comprobante Ficasl (NCF)
-    para República Dominicana.
-
-    Caracter 1: Serie
-        Valores Permitidos: A o P
-    Caracter 2-3: División de Negocios
-        Valores Permitidos: 1 al 99
-    Caracter 4-6: Punto de Emisión
-        Valores Permitidos: 1 al 999
-    Caracter 7-9: Area de Impresión
-        Valores Permitidos: 1 al 999
-    Caracter 10-11: Tipo de Comprobante
-        Valores Permitidos: 01, 02, 03, 04, 11, 12, 13, 14, 15
-    Caracter 12-19: Secuendial
-        Valores Permitidos: 1 al 99,999,999 (sin comas)
-
-    Tamaño: 19 Caracteres
-
-    :param value: string con NCF
-
-    :returns: True cuando tiene exito, False cuando falla.
-    """
+    
     if not value:
         return False
 
