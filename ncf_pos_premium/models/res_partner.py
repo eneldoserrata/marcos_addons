@@ -74,7 +74,7 @@ class ResPartner(models.Model):
         if order_id:
             sale_order = self.env['sale.order'].browse([order_id])
             if sale_order:
-                super(sale_credit_limit, sale_order).action_confirm()
+                return sale_order.action_confirm()
 
     @api.multi
     def update_pos_cache(self, partner_ids):
