@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, api
+from odoo import models, api, _
 
 
 class SaleOrder(models.Model):
