@@ -23,7 +23,7 @@ class product_template(models.Model):
 
         for product in self:
             products = self.env['product.product'].search([('product_tmpl_id', '=', product.id)])
-            products.update_pos_cache(products.ids)
+            products.pos_cache_update(products.ids)
             for p in products:
                 if p and p.sale_ok and p.available_in_pos:
                     product_datas = p.sudo().read(product_fields_load)[0]
@@ -43,14 +43,14 @@ class product_product(models.Model):
     _inherit = 'product.product'
 
     @api.multi
-    @job
-    def update_pos_cache(self, product_ids):
-        if not self._context.get("job_uuid", False):
-            pos_cache = self.env["pos.auto.cache"]
-            use_redis, redis_db_pos = pos_cache.get_config()
-            if use_redis:
-                pos_cache.with_delay(channel="root.poscache")._auto_cache_data("product_product", product_ids,
-                                                                           sigle_cache=True)
+    def pos_cache_update(self, product_ids):
+        if product_ids:
+            if not self._context.get("job_uuid", False):
+                pos_cache = self.env["pos.auto.cache"]
+                use_redis, redis_db_pos = pos_cache.get_config()
+                if use_redis:
+                    pos_cache.with_delay(description="update product cache", channel="root.poscache")._auto_cache_data("product_product", product_ids,
+                                                                               sigle_cache=True)
 
     @api.multi
     def remove_from_cache(self):
@@ -82,5 +82,5 @@ class product_product(models.Model):
                 pos_configs = self.env["pos.config"].search([('multi_session_id','!=',False)])
                 if pos_configs and notifications:
                     pos_configs._send_to_channel("pos.sync.backend", notifications)
-            self.update_pos_cache(product.ids)
+            self.pos_cache_update(product.ids)
         return product
