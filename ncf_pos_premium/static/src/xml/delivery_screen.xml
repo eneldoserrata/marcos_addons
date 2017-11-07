@@ -123,29 +123,29 @@
         </div>
     </t>
 
-    <t t-extend="Orderline">
-        <t t-jquery=".info-list" t-operation="append">
+    <!--<t t-extend="Orderline">-->
+        <!--<t t-jquery=".info-list" t-operation="append">-->
             <!--<t t-if="line.wvget_note()">-->
             <!--<li class="info orderline-note">-->
             <!--<i class='fa fa-tag'/><t t-esc="line.wvget_note()" />-->
             <!--</li>-->
             <!--</t>-->
-            <ul class="order_line_wizard">
-                <li t-attf-class="button_draft #{ line.order_line_status == 0 ? 'text-primary' : 'text-muted' }">
-                    Pendiente
-                    <span class="chevron"></span>
-                </li>
-                <li t-attf-class="button_cooked #{ line.order_line_status == 1 ? 'text-primary' : 'text-muted' }">
-                    Preparando
-                    <span class="chevron"></span>
-                </li>
-                <li t-attf-class="button_delivered #{ line.order_line_status == 2 ? 'text-primary' : 'text-muted' }">
-                    Listo
-                    <span class="chevron"></span>
-                </li>
-            </ul>
-        </t>
-    </t>
+            <!--<ul class="order_line_wizard">-->
+                <!--<li t-attf-class="button_draft #{ line.order_line_status == 0 ? 'text-primary' : 'text-muted' }">-->
+                    <!--Pendiente-->
+                    <!--<span class="chevron"></span>-->
+                <!--</li>-->
+                <!--<li t-attf-class="button_cooked #{ line.order_line_status == 1 ? 'text-primary' : 'text-muted' }">-->
+                    <!--Preparando-->
+                    <!--<span class="chevron"></span>-->
+                <!--</li>-->
+                <!--<li t-attf-class="button_delivered #{ line.order_line_status == 2 ? 'text-primary' : 'text-muted' }">-->
+                    <!--Listo-->
+                    <!--<span class="chevron"></span>-->
+                <!--</li>-->
+            <!--</ul>-->
+        <!--</t>-->
+    <!--</t>-->
 
     <t t-name="XmlKitchenReceipt">
         <receipt align='center' width='40' value-thousands-separator=''>
