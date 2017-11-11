@@ -265,26 +265,24 @@ class DgiiReport(models.Model):
                 FECHA_PAGO = False
 
             if invoice_id.state != "cancel" and (
-                        invoice_id.journal_id.ncf_remote_validation or invoice_id.journal_id.ncf_control):
+                    invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in ['normal',
+                                                                                                         'minor',
+                                                                                                         'informal']) or (
+                    invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal', 'gov',
+                                                                                             'special']):
 
                 if invoice_id.type in ("out_invoice", "out_refund", "in_invoice", "in_refund"):
 
                     if not api_marcos.is_identification(invoice_id.partner_id.vat):
 
-                        if (invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in [
-                            'normal', 'minor', 'informal']) or (
-                                invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal',
-                                                                                                         'gov',
-                                                                                                         'special']):
+                        error_msg = u"RNC/Cédula no es valido"
 
-                            error_msg = u"RNC/Cédula no es valido"
+                        if not error_list.get(invoice_id.id, False):
+                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
+                        else:
+                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
 
-                            if not error_list.get(invoice_id.id, False):
-                                error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                            else:
-                                error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-
-                            continue
+                        continue
 
                     if not api_marcos.is_ncf(invoice_id.number, invoice_id.type):
 
@@ -315,9 +313,8 @@ class DgiiReport(models.Model):
 
                         if not NUMERO_COMPROBANTE_MODIFICADO_ID:
 
-                            INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search([('number','=',invoice_id.origin)])
-
-
+                            INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search(
+                                [('number', '=', invoice_id.origin)])
 
                             if INV_NUMERO_COMPROBANTE_MODIFICADO_ID:
                                 # agrega compatibilidad con la versiones anteriores donde la factura que afecta solo se grababa como un char en el campo origin
@@ -328,7 +325,8 @@ class DgiiReport(models.Model):
 
                                 error_msg = u"Falta el comprobante que afecta"
                                 if not error_list.get(invoice_id.id, False):
-                                    error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
+                                    error_list.update(
+                                        {invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
                                 else:
                                     error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
                         elif len(NUMERO_COMPROBANTE_MODIFICADO_ID) > 1:
