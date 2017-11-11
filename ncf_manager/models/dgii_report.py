@@ -101,8 +101,8 @@ class DgiiReport(models.Model):
                     rec.SALE_ITBIS_TOTAL += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_FACTURADO += sale.MONTO_FACTURADO
 
-            rec.SALE_ITBIS_CHARGED = rec.SALE_ITBIS_TOTAL-rec.SALE_ITBIS_NC
-            rec.SALE_TOTAL_MONTO_CHARGED = rec.SALE_TOTAL_MONTO_FACTURADO-rec.SALE_TOTAL_MONTO_NC
+            rec.SALE_ITBIS_CHARGED = rec.SALE_ITBIS_TOTAL - rec.SALE_ITBIS_NC
+            rec.SALE_TOTAL_MONTO_CHARGED = rec.SALE_TOTAL_MONTO_FACTURADO - rec.SALE_TOTAL_MONTO_NC
 
     @api.multi
     @api.depends("purchase_report", "sale_report")
@@ -196,7 +196,8 @@ class DgiiReport(models.Model):
         cancel_line = 1
         ext_line = 1
 
-        invoice_ids = self.env["account.invoice"].search([('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date)])
+        invoice_ids = self.env["account.invoice"].search(
+            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date)])
 
         draft_invoice_ids_set = invoice_ids.filtered(lambda x: x.state == "draft")
         invoice_ids_set = invoice_ids.filtered(lambda x: x.state in ('open', 'paid', 'cancel'))
@@ -208,7 +209,8 @@ class DgiiReport(models.Model):
         for draft_invoice_id_set in draft_invoice_ids_set:
             if not error_list.get(draft_invoice_id_set.id, False):
                 error_list.update(
-                    {draft_invoice_id_set.id: [(draft_invoice_id_set.type, draft_invoice_id_set.number, "Factura sin validar")]})
+                    {draft_invoice_id_set.id: [
+                        (draft_invoice_id_set.type, draft_invoice_id_set.number, "Factura sin validar")]})
             else:
                 error_list[draft_invoice_id_set.id].append(
                     (draft_invoice_id_set.type, draft_invoice_id_set.number, "Factura sin validar"))
@@ -262,23 +264,36 @@ class DgiiReport(models.Model):
             else:
                 FECHA_PAGO = False
 
-            if invoice_id.state != "cancel" and (invoice_id.journal_id.ncf_remote_validation or invoice_id.journal_id.ncf_control):
+            if invoice_id.state != "cancel" and (
+                        invoice_id.journal_id.ncf_remote_validation or invoice_id.journal_id.ncf_control):
 
                 if invoice_id.type in ("out_invoice", "out_refund", "in_invoice", "in_refund"):
 
-                    if not api_marcos.is_identification(invoice_id.partner_id.vat) and invoice_id.partner_id.sale_fiscal_type in ("fiscal", "gov", "special"):
-                        error_msg = u"RNC/Cédula no es valido"
-                        if not error_list.get(invoice_id.id, False):
-                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                        else:
-                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
+                    if not api_marcos.is_identification(invoice_id.partner_id.vat):
 
-                        if not api_marcos.is_ncf(invoice_id.number, invoice_id.type):
-                            error_msg = u"NCF no es valido"
+                        if (invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in [
+                            'normal', 'minor', 'informal']) or (
+                                invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal',
+                                                                                                         'gov',
+                                                                                                         'special']):
+
+                            error_msg = u"RNC/Cédula no es valido"
+
                             if not error_list.get(invoice_id.id, False):
                                 error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
                             else:
                                 error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
+
+                            continue
+
+                    if not api_marcos.is_ncf(invoice_id.number, invoice_id.type):
+
+                        error_msg = u"NCF no es valido"
+
+                        if not error_list.get(invoice_id.id, False):
+                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
+                        else:
+                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
 
                         continue
 
@@ -295,14 +310,27 @@ class DgiiReport(models.Model):
                                 error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
 
                     if invoice_id.type in ("out_refund", "in_refund"):
-                        NUMERO_COMPROBANTE_MODIFICADO_ID = invoice_id.origin_invoice_ids.filtered(lambda x: x.state in ("open","paid"))
+                        NUMERO_COMPROBANTE_MODIFICADO_ID = invoice_id.origin_invoice_ids.filtered(
+                            lambda x: x.state in ("open", "paid"))
 
                         if not NUMERO_COMPROBANTE_MODIFICADO_ID:
-                            error_msg = u"Falta el comprobante que afecta"
-                            if not error_list.get(invoice_id.id, False):
-                                error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
+
+                            INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search([('number','=',invoice_id.origin)])
+
+
+
+                            if INV_NUMERO_COMPROBANTE_MODIFICADO_ID:
+                                # agrega compatibilidad con la versiones anteriores donde la factura que afecta solo se grababa como un char en el campo origin
+                                # esto resuelve cuando se ha efecturado una migracion de una version anteior
+                                NUMERO_COMPROBANTE_MODIFICADO = INV_NUMERO_COMPROBANTE_MODIFICADO_ID[0].number
+                                affected_nvoice_id = INV_NUMERO_COMPROBANTE_MODIFICADO_ID[0].id
                             else:
-                                error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
+
+                                error_msg = u"Falta el comprobante que afecta"
+                                if not error_list.get(invoice_id.id, False):
+                                    error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
+                                else:
+                                    error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
                         elif len(NUMERO_COMPROBANTE_MODIFICADO_ID) > 1:
                             error_msg = u"Nota de crédito no puede afectar dos facturas"
                             if not error_list.get(invoice_id.id, False):
@@ -313,8 +341,6 @@ class DgiiReport(models.Model):
                         else:
                             NUMERO_COMPROBANTE_MODIFICADO = NUMERO_COMPROBANTE_MODIFICADO_ID.number
                             affected_nvoice_id = NUMERO_COMPROBANTE_MODIFICADO_ID.id
-
-
 
                     if not invoice_id.number:
                         error_msg = u"Factura validada con error"
@@ -672,7 +698,7 @@ class DgiiReport(models.Model):
         purchase_file.close()
         purchase_file = open(pruchase_path, 'rb')
         purchase_binary = base64.b64encode(purchase_file.read())
-        purchase_filename = 'DGII_606_{}_{}{}.TXT'.format(company_fiscal_identificacion, str(year),str(month).zfill(2))
+        purchase_filename = 'DGII_606_{}_{}{}.TXT'.format(company_fiscal_identificacion, str(year), str(month).zfill(2))
         self.write({'purchase_binary': purchase_binary, 'purchase_filename': purchase_filename})
 
         path = '/tmp/608{}.txt'.format(company_fiscal_identificacion)
@@ -698,7 +724,7 @@ class DgiiReport(models.Model):
         file.close()
         file = open(path, 'rb')
         report = base64.b64encode(file.read())
-        report_name = 'DGII_608_{}_{}{}.TXT'.format(company_fiscal_identificacion,str(year),str(month).zfill(2))
+        report_name = 'DGII_608_{}_{}{}.TXT'.format(company_fiscal_identificacion, str(year), str(month).zfill(2))
         self.write({'cancel_binary': report, 'cancel_filename': report_name})
 
 
