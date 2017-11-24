@@ -973,6 +973,35 @@ odoo.define('ncf_pos_premium.models', function (require) {
             _super_order.printChanges.apply(this, arguments);
             this.just_printed = true;
         },
+        generate_unique_id: function () {
+            // Generates a public identification number for the order.
+            // The generated number must be unique and sequential. They are made 12 digit long
+            // to fit into EAN-13 barcodes, should it be needed
+
+            function makeid() {
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                for (var i = 0; i < 5; i++)
+                    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+                return text;
+            }
+
+            function zero_pad(num, size) {
+                var s = "" + num;
+                while (s.length < size) {
+                    s = "0" + s;
+                }
+                return s;
+            }
+
+            var uid = zero_pad(this.pos.pos_session.id, 5) + '-' +
+                zero_pad(this.pos.pos_session.login_number, 3) + '-' +
+                zero_pad(this.sequence_number, 4) + '-' + makeid();
+
+            return uid
+        },
     });
 
     var _super_order_line = models.Orderline.prototype;
