@@ -189,6 +189,7 @@ def is_ncf(value, type):
     if not value:
         return False
 
+    value = value.strip()
     if len(value) == 19:
         try:
             if type in ("in_refund", "out_refund") and value[0] in ('A', 'P') and int(value[1:3]) and int(

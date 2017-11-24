@@ -211,20 +211,26 @@ class AccountInvoice(models.Model):
         if self.type in ('out_invoice', 'out_refund'):
             self.journal_id = self.shop_id.journal_id.id
 
-    @api.one
-    @api.constrains("move_name")
-    def constrains_move_name(self):
-        if self.type in ("in_invoice", "in_refund") and not self.state == "draft":
+    def validate_ncf(self):
+        if self.type in ("in_invoice", "in_refund") and self.move_name is not False:
             res = self.env["marcos.api.tools"].invoice_ncf_validation(self)
-            if not res == True:
+            if res is not True:
                 _logger.warning(res)
                 raise exceptions.ValidationError(res[2])
 
+    @api.onchange("move_name")
+    def onchange_ncf(self):
+        self.validate_ncf()
+
     @api.multi
     def action_invoice_open(self):
+
         msg = False
         self._compute_amount()
         for rec in self:
+
+            self.validate_ncf()
+
             if not rec.partner_id.sale_fiscal_type:
                 rec.sale_fiscal_type = "final"
             if rec.type in ("out_invoice",

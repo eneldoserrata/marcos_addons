@@ -285,7 +285,6 @@ class DgiiReport(models.Model):
                         continue
 
                     if not api_marcos.is_ncf(invoice_id.number, invoice_id.type):
-
                         error_msg = u"NCF no es valido"
 
                         if not error_list.get(invoice_id.id, False):
@@ -499,7 +498,7 @@ class DgiiReport(models.Model):
                 commun_data.update({"LINE": sale_line})
                 sale_report.append(commun_data)
                 sale_line += 1
-            elif invoice_id.type in ("out_invoice", "out_refund") and invoice_id.state == "cancel":
+            elif invoice_id.type in ("out_invoice", "out_refund") and invoice_id.state == "cancel" and invoice_id.move_name:
                 commun_data.update({"LINE": cancel_line, "TIPO_ANULACION": invoice_id.anulation_type,
                                     "NUMERO_COMPROBANTE_FISCAL": invoice_id.move_name})
                 cancel_report.append(commun_data)
