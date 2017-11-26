@@ -762,12 +762,6 @@ class DgiiReportPurchaseLine(models.Model):
 class DgiiReportSaleLine(models.Model):
     _name = "dgii.report.sale.line"
 
-    @api.depends("invoice_id")
-    @api.one
-    def get_aux_diff(self):
-        self.invoice_id_amount_diff = self.MONTO_FACTURADO - self.invoice_id_amount
-        self.invoice_id_tax_diff = self.ITBIS_FACTURADO - self.invoice_id_tax
-
     dgii_report_id = fields.Many2one("dgii.report")
     LINE = fields.Integer("Linea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)
@@ -783,12 +777,6 @@ class DgiiReportSaleLine(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency', related="invoice_id.currency_id",
                                   required=True, readonly=True, states={'draft': [('readonly', False)]},
                                   track_visibility='always')
-
-    invoice_id_amount = fields.Monetary(related="invoice_id.amount_untaxed")
-    invoice_id_tax = fields.Monetary(related="invoice_id.amount_tax")
-
-    invoice_id_amount_diff = fields.Float(compute="get_aux_diff")
-    invoice_id_tax_diff = fields.Float(compute="get_aux_diff")
 
     number = fields.Char(related="invoice_id.number", string=" NCF")
     inv_partner = fields.Many2one("res.partner", related="invoice_id.partner_id", string="Relacionado")
