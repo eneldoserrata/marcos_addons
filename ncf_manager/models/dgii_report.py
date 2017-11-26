@@ -94,7 +94,7 @@ class DgiiReport(models.Model):
             rec.SALE_TOTAL_MONTO_CHARGED = 0
 
             for sale in rec.sale_report:
-                if sale.NUMERO_COMPROBANTE_MODIFICADO:
+                if sale.NUMERO_COMPROBANTE_FISCAL[9:-8] == "04":
                     rec.SALE_ITBIS_NC += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_NC += sale.MONTO_FACTURADO
                 else:
@@ -389,11 +389,12 @@ class DgiiReport(models.Model):
                         [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', line.product_id.id),
                          ("id", "in", list(move_line_not_repeat))])
 
-                if move_line_ids.ids[0] in move_line_not_repeat:
-                    move_line_ids = move_line_ids[0]
-                    move_line_not_repeat.remove(move_line_ids[0].id)
-                else:
-                    continue
+                if len(move_line_not_repeat) > 0 and move_line_ids:
+                    if move_line_ids.ids[0] in move_line_not_repeat:
+                        move_line_ids = move_line_ids[0]
+                        move_line_not_repeat.remove(move_line_ids[0].id)
+                    else:
+                        continue
 
                 debit = abs(sum([line.debit for line in move_line_ids]))
                 credit = abs(sum([line.credit for line in move_line_ids]))
@@ -645,7 +646,6 @@ class DgiiReport(models.Model):
             ln += sale_line.NUMERO_COMPROBANTE_FISCAL.rjust(19)
             ln += sale_line.NUMERO_COMPROBANTE_MODIFICADO or "".rjust(19)
             ln += sale_line.FECHA_COMPROBANTE.replace("-", "")
-            ln += sale_line.FECHA_PAGO.replace("-", "") if sale_line.FECHA_PAGO else "".rjust(8)
             ln += "{:.2f}".format(sale_line.ITBIS_FACTURADO).zfill(12)
             ln += "{:.2f}".format(sale_line.MONTO_FACTURADO).zfill(12)
             lines.append(ln)
