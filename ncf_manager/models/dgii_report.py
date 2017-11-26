@@ -68,7 +68,7 @@ class DgiiReport(models.Model):
             rec.RETENCION_RENTA = 0
 
             for purchase in rec.purchase_report:
-                if purchase.NUMERO_COMPROBANTE_MODIFICADO != False:
+                if purchase.NUMERO_COMPROBANTE_FISCAL[9:-8] == "04":
                     rec.ITBIS_TOTAL_NC += purchase.ITBIS_FACTURADO
                     rec.TOTAL_MONTO_NC += purchase.MONTO_FACTURADO
                     rec.RETENCION_RENTA -= purchase.RETENCION_RENTA

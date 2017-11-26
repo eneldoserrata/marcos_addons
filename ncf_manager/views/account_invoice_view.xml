@@ -211,8 +211,8 @@
             <field name="inherit_id" ref="account.invoice_supplier_tree"/>
             <field name="arch" type="xml">
                 <field name="residual_signed" position="after">
-                    <field name="amount_untaxed_signed" string="Subtotal" invisible="1"/>
-                    <field name="tax_company_amount_total_signed" string="Impuesto" invisible="1"/>
+                    <field name="amount_untaxed_signed" string="Subtotal Moneda Compañia" invisible="1" sum="Subtotal en la moneda de la empresa"/>
+                    <field name="tax_company_amount_total_signed" invisible="1" sum="Inpuesto en la moneda de la empresa"/>
                 </field>
             </field>
         </record>

@@ -175,7 +175,7 @@ class AccountInvoice(models.Model):
 
 
     is_nd = fields.Boolean()
-    tax_company_amount_total_signed = fields.Monetary(u"Impuesto en Moneda Compañia", compute=_compute_amount)
+    tax_company_amount_total_signed = fields.Monetary(u"Impuesto Moneda Compañia", compute=_compute_amount)
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
