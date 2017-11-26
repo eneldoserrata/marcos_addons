@@ -197,8 +197,7 @@ class DgiiReport(models.Model):
         ext_line = 1
 
         invoice_ids = self.env["account.invoice"].search(
-            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date),
-             ('number', '=', 'A010010010100169250')])
+            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date)])
 
         draft_invoice_ids_set = invoice_ids.filtered(lambda x: x.state == "draft")
         invoice_ids_set = invoice_ids.filtered(lambda x: x.state in ('open', 'paid', 'cancel'))
