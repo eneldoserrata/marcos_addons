@@ -204,5 +204,18 @@
             </field>
         </record>
 
+
+        <record id="ncf_manager_invoice_supplier_tree" model="ir.ui.view">
+            <field name="name">ncf_manager account.invoice.supplier.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_tree"/>
+            <field name="arch" type="xml">
+                <field name="residual_signed" position="after">
+                    <field name="amount_untaxed_signed" string="Subtotal" invisible="1"/>
+                    <field name="tax_company_amount_total_signed" string="Impuesto" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
     </data>
 </odoo>

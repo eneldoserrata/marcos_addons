@@ -57,6 +57,13 @@ class AccountInvoice(models.Model):
                 line.amount for line in self.tax_line_ids if not line.tax_id.purchase_tax_type in ("isr", "ritbis"))
             self.amount_total = self.amount_untaxed + self.amount_tax
 
+        if self.amount_untaxed and self.amount_untaxed:
+            if self.currency_id:
+                self.tax_company_amount_total_signed = round((self.amount_untaxed_signed/self.amount_untaxed)*self.amount_tax, 2)
+            else:
+                self.tax_company_amount_total_signed = self.amount_tax
+
+
     @api.model_cr_context
     def _auto_init(self):
         self._sql_constraints = [
@@ -165,7 +172,10 @@ class AccountInvoice(models.Model):
                                       ("import", u"IMPORTACIONES NO REQUIRE NCF"),
                                       ("others", u"OTROS NO REQUIRE NCF")],
                                      string=u"Tipo de compra", default="normal", related="journal_id.purchase_type")
+
+
     is_nd = fields.Boolean()
+    tax_company_amount_total_signed = fields.Monetary(u"Impuesto en Moneda Compañia", compute=_compute_amount)
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
