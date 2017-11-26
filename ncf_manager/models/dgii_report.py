@@ -313,10 +313,6 @@ class DgiiReport(models.Model):
 
                         if not NUMERO_COMPROBANTE_MODIFICADO_ID:
 
-                            if invoice_id.number == 'A010010010400029861':
-                                import pdb;
-                                pdb.set_trace()
-
                             INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search(
                                 [('number', '=', invoice_id.origin)])
 
