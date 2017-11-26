@@ -90,6 +90,8 @@
                                         <field name="FECHA_PAGO"/>
                                         <field name="ITBIS_FACTURADO" sum="Total ITBIS Facturado"/>
                                         <field name="MONTO_FACTURADO" sum="Total Monto Facturado"/>
+                                        <field name="invoice_id_amount_diff" sum="Total Monto Facturado"/>
+                                        <field name="invoice_id_tax_diff" sum="Total Monto Facturado"/>
                                     </tree>
                                 </field>
                             </page>

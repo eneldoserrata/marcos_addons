@@ -197,7 +197,8 @@ class DgiiReport(models.Model):
         ext_line = 1
 
         invoice_ids = self.env["account.invoice"].search(
-            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date)])
+            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date),
+             ('number', '=', 'A010010010100169250')])
 
         draft_invoice_ids_set = invoice_ids.filtered(lambda x: x.state == "draft")
         invoice_ids_set = invoice_ids.filtered(lambda x: x.state in ('open', 'paid', 'cancel'))
@@ -265,11 +266,12 @@ class DgiiReport(models.Model):
                 FECHA_PAGO = False
 
             if invoice_id.state != "cancel" and (
-                    invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in ['normal',
-                                                                                                         'minor',
-                                                                                                         'informal']) or (
-                    invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal', 'gov',
-                                                                                             'special']):
+                            invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in [
+                        'normal',
+                        'minor',
+                        'informal']) or (
+                            invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal', 'gov',
+                                                                                                     'special']):
 
                 if invoice_id.type in ("out_invoice", "out_refund", "in_invoice", "in_refund"):
 
@@ -313,7 +315,8 @@ class DgiiReport(models.Model):
                         if not NUMERO_COMPROBANTE_MODIFICADO_ID:
 
                             if invoice_id.number == 'A010010010400029861':
-                                import pdb;pdb.set_trace()
+                                import pdb;
+                                pdb.set_trace()
 
                             INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search(
                                 [('number', '=', invoice_id.origin)])
@@ -364,8 +367,7 @@ class DgiiReport(models.Model):
                 "RETENCION_RENTA": RETENCION_RENTA
             }
 
-            prevent_repeat = set()
-            base_prevent_repeat = set()
+            move_line_not_repeat = set(invoice_id.move_id.line_ids.ids)
             for line in invoice_id.invoice_line_ids:
                 taxes = line.invoice_line_tax_ids
 
@@ -382,10 +384,17 @@ class DgiiReport(models.Model):
 
                 move_line_ids = self.env["account.move.line"].search(
                     [('move_id', '=', invoice_id.move_id.id), ('name', '=', line.name),
-                     ('account_id', 'in', account_ids)])
+                     ('account_id', 'in', account_ids), ("id", "in", list(move_line_not_repeat))])
                 if not move_line_ids:
                     move_line_ids = self.env["account.move.line"].search(
-                        [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', line.product_id.id)])
+                        [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', line.product_id.id),
+                         ("id", "in", list(move_line_not_repeat))])
+
+                if move_line_ids.ids[0] in move_line_not_repeat:
+                    move_line_ids = move_line_ids[0]
+                    move_line_not_repeat.remove(move_line_ids[0].id)
+                else:
+                    continue
 
                 debit = abs(sum([line.debit for line in move_line_ids]))
                 credit = abs(sum([line.credit for line in move_line_ids]))
@@ -402,16 +411,11 @@ class DgiiReport(models.Model):
                     else:
                         error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
 
-                base_hash = move_line_ids
-                if base_hash in base_prevent_repeat:
-                    pass
+                if not commun_data.get("MONTO_FACTURADO", False):
+                    commun_data.update({"MONTO_FACTURADO": amount})
                 else:
-                    if not commun_data.get("MONTO_FACTURADO", False):
-                        commun_data.update({"MONTO_FACTURADO": amount})
-                    else:
-                        commun_data["MONTO_FACTURADO"] += amount
-                    base_prevent_repeat.add(base_hash)
-
+                    commun_data["MONTO_FACTURADO"] += amount
+                prevent_repeat = set()
                 for tax in taxes:
                     if tax.type_tax_use in ("purchase", "sale"):
 
@@ -498,7 +502,8 @@ class DgiiReport(models.Model):
                 commun_data.update({"LINE": sale_line})
                 sale_report.append(commun_data)
                 sale_line += 1
-            elif invoice_id.type in ("out_invoice", "out_refund") and invoice_id.state == "cancel" and invoice_id.move_name:
+            elif invoice_id.type in (
+                    "out_invoice", "out_refund") and invoice_id.state == "cancel" and invoice_id.move_name:
                 commun_data.update({"LINE": cancel_line, "TIPO_ANULACION": invoice_id.anulation_type,
                                     "NUMERO_COMPROBANTE_FISCAL": invoice_id.move_name})
                 cancel_report.append(commun_data)
@@ -757,6 +762,12 @@ class DgiiReportPurchaseLine(models.Model):
 class DgiiReportSaleLine(models.Model):
     _name = "dgii.report.sale.line"
 
+    @api.depends("invoice_id")
+    @api.one
+    def get_aux_diff(self):
+        self.invoice_id_amount_diff = self.MONTO_FACTURADO - self.invoice_id_amount
+        self.invoice_id_tax_diff = self.ITBIS_FACTURADO - self.invoice_id_tax
+
     dgii_report_id = fields.Many2one("dgii.report")
     LINE = fields.Integer("Linea")
     RNC_CEDULA = fields.Char(u"RNC", size=11)
@@ -769,6 +780,16 @@ class DgiiReportSaleLine(models.Model):
     MONTO_FACTURADO = fields.Float("Monto Facturado")
 
     invoice_id = fields.Many2one("account.invoice", "NCF")
+    currency_id = fields.Many2one('res.currency', string='Currency', related="invoice_id.currency_id",
+                                  required=True, readonly=True, states={'draft': [('readonly', False)]},
+                                  track_visibility='always')
+
+    invoice_id_amount = fields.Monetary(related="invoice_id.amount_untaxed")
+    invoice_id_tax = fields.Monetary(related="invoice_id.amount_tax")
+
+    invoice_id_amount_diff = fields.Float(compute="get_aux_diff")
+    invoice_id_tax_diff = fields.Float(compute="get_aux_diff")
+
     number = fields.Char(related="invoice_id.number", string=" NCF")
     inv_partner = fields.Many2one("res.partner", related="invoice_id.partner_id", string="Relacionado")
     affected_nvoice_id = fields.Many2one("account.invoice", "Afecta")
