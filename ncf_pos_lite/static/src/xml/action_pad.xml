@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template">
+
+    <t t-name="all_orders_action_button">
+        <span class="control-button all-orders">
+            <i class="fa fa-list-alt"></i>
+            Ordenes
+        </span>
+    </t>
+
+    <!--<t t-extend="ActionpadWidget">-->
+        <!--<t t-jquery=".actionpad" t-operation="before">-->
+            <!--<span class="control-button" id="all_orders"-->
+                  <!--style="width: 384px;margin-right: 5px;margin-top: 3px;margin-bottom: -7px;">-->
+                <!--Todas las-->
+            <!--</span>-->
+        <!--</t>-->
+    <!--</t>-->
+
+    <t t-extend="ActionpadWidget">
+        <t t-jquery=".actionpad" t-operation="replace">
+            <div class="actionpad">
+                <button t-attf-class='button set-customer #{ ( widget.pos.get_client() and widget.pos.get_client().name.length > 10) ? "decentered" : "" }'>
+                    <i class='fa fa-user'/>
+                    <t t-if="widget.pos.get_client()">
+                        <t t-if="widget.pos.get_client().sale_fiscal_type == 'fiscal'">
+                            <span style="color:red">FISCAL</span>
+                        </t>
+                        <t t-if="widget.pos.get_client().sale_fiscal_type == 'gov'">
+                            <span style="color:red">GUBERNAMENTAL</span>
+                        </t>
+                        <t t-if="widget.pos.get_client().sale_fiscal_type == 'special'">
+                            <span style="color:red">ESPECIAL</span>
+                        </t>
+                        <t t-if="widget.pos.get_client().sale_fiscal_type == 'final' || widget.pos.get_client().sale_fiscal_type == ''">
+                            <span style="color:red">FINAL</span>
+                        </t>
+                        <br/>
+                        <t t-esc="widget.pos.get_client().name"/>
+                        <br/>
+                    </t>
+                    <t t-if="!widget.pos.get_client()">
+                        Customer
+                    </t>
+
+                </button>
+                <button class='button pay'>
+                    <div class='pay-circle'>
+                        <i class='fa fa-chevron-right'/>
+                    </div>
+                    Payment
+                </button>
+            </div>
+        </t>
+    </t>
+</templates>

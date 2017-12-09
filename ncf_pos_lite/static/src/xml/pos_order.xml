@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template">
+
+    <t t-extend="Product">
+        <t t-jquery=".product-img" t-operation="append">
+            <span t-attf-class="qty-tag #{product.qty_available lte 0 ? 'not-available':''}">
+                <t t-esc="product.qty_available"/>
+            </span>
+        </t>
+    </t>
+
+    <t t-extend="ProductScreenWidget">
+
+        <t t-jquery=".control-buttons.oe_hidden" t-operation="replace">
+
+        </t>
+        <t t-jquery="table" t-operation="append">
+            <tr class="content-row" id="tr-pos-options-bar">
+                <td class="content-cell" style="background-color: #393939;">
+                    <div id="pos-options-bar">
+                        <h3>Opciones</h3>
+                        <ul style="display: block;background-color: #eeeeee;">
+                            <div class="control-buttons oe_hidden"></div>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </t>
+    </t>
+
+    <t t-extend="Orderline">
+
+        <t t-jquery=".info-list" t-operation="after">
+
+                <div t-if="line.ms_info and line.ms_info.created" class="ms_info" style="cursor: pointer; color: blue; font: italic bold;">
+                    Hecho por
+                    <t t-esc="line.ms_info.created.user.name"/>
+                    (<t t-esc="line.ms_info.created.pos.name"/>)
+                    <t t-if="line.ms_info.changed and line.ms_info.changed.pos.id != line.ms_info.created.pos.id">
+                        , Editado por
+                        <t t-esc="line.ms_info.changed.user.name"/>
+                        (<t t-esc="line.ms_info.changed.pos.name"/>)
+                    </t>
+                </div>
+
+        </t>
+
+
+        <t t-jquery="span.price" t-operation="replace">
+            <span class="price">
+                <t t-if="widget.pos.get_order()">
+                    <t t-if="line.order.is_return_order">
+                        <t t-esc="widget.format_currency(line.get_display_price()*-1)"/>
+                    </t>
+                    <t t-if="!line.order.is_return_order">
+                        <t t-esc="widget.format_currency(line.get_display_price())"/>
+                    </t>
+                </t>
+            </span>
+        </t>
+
+        <t t-jquery="ul.info-list" t-operation="replace">
+            <ul class="info-list">
+                <t t-if="widget.pos.get_order()">
+                    <t t-if="line.get_quantity_str() !== '1' || line.selected ">
+                        <li class="info">
+                            <t t-if="line.order.is_return_order">
+                                <em>
+                                    -
+                                    <t t-esc="line.get_quantity_str()"/>
+                                </em>
+                            </t>
+                            <t t-if="!line.order.is_return_order">
+                                <em>
+                                    <t t-esc="line.get_quantity_str()"/>
+                                </em>
+                            </t>
+                            <t t-esc="line.get_unit().name"/>
+                            at
+                            <t t-esc="widget.format_currency(line.get_unit_display_price(),'Product Price')"/>
+                            /
+                            <t t-esc="line.get_unit().name"/>
+                        </li>
+                    </t>
+                    <t t-if="line.get_discount_str() !== '0'">
+                        <li class="info">
+                            Con un
+                            <em>
+                                <t t-esc="line.get_discount_str()"/>%
+                            </em>
+                            descuento
+                        </li>
+                    </t>
+                    <t t-if="line.get_note()">
+                        <li class="info orderline-note">
+                            <i class='fa fa-tag'/>
+                            <t t-esc="line.get_note()"/>
+                        </li>
+                    </t>
+                </t>
+            </ul>
+        </t>
+    </t>
+
+    <t t-extend="ProductListWidget">
+        <t t-jquery=".product-list-scroller.touch-scrollable" t-operation="prepend">
+            <div id="refund_order_notify">
+                ESTO ES UNA NOTA DE CRÉDITO
+            </div>
+        </t>
+    </t>
+
+    <t t-extend="OrderSelectorWidget">
+
+        <t t-jquery="span.order-button.select-order.selected" t-operation="append">
+            <t t-if="order.ms_info and order.ms_info.created">
+                <t t-if="order.ms_info.created" class="pos_selector_info">
+                    <t t-esc="order.ms_info.created.pos.name"/>
+                </t>
+            </t>
+        </t>
+
+        <t t-jquery="t[t-if='order === widget.pos.get_order()'] .order-sequence" t-operation="replace">
+            <span class='order-sequence'>
+                <t t-if="order.new_order">
+                    <span class="new_order">NUEVO</span>
+                </t>
+                <t t-if="!order.new_order">
+                    <t t-esc='order.sequence_number'/>
+                </t>
+            </span>
+        </t>
+
+        <t t-jquery="t[t-if='order !== widget.pos.get_order()'] .order-sequence" t-operation="replace">
+            <span class='order-sequence'>
+                <t t-if="order.new_order">NUEVO</t>
+                <t t-if="!order.new_order">
+                    <t t-esc='order.sequence_number'/>
+                </t>
+            </span>
+        </t>
+    </t>
+</templates>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="view_pos_config_form" model="ir.ui.view">
+            <field name="name">pos.config.form.view</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//group[@name='features']" position="after">
+                    <group name="Order Note Options" string="Opciones de la nota de pedido">
+                        <group>
+                            <field name='on_order'/>
+                        </group>
+                        <group>
+                            <field name='receipt_order_note' attrs="{'invisible':[('on_order','=',False)]}"/>
+                        </group>
+                    </group>
+                </xpath>
+
+                <field name="active" position="after">
+                    <field name="default_partner_id"/>
+                    <field name="user_ids" widget="many2many_tags"/>
+                </field>
+
+                <xpath expr="//group[@name='features']" position="after">
+                    <group string="Lista de pedidos">
+                        <group>
+                            <field name="order_loading_options" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="number_of_days"
+                                   attrs="{'invisible': [('order_loading_options', '=', 'current_session')]}"/>
+                        </group>
+                    </group>
+                </xpath>
+
+                <field name="iface_display_categ_images" position="after">
+                    <field name='allow_lock'/>
+                </field>
+
+
+            </field>
+        </record>
+
+
+        <record id="point_of_sale.action_pos_config_kanban" model="ir.actions.act_window">
+            <field name="domain">[('user_ids', 'in', uid)]</field>
+        </record>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="view_pos_config_kanban" model="ir.ui.view">
+            <field name="name">ncf_pos.pos.config.kanban.view</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_config_kanban"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//div[@class='o_kanban_card_manage_settings row']" position="attributes">
+                    <attribute name="groups">point_of_sale.group_pos_manager</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="to_restaurant_floor_inherit_form">
+            <field name="name">to.restaurant.floor.inherit.form</field>
+            <field name="model">restaurant.floor</field>
+            <field name="inherit_id" ref="pos_restaurant.view_restaurant_floor_form"></field>
+            <field name="arch" type="xml">
+                <field name="pos_config_id" position="replace">
+                    <field name="pos_config_id" invisible="0"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="to_pos_config_inherit_form">
+            <field name="name">to.pos.config.inherit.form</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="pos_restaurant.view_pos_config_form"></field>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='floor_ids']" position="replace">
+                        <field name="floor_ids" widget="many2many_tags"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="qty_pos_fraction_form" model="ir.ui.view">
+            <field name="name">qty_pos_fraction_form</field>
+            <field name="model">qty.pos.fraction</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="qty"/>
+                        </group>
+                    </sheet>
+
+                </form>
+            </field>
+        </record>
+
+        <record id="qty_pos_fraction_tree" model="ir.ui.view">
+            <field name="name">qty_pos_fraction_tree</field>
+            <field name="model">qty.pos.fraction</field>
+            <field name="arch" type="xml">
+                <tree string="">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="qty"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="qty_pos_fraction_action" model="ir.actions.act_window">
+            <field name="name">Cantidades para detalle</field>
+            <field name="res_model">qty.pos.fraction</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="qty_pos_fraction_action_menu" action="qty_pos_fraction_action"
+                  parent="point_of_sale.menu_point_config_product" sequence="10"/>
+
+
+    </data>
+</odoo>

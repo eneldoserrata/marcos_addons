@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="climit_override_credit_form" model="ir.ui.view">
+            <field name="name">climit.override.credit.form</field>
+            <field name="model">res.partner</field>
+            <field eval="20" name="priority"/>
+            <field name="arch" type="xml">
+                <form>
+                    <p>¡Este cliente excederá el límite de crédito si confirma esta orden de venta!</p>
+                    <group>
+                        <field name="name" string="Customer" readonly="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="credit_limit" readonly="1" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="credit" readonly="1" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <label for="confirmed_orders_total" string="Sales Orders"
+                               attrs="{'invisible':[('confirmed_orders_count','=', 0)]}"/>
+                        <div attrs="{'invisible':[('confirmed_orders_count','=', 0)]}">
+                            <field name="confirmed_orders_count" class="oe_inline"/>
+                            Cotizacines:
+                            <field name="confirmed_orders_total" class="oe_inline" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                        <label for="draft_invoices_total" string="Invoices"
+                               attrs="{'invisible':[('draft_invoices_count','=', 0)]}"/>
+                        <div attrs="{'invisible':[('draft_invoices_count','=', 0)]}">
+                            <field name="draft_invoices_count" class="oe_inline"/>
+                            Facturas en borrador:
+                            <field name="draft_invoices_total" class="oe_inline" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </group>
+                    <footer>
+                        <button string="Confirmar de todos modos" type="object" name="confirm_override" class="oe_highlight"
+                                help="Haga clic en este botón para anular el límite de crédito de este cliente"/>
+                        <button string="Cerrar" special="cancel" class="oe_right oe_highlight"
+                                help="Haga clic en este botón para cerrar la ventana"/>
+                    </footer>
+
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

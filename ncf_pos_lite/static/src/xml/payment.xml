@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+    <t t-extend="PaymentScreenWidget">
+
+        <t t-jquery=" .payment-screen .screen-content .right-content .paymentlines-container" t-operation="after">
+            <t t-if="widget.pos.config.on_order">
+                <center>
+                    <textarea id="order_note" style="width:610px; height:50px;resize: none;"
+                              placeholder="Escriba aquí alguna nota para la orden"></textarea>
+                </center>
+            </t>
+        </t>
+
+        <t t-jquery="h1" t-operation="replace">
+            <t t-if="widget.pos.get_order()">
+                <t t-if="widget.pos.get_order().is_return_order">
+                    <h1>Reembolso</h1>
+                </t>
+                <t t-if="!widget.pos.get_order().is_return_order">
+                    <h1>Pago</h1>
+                </t>
+            </t>
+            <t t-if="!widget.pos.get_order()">
+                <h1>Pago</h1>
+            </t>
+        </t>
+    </t>
+
+    <t t-extend="PaymentScreen-Paymentlines">
+        <t t-jquery="div.paymentlines-empty" t-operation="replace">
+            <t t-if="order">
+                <t t-if="order.is_return_order">
+                    <div class='paymentlines-empty'>
+                        <div class='total' style="color:#2b8b8e">
+                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                        </div>
+                        <div class='message'>
+                            Seleccione un método de reembolso.
+                        </div>
+                    </div>
+                </t>
+                <t t-if="!order.is_return_order">
+                    <div class='paymentlines-empty'>
+                        <div class='total'>
+                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                        </div>
+                        <div class='message'>
+                            Por favor seleccione un método de pago.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </t>
+
+    <t t-extend="PaymentScreen-Paymentmethods">
+        <t t-jquery=".paymentmethods" t-operation="replace">
+            <div class='paymentmethods'>
+                <t t-foreach="widget.pos.cashregisters" t-as="cashregister">
+                    <t t-if="widget.pos.get_order()">
+                        <t t-if="!widget.pos.get_order().is_return_order">
+                            <t t-if="widget.pos.user.allow_payments">
+                                <t t-if="!cashregister.journal.credit">
+                                    <div class="button paymentmethod" t-att-data-id="cashregister.journal_id[0]">
+                                        <t t-esc="cashregister.journal_id[1]"/>
+                                    </div>
+                                </t>
+                            </t>
+                        </t>
+
+                        <t t-if="!widget.pos.get_order().is_return_order">
+                            <t t-if="widget.pos.user.allow_payments">
+                                <t t-if="cashregister.journal.credit">
+                                    <div class="button paymentmethod credit_journal"
+                                         t-att-data-id="cashregister.journal_id[0]">
+                                        <t t-esc="cashregister.journal_id[1]"/>
+                                    </div>
+                                </t>
+                            </t>
+                        </t>
+                    </t>
+                </t>
+            </div>
+        </t>
+    </t>
+
+
+    <t t-extend="PaymentScreen-Numpad">
+        <t t-jquery=".numpad" t-operation="replace">
+            <div class="numpad" t-if="widget.pos.user.allow_payments">
+                <button class="input-button number-char" data-action='1'>1</button>
+                <button class="input-button number-char" data-action='2'>2</button>
+                <button class="input-button number-char" data-action='3'>3</button>
+                <button class="mode-button" data-action='+10'>+10</button>
+                <br/>
+                <button class="input-button number-char" data-action='4'>4</button>
+                <button class="input-button number-char" data-action='5'>5</button>
+                <button class="input-button number-char" data-action='6'>6</button>
+                <button class="mode-button" data-action='+20'>+20</button>
+                <br/>
+                <button class="input-button number-char" data-action='7'>7</button>
+                <button class="input-button number-char" data-action='8'>8</button>
+                <button class="input-button number-char" data-action='9'>9</button>
+                <button class="mode-button" data-action='+50'>+50</button>
+                <br/>
+                <button class="input-button numpad-char" data-action='CLEAR'>C</button>
+                <button class="input-button number-char" data-action='0'>0</button>
+                <button class="input-button number-char" t-att-data-action='widget.decimal_point'>
+                    <t t-esc='widget.decimal_point'/>
+                </button>
+                <button class="input-button numpad-backspace" data-action='BACKSPACE'>
+                    <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21"/>
+                </button>
+            </div>
+        </t>
+    </t>
+
+
+</templates>

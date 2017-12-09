@@ -1,0 +1,66 @@
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="pos_restaurant_kitchen_floor_form">
+            <field name="name">Restaurant Floors</field>
+            <field name="model">restaurant.floor</field>
+            <field name="inherit_id" ref="pos_restaurant.view_restaurant_floor_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='table_ids']" position="replace">
+                    <field name="table_ids">
+                        <tree string='Tables' editable="top">
+                            <field name="name" />
+                            <field name="seats" />
+                            <field name="shape" />
+                        </tree>
+                    </field>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="pos_restaurant_kitchen_table_form">
+            <field name="name">Restaurant Table</field>
+            <field name="model">restaurant.table</field>
+            <field name="inherit_id" ref="pos_restaurant.view_restaurant_table_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='seats']" position="after">
+                    <field name="floor_id"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_restaurant_table_tree">
+            <field name="name">Restaurant Table</field>
+            <field name="model">restaurant.table</field>
+            <field name="arch" type="xml">
+                <tree string="Restaurant Table">
+                    <field name="name" />
+                    <field name="floor_id"/>
+                    <field name="seats" />
+                    <field name="shape" />
+                    <field name="color" />
+                    <field name="position_h" />
+                    <field name="position_v" />
+                    <field name="width" />
+                    <field name="height" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_restaurant_table">
+            <field name="name">Floor Tables</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">restaurant.table</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem
+            parent="point_of_sale.menu_point_config_product"
+            action="action_restaurant_table"
+            id="menu_action_restaurant_table"
+            sequence="31"
+            groups="point_of_sale.group_pos_manager"/>
+
+    </data>
+</openerp>
