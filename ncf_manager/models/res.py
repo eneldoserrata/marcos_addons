@@ -227,7 +227,8 @@ class ResPartner(models.Model):
             for inv in invoice_ids:
                 pterm = rec.property_payment_term_id or rec.property_supplier_payment_term_id
                 if pterm:
-                    pterm_list = pterm.with_context(currency_id=inv.company_id.currency_id.id).compute(value=1, date_ref=inv.date_invoice)[0]
+                    currency_id = inv.currency_id.id or inv.company_id.currency_id.id
+                    pterm_list = pterm.with_context(currency_id=currency_id).compute(value=1, date_ref=inv.date_invoice)[0]
                     date_due = max(line[0] for line in pterm_list)
                     inv.date_due = date_due
                     for line in inv.move_id.line_ids:
