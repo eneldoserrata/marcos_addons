@@ -55,6 +55,21 @@ class DgiiReport(models.Model):
     @api.multi
     @api.depends("purchase_report")
     def _purchase_report_totals(self):
+
+        summary_dict = {
+            "01": {"count": 0, "amount": 0.0},
+            "02": {"count": 0, "amount": 0.0},
+            "03": {"count": 0, "amount": 0.0},
+            "04": {"count": 0, "amount": 0.0},
+            "05": {"count": 0, "amount": 0.0},
+            "06": {"count": 0, "amount": 0.0},
+            "07": {"count": 0, "amount": 0.0},
+            "08": {"count": 0, "amount": 0.0},
+            "09": {"count": 0, "amount": 0.0},
+            "10": {"count": 0, "amount": 0.0},
+            "11": {"count": 0, "amount": 0.0},
+        }
+
         for rec in self:
             rec.ITBIS_TOTAL = 0
             rec.ITBIS_TOTAL_NC = 0
@@ -79,12 +94,49 @@ class DgiiReport(models.Model):
                     rec.RETENCION_RENTA += purchase.RETENCION_RENTA
                     rec.ITBIS_RETENIDO += purchase.ITBIS_RETENIDO
 
+                summary_dict[purchase.invoice_id.purchase_fiscal_type]["count"] += 1
+                summary_dict[purchase.invoice_id.purchase_fiscal_type]["amount"] += purchase.MONTO_FACTURADO
+
+
             rec.ITBIS_TOTAL_PAYMENT = rec.ITBIS_TOTAL - rec.ITBIS_TOTAL_NC
             rec.TOTAL_MONTO_PAYMENT = rec.TOTAL_MONTO_FACTURADO - rec.TOTAL_MONTO_NC
+
+            rec.pcount_01 = summary_dict["01"]["count"]
+            rec.pcount_02 = summary_dict["02"]["count"]
+            rec.pcount_03 = summary_dict["03"]["count"]
+            rec.pcount_04 = summary_dict["04"]["count"]
+            rec.pcount_05 = summary_dict["05"]["count"]
+            rec.pcount_06 = summary_dict["06"]["count"]
+            rec.pcount_07 = summary_dict["07"]["count"]
+            rec.pcount_08 = summary_dict["08"]["count"]
+            rec.pcount_09 = summary_dict["09"]["count"]
+            rec.pcount_10 = summary_dict["10"]["count"]
+            rec.pcount_11 = summary_dict["11"]["count"]
+
+            rec.pamount_01 = summary_dict["01"]["amount"]
+            rec.pamount_02 = summary_dict["02"]["amount"]
+            rec.pamount_03 = summary_dict["03"]["amount"]
+            rec.pamount_04 = summary_dict["04"]["amount"]
+            rec.pamount_05 = summary_dict["05"]["amount"]
+            rec.pamount_06 = summary_dict["06"]["amount"]
+            rec.pamount_07 = summary_dict["07"]["amount"]
+            rec.pamount_08 = summary_dict["08"]["amount"]
+            rec.pamount_09 = summary_dict["09"]["amount"]
+            rec.pamount_10 = summary_dict["10"]["amount"]
+            rec.pamount_11 = summary_dict["11"]["amount"]
+
 
     @api.multi
     @api.depends("sale_report")
     def _sale_report_totals(self):
+
+        summary_dict = {
+            "final": {"count": 0, "amount": 0.0},
+            "fiscal": {"count": 0, "amount": 0.0},
+            "gov": {"count": 0, "amount": 0.0},
+            "special": {"count": 0, "amount": 0.0},
+            "unico": {"count": 0, "amount": 0.0},
+        }
         for rec in self:
             rec.SALE_ITBIS_TOTAL = 0
             rec.SALE_ITBIS_NC = 0
@@ -101,8 +153,22 @@ class DgiiReport(models.Model):
                     rec.SALE_ITBIS_TOTAL += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_FACTURADO += sale.MONTO_FACTURADO
 
+                summary_dict[sale.invoice_id.sale_fiscal_type]["count"] += 1
+                summary_dict[sale.invoice_id.sale_fiscal_type]["amount"] += sale.MONTO_FACTURADO
+
             rec.SALE_ITBIS_CHARGED = rec.SALE_ITBIS_TOTAL - rec.SALE_ITBIS_NC
             rec.SALE_TOTAL_MONTO_CHARGED = rec.SALE_TOTAL_MONTO_FACTURADO - rec.SALE_TOTAL_MONTO_NC
+
+            rec.count_final = summary_dict["final"]["count"]
+            rec.count_fiscal = summary_dict["fiscal"]["count"]
+            rec.count_gov = summary_dict["gov"]["count"]
+            rec.count_special = summary_dict["special"]["count"]
+            rec.count_unico = summary_dict["unico"]["count"]
+            rec.amount_final = summary_dict["final"]["amount"]
+            rec.amount_fiscal = summary_dict["fiscal"]["amount"]
+            rec.amount_gov = summary_dict["gov"]["amount"]
+            rec.amount_special = summary_dict["special"]["amount"]
+            rec.amount_unico = summary_dict["unico"]["amount"]
 
     @api.multi
     @api.depends("purchase_report", "sale_report")
@@ -142,6 +208,32 @@ class DgiiReport(models.Model):
     purchase_filename = fields.Char()
     purchase_binary = fields.Binary(string=u"Archivo 606 TXT")
 
+    # 606 type summary
+    currency_id = fields.Many2one(related="company_id.currency_id")
+
+    pcount_01 = fields.Integer(compute=_purchase_report_totals)
+    pcount_02 = fields.Integer(compute=_purchase_report_totals)
+    pcount_03 = fields.Integer(compute=_purchase_report_totals)
+    pcount_04 = fields.Integer(compute=_purchase_report_totals)
+    pcount_05 = fields.Integer(compute=_purchase_report_totals)
+    pcount_06 = fields.Integer(compute=_purchase_report_totals)
+    pcount_07 = fields.Integer(compute=_purchase_report_totals)
+    pcount_08 = fields.Integer(compute=_purchase_report_totals)
+    pcount_09 = fields.Integer(compute=_purchase_report_totals)
+    pcount_10 = fields.Integer(compute=_purchase_report_totals)
+    pcount_11 = fields.Integer(compute=_purchase_report_totals)
+    pamount_01 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_02 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_03 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_04 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_05 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_06 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_07 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_08 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_09 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_10 = fields.Monetary(compute=_purchase_report_totals)
+    pamount_11 = fields.Monetary(compute=_purchase_report_totals)
+
     # 607
     VENTAS_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)
 
@@ -156,6 +248,18 @@ class DgiiReport(models.Model):
     sale_report = fields.One2many("dgii.report.sale.line", "dgii_report_id")
     sale_filename = fields.Char()
     sale_binary = fields.Binary(string=u"Archivo 607 TXT")
+
+    # 607 type summary
+    count_final = fields.Integer(compute=_sale_report_totals)
+    count_fiscal = fields.Integer(compute=_sale_report_totals)
+    count_gov = fields.Integer(compute=_sale_report_totals)
+    count_special = fields.Integer(compute=_sale_report_totals)
+    count_unico = fields.Integer(compute=_sale_report_totals)
+    amount_final = fields.Integer(compute=_sale_report_totals)
+    amount_fiscal = fields.Integer(compute=_sale_report_totals)
+    amount_gov = fields.Integer(compute=_sale_report_totals)
+    amount_special = fields.Integer(compute=_sale_report_totals)
+    amount_unico = fields.Integer(compute=_sale_report_totals)
 
     # 608
     CANCEL_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)

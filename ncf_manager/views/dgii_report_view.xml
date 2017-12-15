@@ -61,6 +61,114 @@
                         </group>
                         <notebook>
                             <page string="606">
+                                <table class="table table-striped table-hover">
+                                    <tr>
+                                        <th class="tg-yw4l">Tipo De Comprobante</th>
+                                        <th class="tg-yw4l">Cantidad</th>
+                                        <th class="tg-yw4l">Monto Facturado</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">01 - Gastos de personal</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_01"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_01"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">02 - Gastos por trabajo, suministros y servicios</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_02"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_02"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">03 - Arrendamientos</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_03"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_03"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">04 - Gastos de Activos Fijos</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_04"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_04"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">05 - Gastos de Representación</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_05"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_05"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">06 - Otras Deducciones Admitidas</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_06"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_06"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">07 - Gastos Financieros</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_07"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_07"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">08 - Gastos Extraordinarios</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_08"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_08"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">09 - Compras y Gastos que forman parte del Costo de
+                                            Venta
+                                        </td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_09"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_09"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">10 - Adquisiciones de Activos</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_10"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_10"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">11 - Gastos de Seguro</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="pcount_11"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="pamount_11"/>
+                                        </td>
+                                    </tr>
+                                </table>
                                 <field name="purchase_report">
                                     <tree>
                                         <field name="LINE"/>
@@ -79,6 +187,58 @@
                                 </field>
                             </page>
                             <page string="607">
+                                <table class="table table-striped table-hover">
+                                    <tr>
+                                        <th class="tg-yw4l">Tipo De Comprobante</th>
+                                        <th class="tg-yw4l">Cantidad</th>
+                                        <th class="tg-yw4l">Monto Facturado</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">Consumidor final</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="count_final"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="amount_final"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">Para credito fiscal</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="count_fiscal"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="amount_fiscal"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">Gubernamental</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="count_gov"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="amount_gov"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">Regimenes especiales</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="count_special"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="amount_special"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tg-yw4l">Unico ingreso</td>
+                                        <td class="tg-yw4l text-center">
+                                            <field name="count_unico"/>
+                                        </td>
+                                        <td class="tg-yw4l text-right">
+                                            <field name="amount_unico"/>
+                                        </td>
+                                    </tr>
+                                </table>
                                 <field name="sale_report">
                                     <tree>
                                         <field name="LINE"/>
