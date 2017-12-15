@@ -44,7 +44,7 @@ _logger = logging.getLogger(__name__)
 
 class AccountPayment(models.Model):
     _name = 'account.payment'
-    _inherit = ['account.payment', 'mail.thread']
+    _inherit = ['account.payment', 'mail.thread', 'ir.needaction_mixin', 'utm.mixin']
 
     @api.one
     @api.depends("currency_id")
