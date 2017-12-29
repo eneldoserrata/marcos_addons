@@ -51,6 +51,7 @@ _logger = logging.getLogger(__name__)
 class DgiiReport(models.Model):
     _name = "dgii.report"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _order = "name"
 
     @api.multi
     @api.depends("purchase_report")
@@ -144,14 +145,17 @@ class DgiiReport(models.Model):
             rec.SALE_TOTAL_MONTO_FACTURADO = 0
             rec.SALE_TOTAL_MONTO_NC = 0
             rec.SALE_TOTAL_MONTO_CHARGED = 0
+            rec.MONTO_FACTURADO_EXCENTO = 0
 
             for sale in rec.sale_report:
                 if sale.NUMERO_COMPROBANTE_FISCAL[9:-8] == "04":
                     rec.SALE_ITBIS_NC += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_NC += sale.MONTO_FACTURADO
+                    rec.MONTO_FACTURADO_EXCENTO -= sale.MONTO_FACTURADO_EXCENTO
                 else:
                     rec.SALE_ITBIS_TOTAL += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_FACTURADO += sale.MONTO_FACTURADO
+                    rec.MONTO_FACTURADO_EXCENTO += sale.MONTO_FACTURADO_EXCENTO
 
                 summary_dict[sale.invoice_id.sale_fiscal_type]["count"] += 1
                 summary_dict[sale.invoice_id.sale_fiscal_type]["amount"] += sale.MONTO_FACTURADO
@@ -181,7 +185,7 @@ class DgiiReport(models.Model):
 
     company_id = fields.Many2one('res.company', 'Company', required=False,
                                  default=lambda self: self.env.user.company_id)
-    name = fields.Char(string=u"Periodo mes/año", required=True)
+    name = fields.Char(string=u"Periodo mes/año", required=True, unique=True, index=True)
     positive_balance = fields.Float(u"SALDO A FAVOR ANTERIOR", required=True)
 
     it_filename = fields.Char()
@@ -193,13 +197,14 @@ class DgiiReport(models.Model):
     # 606
     COMPRAS_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)
 
-    ITBIS_TOTAL = fields.Float(u"ITBIS Compras", compute=_purchase_report_totals)
-    ITBIS_TOTAL_NC = fields.Float(u"ITBIS Notas de crédito", compute=_purchase_report_totals)
-    ITBIS_TOTAL_PAYMENT = fields.Float(u"ITBIS Pagado", compute=_purchase_report_totals)
-
     TOTAL_MONTO_FACTURADO = fields.Float(u"Monto compra", compute=_purchase_report_totals)
-    TOTAL_MONTO_NC = fields.Float(u"Monto Notas de crédito", compute=_purchase_report_totals)
+    ITBIS_TOTAL = fields.Float(u"ITBIS Compras", compute=_purchase_report_totals)
+
+    TOTAL_MONTO_NC = fields.Float(u"Notas de crédito", compute=_purchase_report_totals)
+    ITBIS_TOTAL_NC = fields.Float(u"ITBIS Notas de crédito", compute=_purchase_report_totals)
+
     TOTAL_MONTO_PAYMENT = fields.Float(u"Total monto facturado", compute=_purchase_report_totals)
+    ITBIS_TOTAL_PAYMENT = fields.Float(u"ITBIS Pagado", compute=_purchase_report_totals)
 
     ITBIS_RETENIDO = fields.Float(u"ITBIS Retenido", compute=_purchase_report_totals)
     RETENCION_RENTA = fields.Float(u"Retención Renta", compute=_purchase_report_totals)
@@ -237,17 +242,24 @@ class DgiiReport(models.Model):
     # 607
     VENTAS_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)
 
-    SALE_ITBIS_TOTAL = fields.Float(u"ITBIS ventas", compute=_sale_report_totals)
-    SALE_ITBIS_NC = fields.Float(u"ITBIS Notas de crédito", compute=_sale_report_totals)
-    SALE_ITBIS_CHARGED = fields.Float(u"ITBIS Cobrado", compute=_sale_report_totals)
-
     SALE_TOTAL_MONTO_FACTURADO = fields.Float(u"Total Facturado", compute=_sale_report_totals)
-    SALE_TOTAL_MONTO_NC = fields.Float(u"Total Notas de crédito", compute=_sale_report_totals)
-    SALE_TOTAL_MONTO_CHARGED = fields.Float(u"Facturado", compute=_sale_report_totals)
+    SALE_ITBIS_TOTAL = fields.Float(u"ITBIS ventas", compute=_sale_report_totals)
 
-    sale_report = fields.One2many("dgii.report.sale.line", "dgii_report_id")
+    SALE_TOTAL_MONTO_NC = fields.Float(u"Total Notas de crédito", compute=_sale_report_totals)
+    SALE_ITBIS_NC = fields.Float(u"ITBIS Notas de crédito", compute=_sale_report_totals)
+
+    SALE_TOTAL_MONTO_CHARGED = fields.Float(u"Facturado", compute=_sale_report_totals)
+    SALE_ITBIS_CHARGED = fields.Float(u"ITBIS Cobrado", compute=_sale_report_totals)
+    MONTO_FACTURADO_EXCENTO = fields.Float(u"ITBIS Cobrado", compute=_sale_report_totals)
+
     sale_filename = fields.Char()
     sale_binary = fields.Binary(string=u"Archivo 607 TXT")
+
+
+
+    sale_report = fields.One2many("dgii.report.sale.line", "dgii_report_id")
+
+
 
     # 607 type summary
     count_final = fields.Integer(compute=_sale_report_totals)
@@ -265,7 +277,7 @@ class DgiiReport(models.Model):
     CANCEL_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)
     cancel_report = fields.One2many("dgii.cancel.report.line", "dgii_report_id")
     cancel_filename = fields.Char()
-    cancel_binary = fields.Binary(string=u"Archivo 607 TXT")
+    cancel_binary = fields.Binary(string=u"Archivo 608 TXT")
 
     # 609
     EXTERIOR_CANTIDAD_REGISTRO = fields.Integer(u"Cantidad de registros", compute=_count_records)
@@ -463,7 +475,8 @@ class DgiiReport(models.Model):
                 "affected_nvoice_id": affected_nvoice_id,
                 "nc": True if affected_nvoice_id else False,
                 "ITBIS_RETENIDO": ITBIS_RETENIDO,
-                "RETENCION_RENTA": RETENCION_RENTA
+                "RETENCION_RENTA": RETENCION_RENTA,
+                "MONTO_FACTURADO_EXCENTO": 0
             }
 
             move_line_not_repeat = set(invoice_id.move_id.line_ids.ids)
@@ -477,13 +490,15 @@ class DgiiReport(models.Model):
                     else:
                         line.write({"invoice_line_tax_ids": [
                             (4, self.env.ref("l10n_do.{}_tax_0_purch".format(self.company_id.id)).id, False)]})
-                    taxes = line.invoice_line_tax_ids
+
+                taxes = line.invoice_line_tax_ids
 
                 account_ids = line.account_id.ids
 
                 move_line_ids = self.env["account.move.line"].search(
                     [('move_id', '=', invoice_id.move_id.id), ('name', '=', line.name),
                      ('account_id', 'in', account_ids), ("id", "in", list(move_line_not_repeat))])
+
                 if not move_line_ids:
                     move_line_ids = self.env["account.move.line"].search(
                         [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', line.product_id.id),
@@ -515,8 +530,11 @@ class DgiiReport(models.Model):
                     commun_data.update({"MONTO_FACTURADO": amount})
                 else:
                     commun_data["MONTO_FACTURADO"] += amount
+
                 prevent_repeat = set()
+
                 for tax in taxes:
+
                     if tax.type_tax_use in ("purchase", "sale"):
 
                         hash = (tax.id, move_line_ids)
@@ -526,7 +544,14 @@ class DgiiReport(models.Model):
                             prevent_repeat.add(hash)
 
                         for base_line in move_line_ids:
+
                             base_amount = abs(base_line.debit - base_line.credit)
+                            if invoice_id.type in ("out_refund", "in_refund"):
+                                base_amount = base_amount*-1
+
+                            if tax.amount == 0:
+                                commun_data["MONTO_FACTURADO_EXCENTO"] += base_amount
+
                             if tax.base_it1_cels:
                                 xls_cels = tax.base_it1_cels.split(",")
                                 for xls_cel in xls_cels:
@@ -559,10 +584,8 @@ class DgiiReport(models.Model):
                 for tax_line in invoice_id.tax_line_ids:
                     tax = self.env["account.tax"].search(
                         [('name', '=', tax_line.name), ('account_id', '=', tax_line.account_id.id)])
-
                     if not tax:
                         tax = self.env["account.tax"].search([('name', '=', tax_line.name)])
-
                     if tax:
                         taxes.append(tax)
 
@@ -577,6 +600,9 @@ class DgiiReport(models.Model):
 
                         amount = abs(sum([line.debit - line.credit for line in move_line_ids]))
                         ITBIS_FACTURADO += amount
+                        if invoice_id.type in ("out_refund", "in_refund"):
+                            amount = amount * -1
+
 
                         if tax.tax_it1_cels:
                             xls_cels = tax.tax_it1_cels.split(",")
@@ -597,6 +623,7 @@ class DgiiReport(models.Model):
                         if tax.type_tax_use == "sale" or (
                                         tax.type_tax_use == "purchase" and tax.purchase_tax_type == "itbis"):
                             commun_data.update({"ITBIS_FACTURADO": ITBIS_FACTURADO})
+
 
             if invoice_id.type in ("out_invoice", "out_refund") and invoice_id.state != "cancel":
                 commun_data.update({"LINE": sale_line})
@@ -849,6 +876,7 @@ class DgiiReportPurchaseLine(models.Model):
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     ITBIS_RETENIDO = fields.Float("ITBIS Retenido")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
+    MONTO_FACTURADO_EXCENTO = fields.Float("Monto Facturado Exento")
     RETENCION_RENTA = fields.Float(u"Retención Renta")
 
     invoice_id = fields.Many2one("account.invoice", "NCF")
@@ -871,6 +899,7 @@ class DgiiReportSaleLine(models.Model):
     FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
+    MONTO_FACTURADO_EXCENTO = fields.Float("Monto Facturado Exento")
 
     invoice_id = fields.Many2one("account.invoice", "NCF")
     currency_id = fields.Many2one('res.currency', string='Currency', related="invoice_id.currency_id",
@@ -881,6 +910,7 @@ class DgiiReportSaleLine(models.Model):
     inv_partner = fields.Many2one("res.partner", related="invoice_id.partner_id", string="Relacionado")
     affected_nvoice_id = fields.Many2one("account.invoice", "Afecta")
     nc = fields.Boolean()
+
 
 
 class DgiiCancelReportline(models.Model):
