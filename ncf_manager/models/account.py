@@ -108,6 +108,7 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     purchase_tax_type = fields.Selection([('itbis', 'ITBIS Pagado'),
+                                          ('itbis_servicio', 'ITBIS Pagado en servicios'),
                                           ('ritbis', 'ITBIS Retenido'),
                                           ('isr', 'ISR Retenido'),
                                           ('rext', 'REMESAS AL EXTERIOR ( Ley  253-12)'),

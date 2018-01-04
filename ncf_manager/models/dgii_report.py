@@ -82,6 +82,7 @@ class DgiiReport(models.Model):
 
             rec.ITBIS_RETENIDO = 0
             rec.RETENCION_RENTA = 0
+            rec.ITBIS_FACTURADO_SERVICIOS = 0
 
             for purchase in rec.purchase_report:
                 if purchase.NUMERO_COMPROBANTE_FISCAL[9:-8] == "04":
@@ -89,15 +90,16 @@ class DgiiReport(models.Model):
                     rec.TOTAL_MONTO_NC += purchase.MONTO_FACTURADO
                     rec.RETENCION_RENTA -= purchase.RETENCION_RENTA
                     rec.ITBIS_RETENIDO -= purchase.ITBIS_RETENIDO
+                    rec.ITBIS_FACTURADO_SERVICIOS -= purchase.ITBIS_FACTURADO_SERVICIOS
                 elif purchase.NUMERO_COMPROBANTE_MODIFICADO == False:
                     rec.ITBIS_TOTAL += purchase.ITBIS_FACTURADO
                     rec.TOTAL_MONTO_FACTURADO += purchase.MONTO_FACTURADO
                     rec.RETENCION_RENTA += purchase.RETENCION_RENTA
                     rec.ITBIS_RETENIDO += purchase.ITBIS_RETENIDO
+                    rec.ITBIS_FACTURADO_SERVICIOS += purchase.ITBIS_FACTURADO_SERVICIOS
 
                 summary_dict[purchase.invoice_id.purchase_fiscal_type]["count"] += 1
                 summary_dict[purchase.invoice_id.purchase_fiscal_type]["amount"] += purchase.MONTO_FACTURADO
-
 
             rec.ITBIS_TOTAL_PAYMENT = rec.ITBIS_TOTAL - rec.ITBIS_TOTAL_NC
             rec.TOTAL_MONTO_PAYMENT = rec.TOTAL_MONTO_FACTURADO - rec.TOTAL_MONTO_NC
@@ -126,7 +128,6 @@ class DgiiReport(models.Model):
             rec.pamount_10 = summary_dict["10"]["amount"]
             rec.pamount_11 = summary_dict["11"]["amount"]
 
-
     @api.multi
     @api.depends("sale_report")
     def _sale_report_totals(self):
@@ -151,6 +152,7 @@ class DgiiReport(models.Model):
                 if sale.NUMERO_COMPROBANTE_FISCAL[9:-8] == "04":
                     rec.SALE_ITBIS_NC += sale.ITBIS_FACTURADO
                     rec.SALE_TOTAL_MONTO_NC += sale.MONTO_FACTURADO
+                    # TODO falta manejar las notas de credito que afectan facturas de otro periodo.
                     rec.MONTO_FACTURADO_EXCENTO -= sale.MONTO_FACTURADO_EXCENTO
                 else:
                     rec.SALE_ITBIS_TOTAL += sale.ITBIS_FACTURADO
@@ -208,6 +210,7 @@ class DgiiReport(models.Model):
 
     ITBIS_RETENIDO = fields.Float(u"ITBIS Retenido", compute=_purchase_report_totals)
     RETENCION_RENTA = fields.Float(u"Retención Renta", compute=_purchase_report_totals)
+    ITBIS_FACTURADO_SERVICIOS = fields.Float(u"ITBIS Facturado servicios", compute=_purchase_report_totals)
 
     purchase_report = fields.One2many(u"dgii.report.purchase.line", "dgii_report_id")
     purchase_filename = fields.Char()
@@ -255,11 +258,7 @@ class DgiiReport(models.Model):
     sale_filename = fields.Char()
     sale_binary = fields.Binary(string=u"Archivo 607 TXT")
 
-
-
     sale_report = fields.One2many("dgii.report.sale.line", "dgii_report_id")
-
-
 
     # 607 type summary
     count_final = fields.Integer(compute=_sale_report_totals)
@@ -288,10 +287,186 @@ class DgiiReport(models.Model):
 
     state = fields.Selection([('draft', 'Nuevo'), ('error', 'Con errores'), ('done', 'Validado')], default="draft")
 
+    def get_invoice_in_draft_error(self, invoice_ids):
+        res = {}
+        error_msg = "Factura sin validar"
+        for invoice_id in invoice_ids:
+            if not error_list.get(invoice_id.id, False):
+                res.update(
+                    {invoice_id.id: [
+                        (invoice_id.type, invoice_id.number, error_msg)]})
+            else:
+                res[invoice_id.id].append(
+                    (invoice_id.type, invoice_id.number, error_msg))
+        return res
+
+    def get_late_informal_payed_invoice(self, start_date, end_date):
+
+        invoice_ids = self.env["account.invoice"]
+        paid_invoice_ids = self.env["account.payment"].search(
+            [('payment_date', '>=', start_date), ('payment_date', '<=', end_date), ('invoice_ids', '!=', False)])
+
+        for paid_invoice_id in paid_invoice_ids:
+            invoice_ids |= paid_invoice_id.invoice_ids.filtered(lambda r: r.journal_id.purchase_type == "informal")
+
+        return invoice_ids
+
+    def get_identification_info(self, vat):
+        RNC_CEDULA = vat and re.sub("[^0-9]", "", vat.strip()) or False
+        TIPO_IDENTIFICACION = "3"
+
+        if RNC_CEDULA:
+            if len(RNC_CEDULA) == 9:
+                TIPO_IDENTIFICACION = "1"
+            elif len(RNC_CEDULA) == 11:
+                TIPO_IDENTIFICACION = "2"
+
+        if TIPO_IDENTIFICACION == "3":
+            RNC_CEDULA = ""
+
+        return RNC_CEDULA, TIPO_IDENTIFICACION
+
+    def validate_fiscal_information(self, vat, ncf, invoice_type, origin_invoice_ids):
+        api_marcos = self.env["marcos.api.tools"]
+
+        error_list = []
+        if vat and not api_marcos.is_identification(vat):
+            print vat, vat_type, ncf
+            error_list.append(u"RNC/Cédula no es valido")
+
+        if not api_marcos.is_ncf(ncf, invoice_type):
+            error_list.append(u"El NCF no es valido")
+
+        if len(origin_invoice_ids) > 1 and invoice_type in ("out_refund", "in_refund"):
+            error_list.append(u"NC/ND Afectando varias facturas")
+
+        if not origin_invoice_ids and invoice_type in ("out_refund", "in_refund"):
+            error_list.append(u"NC/ND sin comprobante que afecta")
+
+        if not ncf:
+            error_list.append(u"Factura validada sin número asignado")
+
+        return error_list
+
+    # 608
+    @api.multi
+    def create_cancel_invoice_lines(self, cancel_invoice_ids):
+        self.cancel_report.unlink()
+        new_cancel_report = []
+        cancel_line = 1
+        for invoice_id in cancel_invoice_ids:
+            new_cancel_report.append((0, 0, {"LINE": cancel_line, "TIPO_ANULACION": invoice_id.anulation_type,
+                                             "FECHA_COMPROBANTE": invoice_id.date_invoice,
+                                             "NUMERO_COMPROBANTE_FISCAL": invoice_id.move_name}))
+            self.write({"cancel_report": new_cancel_report})
+            cancel_line += 1
+
+    @api.multi
+    def get_numero_de_comprobante_modificado(self, invoice_id):
+        NUMERO_COMPROBANTE_MODIFICADO = False
+        AFFECTED_NVOICE_ID = False
+
+        origin_invoice_id = invoice_id.origin_invoice_ids.filtered(lambda x: x.state in ("open", "paid"))
+
+        if not origin_invoice_id:
+            origin_invoice_id = self.env["account.invoice"].search(
+                [('number', '=', invoice_id.origin)])
+
+        NUMERO_COMPROBANTE_MODIFICADO = origin_invoice_id[0].number
+        AFFECTED_NVOICE_ID = origin_invoice_id[0].id
+
+        return NUMERO_COMPROBANTE_MODIFICADO, AFFECTED_NVOICE_ID
+
+    def get_payment_date_and_retention_data(self, invoice_id):
+        FECHA_PAGO = False
+        ITBIS_RETENIDO = 0
+        RETENCION_RENTA = 0
+        move_id = self.env["account.move.line"].search(
+            [("move_id", "=", invoice_id.move_id.id), ('full_reconcile_id', '!=', False)])
+        if invoice_id.journal_id.purchase_type == 'informal':
+            if move_id:
+                retentions = self.env["account.move.line"].search(
+                    [('invoice_id', '=', invoice_id.id), ('payment_id', '!=', False),
+                     ('tax_line_id', '!=', False)])
+                if retentions:
+                    for retention in retentions:
+                        if retention.tax_line_id.purchase_tax_type == "ritbis":
+                            ITBIS_RETENIDO += retention.credit
+                        elif retention.tax_line_id.purchase_tax_type == "isr":
+                            RETENCION_RENTA += retention.credit
+
+                    FECHA_PAGO = retentions[0].date
+            else:
+                FECHA_PAGO = move_id and move_id[0].date or False
+
+        else:
+            FECHA_PAGO = False
+
+        return FECHA_PAGO, ITBIS_RETENIDO, RETENCION_RENTA
+
+    @api.multi
+    def create_sales_lines(self, data):
+        dataText = ','.join(self.env.cr.mogrify('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', row) for row in data)
+
+        sale_insert_sql = """
+                        INSERT INTO dgii_report_sale_line ("dgii_report_id","LINE","RNC_CEDULA","TIPO_IDENTIFICACION",
+                        "NUMERO_COMPROBANTE_FISCAL","NUMERO_COMPROBANTE_MODIFICADO","FECHA_COMPROBANTE","ITBIS_FACTURADO","MONTO_FACTURADO",
+                        "MONTO_FACTURADO_EXCENTO","invoice_id","affected_nvoice_id","nc") values {}
+                        """.format(dataText)
+        self.env.cr.execute(sale_insert_sql)
+
+    @api.multi
+    def create_purchase_lines(self, data):
+        dataText = ','.join(
+            self.env.cr.mogrify('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', row) for row in data)
+
+        purchase_insert_sql = """
+                            INSERT INTO dgii_report_purchase_line ("dgii_report_id",
+                            "LINE",
+                            "RNC_CEDULA",
+                            "TIPO_IDENTIFICACION",
+                            "NUMERO_COMPROBANTE_FISCAL",
+                            "NUMERO_COMPROBANTE_MODIFICADO",
+                            "FECHA_COMPROBANTE",
+                            "FECHA_PAGO",
+                            "TIPO_BIENES_SERVICIOS_COMPRADOS",
+                            "ITBIS_FACTURADO",
+                            "ITBIS_RETENIDO",
+                            "MONTO_FACTURADO",
+                            "RETENCION_RENTA"
+                            ,"invoice_id",
+                            "affected_nvoice_id",
+                            "nc",
+                            "ITBIS_FACTURADO_SERVICIOS") values {}
+                            """.format(dataText)
+        self.env.cr.execute(purchase_insert_sql)
+
+    @api.multi
+    def post_error_list(self, error_list):
+        out_inovice_url = "/web#id={}&view_type=form&model=account.invoice&action=196"
+        in_inovice_url = "/web#id={}&view_type=form&model=account.invoice&menu_id=119&action=197"
+        if error_list:
+            message = "<ul>"
+            for ncf, errors in error_list.iteritems():
+                message += "<li>{}</li><ul>".format(errors[0][1] or "Factura invalida")
+                for error in errors:
+                    if error[0] in ("out_invoice", "out_refund"):
+                        message += u"<li><a target='_blank' href='{}'>{}</a></li>".format(out_inovice_url.format(ncf),
+                                                                                          error[2])
+                    else:
+                        message += u"<li><a target='_blank' href='{}'>{}</a></li>".format(in_inovice_url.format(ncf),
+                                                                                          error[2])
+                message += "</ul>"
+            message += "</ul>"
+
+            self.message_post(body=message)
+            self.state = "error"
+        else:
+            self.message_post(body="Generado correctamente")
+            self.state = "done"
+
     @api.multi
     def generate_report(self):
-
-        api_marcos = self.env["marcos.api.tools"]
 
         try:
             month, year = self.name.split("/")
@@ -301,167 +476,81 @@ class DgiiReport(models.Model):
         except:
             raise exceptions.ValidationError(u"Período inválido")
 
-        error_list = {}
+        self.purchase_report.unlink()
+        self.sale_report.unlink()
+        self.cancel_report.unlink()
+        self.exterior_report.unlink()
+
+        self.it_filename = False
+        self.it_binary = False
+        self.ir17_filename = False
+        self.ir17_binary = False
+
+        self.sale_binary = False
+        self.sale_filename = False
+        self.purchase_binary = False
+        self.purchase_filename = False
+        self.cancel_binary = False
+        self.cancel_filename = False
+
         xls_dict = {"it1": {}, "ir17": {}}
         purchase_report = []
         sale_report = []
-        cancel_report = []
         ext_report = []
         sale_line = 1
         purchase_line = 1
-        cancel_line = 1
         ext_line = 1
 
+        sale_except_tax_id = self.env.ref("l10n_do.{}_tax_0_sale".format(self.company_id.id))
+        purchase_except_tax_id = self.env.ref("l10n_do.{}_tax_0_purch".format(self.company_id.id))
+        untax_ids = (sale_except_tax_id.id, purchase_except_tax_id.id)
+
+        journal_ids = self.env["account.journal"].search(
+            ['|', ('ncf_control', '=', True), ('ncf_remote_validation', '=', True)])
+
         invoice_ids = self.env["account.invoice"].search(
-            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date)])
+            [('date_invoice', '>=', start_date), ('date_invoice', '<=', end_date),
+             ('journal_id', 'in', journal_ids.ids)])
+        #
+        # invoice_ids = self.env["account.invoice"].search([('number','=','A030180010100118113')])
 
-        draft_invoice_ids_set = invoice_ids.filtered(lambda x: x.state == "draft")
-        invoice_ids_set = invoice_ids.filtered(lambda x: x.state in ('open', 'paid', 'cancel'))
-        paid_invoice_ids = self.env["account.payment"].search(
-            [('payment_date', '>=', start_date), ('payment_date', '<=', end_date), ('invoice_ids', '!=', False)])
-        for paid_invoice_id in paid_invoice_ids:
-            invoice_ids_set |= paid_invoice_id.invoice_ids.filtered(lambda r: r.journal_id.purchase_type == "informal")
+        error_list = self.get_invoice_in_draft_error(invoice_ids.filtered(lambda x: x.state == "draft"))
 
-        for draft_invoice_id_set in draft_invoice_ids_set:
-            if not error_list.get(draft_invoice_id_set.id, False):
-                error_list.update(
-                    {draft_invoice_id_set.id: [
-                        (draft_invoice_id_set.type, draft_invoice_id_set.number, "Factura sin validar")]})
-            else:
-                error_list[draft_invoice_id_set.id].append(
-                    (draft_invoice_id_set.type, draft_invoice_id_set.number, "Factura sin validar"))
+        self.create_cancel_invoice_lines(invoice_ids.filtered(lambda x: x.state == 'cancel' and
+                                                                        x.type in ("out_invoice", "out_refund") and
+                                                                        x.move_name))
 
-        for invoice_id in invoice_ids_set:
+        invoice_ids = invoice_ids.filtered(lambda x: x.state in ('open', 'paid'))
 
-            if invoice_id.type in ("in_invoice", "in_refund") and invoice_id.journal_id.purchase_type in (
-                    "import", "others"):
+        invoice_ids |= self.get_late_informal_payed_invoice(start_date, end_date)
+
+        count = len(invoice_ids)
+        for invoice_id in invoice_ids:
+
+            RNC_CEDULA, TIPO_IDENTIFICACION = self.get_identification_info(invoice_id.partner_id.vat)
+
+            error_msg = self.validate_fiscal_information(RNC_CEDULA, invoice_id.number, invoice_id.type,
+                                                         invoice_id.origin_invoice_ids)
+            if error_msg:
+                for error in error_msg:
+                    if not error_list.get(invoice_id.id, False):
+                        error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error)]})
+                    else:
+                        error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error))
                 continue
 
-            TIPO_IDENTIFICACION = "3"
-
-            RNC_CEDULA = invoice_id.partner_id.vat and re.sub("[^0-9]", "", invoice_id.partner_id.vat.strip()) or False
-            if RNC_CEDULA:
-                if len(RNC_CEDULA) == 9:
-                    TIPO_IDENTIFICACION = "1"
-                elif len(RNC_CEDULA) == 11:
-                    TIPO_IDENTIFICACION = "2"
-                else:
-                    RNC_CEDULA = ""
-
             NUMERO_COMPROBANTE_FISCAL = invoice_id.number
-
-            NUMERO_COMPROBANTE_MODIFICADO = False
-            affected_nvoice_id = False
-
             FECHA_COMPROBANTE = invoice_id.date_invoice
 
-            ITBIS_RETENIDO = 0
-            RETENCION_RENTA = 0
+            NUMERO_COMPROBANTE_MODIFICADO = AFFECTED_NVOICE_ID = False
 
+            if invoice_id.type in ("out_refund", "in_refund"):
+                NUMERO_COMPROBANTE_MODIFICADO, AFFECTED_NVOICE_ID = self.get_numero_de_comprobante_modificado(
+                    invoice_id)
+
+            FECHA_PAGO = ITBIS_RETENIDO = RETENCION_RENTA = False
             if invoice_id.state == "paid":
-                move_id = self.env["account.move.line"].search(
-                    [("move_id", "=", invoice_id.move_id.id), ('full_reconcile_id', '!=', False)])
-                if invoice_id.journal_id.purchase_type == 'informal':
-                    if move_id:
-                        retentions = self.env["account.move.line"].search(
-                            [('invoice_id', '=', invoice_id.id), ('payment_id', '!=', False),
-                             ('tax_line_id', '!=', False)])
-                        if retentions:
-                            for retention in retentions:
-                                if retention.tax_line_id.purchase_tax_type == "ritbis":
-                                    ITBIS_RETENIDO += retention.credit
-                                elif retention.tax_line_id.purchase_tax_type == "isr":
-                                    RETENCION_RENTA += retention.credit
-
-                            FECHA_PAGO = retentions[0].date
-                else:
-                    FECHA_PAGO = move_id and move_id[0].date or False
-
-            else:
-                FECHA_PAGO = False
-
-            if invoice_id.state != "cancel" and (
-                            invoice_id.journal_id.type == "purchase" and invoice_id.journal_id.purchase_type in [
-                        'normal',
-                        'minor',
-                        'informal']) or (
-                            invoice_id.journal_id.type == "sale" and invoice_id.sale_fiscal_type in ['fiscal', 'gov',
-                                                                                                     'special']):
-
-                if invoice_id.type in ("out_invoice", "out_refund", "in_invoice", "in_refund"):
-
-                    if not api_marcos.is_identification(invoice_id.partner_id.vat):
-
-                        error_msg = u"RNC/Cédula no es valido"
-
-                        if not error_list.get(invoice_id.id, False):
-                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                        else:
-                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-
-                        continue
-
-                    if not api_marcos.is_ncf(invoice_id.number, invoice_id.type):
-                        error_msg = u"NCF no es valido"
-
-                        if not error_list.get(invoice_id.id, False):
-                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                        else:
-                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-
-                        continue
-
-                    if len(invoice_id.origin_invoice_ids) > 1 and invoice_id.type in ("out_refund", "in_refund"):
-
-                        origin_invoice_ids = invoice_id.origin_invoice_ids.filtered(
-                            lambda x: x.state in ("paid", "open"))
-
-                        if len(origin_invoice_ids) > 1:
-                            error_msg = u"Afectado por varias notas de credito"
-                            if not error_list.get(invoice_id.id, False):
-                                error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                            else:
-                                error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-
-                    if invoice_id.type in ("out_refund", "in_refund"):
-                        NUMERO_COMPROBANTE_MODIFICADO_ID = invoice_id.origin_invoice_ids.filtered(
-                            lambda x: x.state in ("open", "paid"))
-
-                        if not NUMERO_COMPROBANTE_MODIFICADO_ID:
-
-                            INV_NUMERO_COMPROBANTE_MODIFICADO_ID = self.env["account.invoice"].search(
-                                [('number', '=', invoice_id.origin)])
-
-                            if INV_NUMERO_COMPROBANTE_MODIFICADO_ID:
-                                # agrega compatibilidad con la versiones anteriores donde la factura que afecta solo se grababa como un char en el campo origin
-                                # esto resuelve cuando se ha efecturado una migracion de una version anteior
-                                NUMERO_COMPROBANTE_MODIFICADO = INV_NUMERO_COMPROBANTE_MODIFICADO_ID[0].number
-                                affected_nvoice_id = INV_NUMERO_COMPROBANTE_MODIFICADO_ID[0].id
-                            else:
-
-                                error_msg = u"Falta el comprobante que afecta"
-                                if not error_list.get(invoice_id.id, False):
-                                    error_list.update(
-                                        {invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                                else:
-                                    error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-                        elif len(NUMERO_COMPROBANTE_MODIFICADO_ID) > 1:
-                            error_msg = u"Nota de crédito no puede afectar dos facturas"
-                            if not error_list.get(invoice_id.id, False):
-                                error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                            else:
-                                error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
-
-                        else:
-                            NUMERO_COMPROBANTE_MODIFICADO = NUMERO_COMPROBANTE_MODIFICADO_ID.number
-                            affected_nvoice_id = NUMERO_COMPROBANTE_MODIFICADO_ID.id
-
-                    if not invoice_id.number:
-                        error_msg = u"Factura validada con error"
-                        if not error_list.get(invoice_id.id, False):
-                            error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                        else:
-                            error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
+                FECHA_PAGO, ITBIS_RETENIDO, RETENCION_RENTA = self.get_payment_date_and_retention_data(invoice_id)
 
             commun_data = {
                 "RNC_CEDULA": RNC_CEDULA,
@@ -469,223 +558,207 @@ class DgiiReport(models.Model):
                 "NUMERO_COMPROBANTE_FISCAL": NUMERO_COMPROBANTE_FISCAL,
                 "NUMERO_COMPROBANTE_MODIFICADO": NUMERO_COMPROBANTE_MODIFICADO,
                 "FECHA_COMPROBANTE": FECHA_COMPROBANTE,
-                "FECHA_PAGO": FECHA_PAGO,
+                "FECHA_PAGO": FECHA_PAGO and FECHA_PAGO or None,
                 "invoice_id": invoice_id.id,
                 "inv_partner": invoice_id.partner_id.id,
-                "affected_nvoice_id": affected_nvoice_id,
-                "nc": True if affected_nvoice_id else False,
-                "ITBIS_RETENIDO": ITBIS_RETENIDO,
-                "RETENCION_RENTA": RETENCION_RENTA,
-                "MONTO_FACTURADO_EXCENTO": 0
+                "affected_nvoice_id": AFFECTED_NVOICE_ID,
+                "nc": True if AFFECTED_NVOICE_ID else False,
+                "MONTO_FACTURADO_EXCENTO": 0,
+                "MONTO_FACTURADO": 0,
+                "ITBIS_FACTURADO": 0,
+                "ITBIS_FACTURADO_SERVICIOS": 0,
+                "ITBIS_RETENIDO": ITBIS_RETENIDO and ITBIS_RETENIDO or 0,
+                "RETENCION_RENTA": RETENCION_RENTA and RETENCION_RENTA or 0,
+                "TIPO_BIENES_SERVICIOS_COMPRADOS": invoice_id.purchase_fiscal_type
             }
 
-            move_line_not_repeat = set(invoice_id.move_id.line_ids.ids)
-            for line in invoice_id.invoice_line_ids:
-                taxes = line.invoice_line_tax_ids
+            no_tax_line = invoice_id.invoice_line_ids.filtered(lambda x: not x.invoice_line_tax_ids)
 
-                if not taxes:
-                    if invoice_id.type in ("out_invoice", "out_refund"):
-                        line.write({"invoice_line_tax_ids": [
-                            (4, self.env.ref("l10n_do.{}_tax_0_sale".format(self.company_id.id)).id, False)]})
-                    else:
-                        line.write({"invoice_line_tax_ids": [
-                            (4, self.env.ref("l10n_do.{}_tax_0_purch".format(self.company_id.id)).id, False)]})
-
-                taxes = line.invoice_line_tax_ids
-
-                account_ids = line.account_id.ids
-
-                move_line_ids = self.env["account.move.line"].search(
-                    [('move_id', '=', invoice_id.move_id.id), ('name', '=', line.name),
-                     ('account_id', 'in', account_ids), ("id", "in", list(move_line_not_repeat))])
-
-                if not move_line_ids:
-                    move_line_ids = self.env["account.move.line"].search(
-                        [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', line.product_id.id),
-                         ("id", "in", list(move_line_not_repeat))])
-
-                if len(move_line_not_repeat) > 0 and move_line_ids:
-                    if move_line_ids.ids[0] in move_line_not_repeat:
-                        move_line_ids = move_line_ids[0]
-                        move_line_not_repeat.remove(move_line_ids[0].id)
-                    else:
-                        continue
-
-                debit = abs(sum([line.debit for line in move_line_ids]))
-                credit = abs(sum([line.credit for line in move_line_ids]))
-
-                if invoice_id.type in ["out_invoice", "in_refund"]:
-                    amount = credit - debit
+            if no_tax_line:
+                if invoice_id.type in ("out_invoice", "out_refund"):
+                    no_tax_line.write({"invoice_line_tax_ids": [(4, sale_except_tax_id.id, False)]})
                 else:
-                    amount = debit - credit
+                    no_tax_line.write({"invoice_line_tax_ids": [(4, purchase_except_tax_id, False)]})
 
-                if not line.name:
-                    error_msg = u"La factura tiene lineas sin descripción"
-                    if not error_list.get(invoice_id.id, False):
-                        error_list.update({invoice_id.id: [(invoice_id.type, invoice_id.number, error_msg)]})
-                    else:
-                        error_list[invoice_id.id].append((invoice_id.type, invoice_id.number, error_msg))
+            untaxed_lines = invoice_id.invoice_line_ids.filtered(lambda x: x.invoice_line_tax_ids[0].id in untax_ids)
 
-                if not commun_data.get("MONTO_FACTURADO", False):
-                    commun_data.update({"MONTO_FACTURADO": amount})
+            untaxed_move_lines = []
+            for untaxed_line in untaxed_lines:
+                if invoice_id.type in ("in_invoice", 'out_refund'):
+                    domain = [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', untaxed_line.product_id.id),
+                              ('debit', '=', abs(untaxed_line.price_subtotal_signed))]
                 else:
-                    commun_data["MONTO_FACTURADO"] += amount
+                    domain = [('move_id', '=', invoice_id.move_id.id), ('product_id', '=', untaxed_line.product_id.id),
+                              ('credit', '=', abs(untaxed_line.price_subtotal_signed))]
 
-                prevent_repeat = set()
+                move_lines = self.env["account.move.line"].search(domain)
+                if move_lines:
+                    untaxed_move_lines.append(move_lines)
 
-                for tax in taxes:
+            if untaxed_move_lines:
+                if invoice_id.type in ("out_invoice", "out_refund"):
+                    if not sale_except_tax_id in [t.tax_id for t in invoice_id.tax_line_ids]:
+                        invoice_id.write({"tax_line_ids": [(0, 0, {"tax_id": sale_except_tax_id.id,
+                                                                   "name": sale_except_tax_id.name,
+                                                                   "account_id": untaxed_move_lines[
+                                                                       0].account_id.id})]})
+                else:
+                    if not purchase_except_tax_id in [t.tax_id for t in invoice_id.tax_line_ids]:
+                        invoice_id.write({"tax_line_ids": [(0, 0, {"tax_id": purchase_except_tax_id.id,
+                                                                   "name": purchase_except_tax_id.name,
+                                                                   "account_id": untaxed_move_lines[
+                                                                       0].account_id.id})]})
 
-                    if tax.type_tax_use in ("purchase", "sale"):
+                commun_data["MONTO_FACTURADO_EXCENTO"] = self.env.user.company_id.currency_id.round(
+                    sum(abs(rec.debit - rec.credit) for rec in untaxed_move_lines))
 
-                        hash = (tax.id, move_line_ids)
-                        if hash in prevent_repeat:
-                            continue
-                        else:
-                            prevent_repeat.add(hash)
+            taxed_lines = invoice_id.invoice_line_ids.filtered(lambda x: x.invoice_line_tax_ids[0].id not in untax_ids)
 
-                        for base_line in move_line_ids:
+            taxed_lines_name = [rec.product_id.id for rec in taxed_lines]
 
-                            base_amount = abs(base_line.debit - base_line.credit)
-                            if invoice_id.type in ("out_refund", "in_refund"):
-                                base_amount = base_amount*-1
-
-                            if tax.amount == 0:
-                                commun_data["MONTO_FACTURADO_EXCENTO"] += base_amount
-
-                            if tax.base_it1_cels:
-                                xls_cels = tax.base_it1_cels.split(",")
-                                for xls_cel in xls_cels:
-                                    if not xls_dict["it1"].get(xls_cel, False):
-                                        xls_dict["it1"].update({xls_cel: base_amount})
-                                    else:
-                                        xls_dict["it1"][xls_cel] += base_amount
-
-                            if tax.base_ir17_cels:
-                                xls_cels = tax.base_ir17_cels.split(u",")
-
-                                for xls_cel in xls_cels:
-                                    xls_cel = xls_cel.split(u"%")
-
-                                    if len(xls_cel) == 1:
-                                        if not xls_dict["ir17"].get(xls_cel[0], False):
-                                            xls_dict["ir17"].update({xls_cel[0]: base_amount})
-                                        else:
-                                            xls_dict["ir17"][xls_cel[0]] += base_amount
-                                    elif len(xls_cel) == 2:
-                                        if not xls_dict["ir17"].get(xls_cel[0], False):
-                                            xls_dict["ir17"].update(
-                                                {xls_cel[0]: round(base_amount * (float(xls_cel[1]) / 100), 2)})
-                                        else:
-                                            xls_dict["ir17"][xls_cel[0]] += round(
-                                                base_amount * (float(xls_cel[1]) / 100), 2)
-
-            if invoice_id.move_id:
-                taxes = []
-                for tax_line in invoice_id.tax_line_ids:
-                    tax = self.env["account.tax"].search(
-                        [('name', '=', tax_line.name), ('account_id', '=', tax_line.account_id.id)])
-                    if not tax:
-                        tax = self.env["account.tax"].search([('name', '=', tax_line.name)])
-                    if tax:
-                        taxes.append(tax)
-
-            ITBIS_FACTURADO = 0.0
-            for tax in taxes:
-
-                if tax.type_tax_use in ("purchase", "sale"):
-                    move_line_ids = self.env["account.move.line"].search(
-                        [('move_id', '=', invoice_id.move_id.id), ('name', '=', tax.name)])
-
-                    if move_line_ids:
-
-                        amount = abs(sum([line.debit - line.credit for line in move_line_ids]))
-                        ITBIS_FACTURADO += amount
-                        if invoice_id.type in ("out_refund", "in_refund"):
-                            amount = amount * -1
-
-
-                        if tax.tax_it1_cels:
-                            xls_cels = tax.tax_it1_cels.split(",")
-                            for xls_cel in xls_cels:
-                                if not xls_dict["it1"].get(xls_cel, False):
-                                    xls_dict["it1"].update({xls_cel: amount})
-                                else:
-                                    xls_dict["it1"][xls_cel] += amount
-
-                        if tax.tax_ir17_cels:
-                            xls_cels = tax.tax_ir17_cels.split(",")
-                            for xls_cel in xls_cels:
-                                if not xls_dict["ir17"].get(xls_cel, False):
-                                    xls_dict["ir17"].update({xls_cel: amount})
-                                else:
-                                    xls_dict["ir17"][xls_cel] += amount
-
-                        if tax.type_tax_use == "sale" or (
-                                        tax.type_tax_use == "purchase" and tax.purchase_tax_type == "itbis"):
-                            commun_data.update({"ITBIS_FACTURADO": ITBIS_FACTURADO})
-
-
-            if invoice_id.type in ("out_invoice", "out_refund") and invoice_id.state != "cancel":
-                commun_data.update({"LINE": sale_line})
-                sale_report.append(commun_data)
-                sale_line += 1
-            elif invoice_id.type in (
-                    "out_invoice", "out_refund") and invoice_id.state == "cancel" and invoice_id.move_name:
-                commun_data.update({"LINE": cancel_line, "TIPO_ANULACION": invoice_id.anulation_type,
-                                    "NUMERO_COMPROBANTE_FISCAL": invoice_id.move_name})
-                cancel_report.append(commun_data)
-                cancel_line += 1
-            elif invoice_id.type in ("in_invoice",
-                                     "in_refund") and invoice_id.state != "cancel" and invoice_id.journal_id.purchase_type == "exterior":
-                commun_data.update({"LINE": ext_line})
-                ext_report.append(commun_data)
-                ext_line += 1
-            elif invoice_id.type in ("in_invoice", "in_refund") and invoice_id.state != "cancel":
-                commun_data.update(
-                    {"LINE": purchase_line, "TIPO_BIENES_SERVICIOS_COMPRADOS": invoice_id.purchase_fiscal_type})
-                purchase_report.append(commun_data)
-                purchase_line += 1
+            if commun_data["MONTO_FACTURADO_EXCENTO"]:
+                taxed_lines_amount = self.env["account.move.line"].search(
+                    [('move_id', '=', invoice_id.move_id.id), ('product_id', 'in', taxed_lines_name),
+                     ("id", 'not in', [x.id for x in untaxed_move_lines])])
             else:
-                continue
+                taxed_lines_amount = self.env["account.move.line"].search([('move_id', '=', invoice_id.move_id.id),
+                                                                           ('product_id', 'in', taxed_lines_name)])
 
-        error_ids = error_list.keys()
+            commun_data["MONTO_FACTURADO"] = self.env.user.company_id.currency_id.round(
+                sum(abs(rec.debit - rec.credit) for rec in taxed_lines_amount))
 
-        # 607
-        self.sale_report.unlink()
-        new_sale_lines = []
-        for sale in sale_report:
-            if not sale["invoice_id"] in error_ids:
-                new_sale_lines.append((0, 0, sale))
-        self.write({"sale_report": new_sale_lines})
+            commun_data["MONTO_FACTURADO"] += commun_data["MONTO_FACTURADO_EXCENTO"]
 
-        # 608
-        self.cancel_report.unlink()
-        new_cancel_report = []
-        for cancel in cancel_report:
-            if not cancel["invoice_id"] in error_ids:
-                new_cancel_report.append((0, 0, cancel))
-        self.write({"cancel_report": new_cancel_report})
+            for tax in invoice_id.tax_line_ids:
+                tax_base_amount = commun_data["MONTO_FACTURADO"]
+                untax_base_amount = commun_data["MONTO_FACTURADO_EXCENTO"]
 
-        # 609
-        new_ext_report = []
-        self.exterior_report.unlink()
-        for ext in ext_report:
-            if not ext["invoice_id"] in error_ids:
-                new_ext_report.append((0, 0, ext))
+                tax_line = self.env["account.move.line"].search(
+                    [('move_id', '=', invoice_id.move_id.id), ('tax_line_id', '=', tax.tax_id.id)])
 
-        self.write({"exterior_report": new_ext_report})
+                if tax_line:
+                    tax_amount = self.env.user.company_id.currency_id.round(
+                        sum(abs(rec.debit - rec.credit) for rec in tax_line))
 
-        # 606
-        new_purchase_lines = []
-        self.purchase_report.unlink()
-        for purchase in purchase_report:
-            if not purchase["invoice_id"] in error_ids:
-                new_purchase_lines.append((0, 0, purchase))
+                    if tax.tax_id.type_tax_use == "sale" or (
+                            tax.tax_id.type_tax_use == "purchase" and tax.tax_id.purchase_tax_type in ("itbis")):
+                        commun_data["ITBIS_FACTURADO"] += tax_amount
 
-        self.write({"purchase_report": new_purchase_lines})
+                    if tax.tax_id.type_tax_use == "purchase" and tax.tax_id.purchase_tax_type == "itbis_servicio":
+                        commun_data["ITBIS_FACTURADO_SERVICIOS"] += tax_amount
+                else:
+                    tax_amount = 0
 
-        self.generate_txt()
+                if invoice_id.type in ("out_refund", "in_refund"):
+                    tax_base_amount = tax_base_amount * -1
+                    untax_base_amount = untax_base_amount * -1
+                    tax_amount = tax_amount*-1
 
+                if tax.tax_id.base_it1_cels:
+                    xls_cels = tax.tax_id.base_it1_cels.split(",")
+
+                    for xls_cel in xls_cels:
+                        if tax.tax_id.amount == 0:
+                            if not xls_dict["it1"].get(xls_cel, False):
+                                xls_dict["it1"].update({xls_cel: untax_base_amount})
+                            else:
+                                xls_dict["it1"][xls_cel] += untax_base_amount
+                        else:
+                            if not xls_dict["it1"].get(xls_cel, False):
+                                xls_dict["it1"].update({xls_cel: tax_base_amount})
+                            else:
+                                xls_dict["it1"][xls_cel] += tax_base_amount
+
+                if tax.tax_id.base_ir17_cels:
+                    xls_cels = tax.tax_id.base_ir17_cels.split(u",")
+
+                    for xls_cel in xls_cels:
+                        xls_cel = xls_cel.split(u"%")
+
+                        if len(xls_cel) == 1:
+                            if not xls_dict["ir17"].get(xls_cel[0], False):
+                                xls_dict["ir17"].update({xls_cel[0]: commun_data["MONTO_FACTURADO"]})
+                            else:
+                                xls_dict["ir17"][xls_cel[0]] += commun_data["MONTO_FACTURADO"]
+                        elif len(xls_cel) == 2:
+                            if not xls_dict["ir17"].get(xls_cel[0], False):
+                                xls_dict["ir17"].update(
+                                    {xls_cel[0]: round(commun_data["MONTO_FACTURADO"] * (float(xls_cel[1]) / 100), 2)})
+                            else:
+                                xls_dict["ir17"][xls_cel[0]] += round(
+                                    commun_data["MONTO_FACTURADO"] * (float(xls_cel[1]) / 100), 2)
+
+                if tax.tax_id.tax_it1_cels:
+                    xls_cels = tax.tax_id.tax_it1_cels.split(",")
+                    for xls_cel in xls_cels:
+                        if not xls_dict["it1"].get(xls_cel, False):
+                            xls_dict["it1"].update({xls_cel: tax_amount})
+                        else:
+                            xls_dict["it1"][xls_cel] += tax_amount
+
+                if tax.tax_id.tax_ir17_cels:
+                    xls_cels = tax.tax_id.tax_ir17_cels.split(",")
+                    for xls_cel in xls_cels:
+                        if not xls_dict["ir17"].get(xls_cel, False):
+                            xls_dict["ir17"].update({xls_cel: tax_amount})
+                        else:
+                            xls_dict["ir17"][xls_cel] += tax_amount
+
+            if invoice_id.type in ("out_invoice", "out_refund") and commun_data["MONTO_FACTURADO"]:
+                sale_report.append((self.id,
+                                    sale_line,
+                                    commun_data["RNC_CEDULA"],
+                                    commun_data["TIPO_IDENTIFICACION"],
+                                    commun_data["NUMERO_COMPROBANTE_FISCAL"],
+                                    commun_data["NUMERO_COMPROBANTE_MODIFICADO"] and commun_data[
+                                        "NUMERO_COMPROBANTE_MODIFICADO"] or None,
+                                    commun_data["FECHA_COMPROBANTE"],
+                                    commun_data["ITBIS_FACTURADO"],
+                                    commun_data["MONTO_FACTURADO"],
+                                    commun_data["MONTO_FACTURADO_EXCENTO"],
+                                    invoice_id.id,
+                                    AFFECTED_NVOICE_ID and AFFECTED_NVOICE_ID or None,
+                                    AFFECTED_NVOICE_ID and True or False))
+                sale_line += 1
+            elif invoice_id.type in ("in_invoice", "in_refund") and commun_data["MONTO_FACTURADO"]:
+                purchase_report.append((self.id,
+                                        purchase_line,
+                                        commun_data["RNC_CEDULA"],
+                                        commun_data["TIPO_IDENTIFICACION"],
+                                        commun_data["NUMERO_COMPROBANTE_FISCAL"],
+                                        commun_data["NUMERO_COMPROBANTE_MODIFICADO"] and commun_data[
+                                            "NUMERO_COMPROBANTE_MODIFICADO"] or None,
+                                        commun_data["FECHA_COMPROBANTE"],
+                                        commun_data["FECHA_PAGO"] and commun_data["FECHA_PAGO"] or None,
+                                        commun_data["TIPO_BIENES_SERVICIOS_COMPRADOS"],
+                                        commun_data["ITBIS_FACTURADO"],
+                                        commun_data["ITBIS_RETENIDO"],
+                                        commun_data["MONTO_FACTURADO"],
+                                        commun_data["RETENCION_RENTA"],
+                                        invoice_id.id,
+                                        AFFECTED_NVOICE_ID and AFFECTED_NVOICE_ID or None,
+                                        AFFECTED_NVOICE_ID and True or False,
+                                        commun_data["ITBIS_FACTURADO_SERVICIOS"]))
+                purchase_line += 1
+
+            _logger.info("DGII report {} - - {}".format(count, invoice_id.type))
+            count -= 1
+
+        if purchase_report:
+            self.create_purchase_lines(purchase_report)
+
+        if sale_report:
+            self.create_sales_lines(sale_report)
+
+        self.generate_txt_files()
+        from pprint import pprint as pp
+        pp(xls_dict)
+        self.generate_xls_files(xls_dict)
+
+        if error_list:
+            self.post_error_list(error_list)
+
+    def generate_xls_files(self, xls_dict):
         # fill IT-1 excel file
         cwf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "IT-1-2017.xlsx")
         wb = load_workbook(cwf)
@@ -718,29 +791,8 @@ class DgiiReport(models.Model):
                 'ir17_filename': FILENAME,
                 'ir17_binary': base64.b64encode(xls_file.read())
             })
-        out_inovice_url = "/web#id={}&view_type=form&model=account.invoice&action=196"
-        in_inovice_url = "/web#id={}&view_type=form&model=account.invoice&menu_id=119&action=197"
-        if error_list:
-            message = "<ul>"
-            for ncf, errors in error_list.iteritems():
-                message += "<li>{}</li><ul>".format(errors[0][1] or "Factura invalida")
-                for error in errors:
-                    if error[0] in ("out_invoice", "out_refund"):
-                        message += u"<li><a target='_blank' href='{}'>{}</a></li>".format(out_inovice_url.format(ncf),
-                                                                                          error[2])
-                    else:
-                        message += u"<li><a target='_blank' href='{}'>{}</a></li>".format(in_inovice_url.format(ncf),
-                                                                                          error[2])
-                message += "</ul>"
-            message += "</ul>"
 
-            self.message_post(body=message)
-            self.state = "error"
-        else:
-            self.message_post(body="Generado correctamente")
-            self.state = "done"
-
-    def generate_txt(self):
+    def generate_txt_files(self):
         company_fiscal_identificacion = re.sub("[^0-9]", "", self.company_id.vat)
         period = self.name.split("/")
         month = period[0]
@@ -845,7 +897,7 @@ class DgiiReport(models.Model):
         for line in self.cancel_report:
             ln = ""
             ln += line.NUMERO_COMPROBANTE_FISCAL
-            ln += line.FECHA_COMPROBANTE.replace("-", "")
+            ln += line.FECHA_COMPROBANTE and line.FECHA_COMPROBANTE.replace("-", "") or ""
             ln += "{}".format(line.TIPO_ANULACION).zfill(2)
             lines.append(ln)
 
@@ -874,9 +926,9 @@ class DgiiReportPurchaseLine(models.Model):
     TIPO_BIENES_SERVICIOS_COMPRADOS = fields.Char("Tipo", size=2)
 
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
+    ITBIS_FACTURADO_SERVICIOS = fields.Float("ITBIS Facturado servicios")
     ITBIS_RETENIDO = fields.Float("ITBIS Retenido")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
-    MONTO_FACTURADO_EXCENTO = fields.Float("Monto Facturado Exento")
     RETENCION_RENTA = fields.Float(u"Retención Renta")
 
     invoice_id = fields.Many2one("account.invoice", "NCF")
@@ -896,7 +948,6 @@ class DgiiReportSaleLine(models.Model):
     NUMERO_COMPROBANTE_FISCAL = fields.Char("NCF", size=19)
     NUMERO_COMPROBANTE_MODIFICADO = fields.Char("Afecta", size=19)
     FECHA_COMPROBANTE = fields.Date("Fecha")
-    FECHA_PAGO = fields.Date("Pagado")
     ITBIS_FACTURADO = fields.Float("ITBIS Facturado")
     MONTO_FACTURADO = fields.Float("Monto Facturado")
     MONTO_FACTURADO_EXCENTO = fields.Float("Monto Facturado Exento")
@@ -910,7 +961,6 @@ class DgiiReportSaleLine(models.Model):
     inv_partner = fields.Many2one("res.partner", related="invoice_id.partner_id", string="Relacionado")
     affected_nvoice_id = fields.Many2one("account.invoice", "Afecta")
     nc = fields.Boolean()
-
 
 
 class DgiiCancelReportline(models.Model):

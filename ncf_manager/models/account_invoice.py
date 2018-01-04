@@ -155,7 +155,7 @@ class AccountInvoice(models.Model):
         comodel_name='account.invoice', column1='refund_invoice_id',
         column2='original_invoice_id', relation='account_invoice_refunds_rel',
         string=u"Factura original", readonly=True, states={'draft': [('readonly', False)]},
-        help=u"Factura original a la que se remite esta factura de reembolso")
+        help=u"Factura original a la que se remite esta factura de reembolso",copy=False)
     refund_invoice_ids = fields.Many2many(
         comodel_name='account.invoice', column1='original_invoice_id',
         column2='refund_invoice_id', relation='account_invoice_refunds_rel',

@@ -101,7 +101,7 @@
                                         </td>
                                     </tr>
                                     <tr class="info">
-                                        <th class="tg-yw4l">ITBIS COMPRAOD</th>
+                                        <th class="tg-yw4l">ITBIS COMPRADO</th>
                                         <td class="text-right">
                                             <field name="ITBIS_TOTAL"/>
                                         </td>
@@ -125,7 +125,7 @@
                                         </td>
                                     </tr>
                                     <tr class="warning">
-                                        <th class="tg-yw4l">ITBIS COMPRAOD - ITBIS NOTAS DE CRÉDITO</th>
+                                        <th class="tg-yw4l">ITBIS COMPRADO - ITBIS NOTAS DE CRÉDITO</th>
                                         <td class="text-right">
                                             <field name="ITBIS_TOTAL_PAYMENT"/>
                                         </td>
@@ -140,6 +140,12 @@
                                         <th class="tg-yw4l">RETENCIÓN RENTA</th>
                                         <td class="text-right">
                                             <field name="RETENCION_RENTA"/>
+                                        </td>
+                                    </tr>
+                                    <tr class="danger">
+                                        <th class="tg-yw4l">ITBIS PAGADO EN SERVICIO</th>
+                                        <td class="text-right">
+                                            <field name="ITBIS_FACTURADO_SERVICIOS"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -402,7 +408,6 @@
                                         <field name="number"/>
                                         <field name="NUMERO_COMPROBANTE_MODIFICADO"/>
                                         <field name="FECHA_COMPROBANTE"/>
-                                        <field name="FECHA_PAGO"/>
                                         <field name="ITBIS_FACTURADO" sum="Total ITBIS Facturado"/>
                                         <field name="MONTO_FACTURADO" sum="Total Monto Facturado"/>
                                         <field name="MONTO_FACTURADO_EXCENTO" sum="Total Monto Facturado exento"/>
@@ -484,6 +489,45 @@
         <menuitem action="dgii_report_action" id="marcos_ncf_dgii_report_wizard_menu"
                   parent="ncf_manager.marcos_account_dgii_menu"
                   sequence="2"/>
+
+        <record id="dgii_eport_purchase_line_action" model="ir.actions.act_window">
+            <field name="name">Consultas lineas del 606</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">dgii.report.purchase.line</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    <!-- Add Text Here -->
+                </p>
+                <p>
+                    <!-- More details about what a user can do with this object will be OK -->
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="dgii_eport_purchase_line_menu" name="Consultas lineas del 606" parent="marcos_account_dgii_menu"
+                  action="dgii_eport_purchase_line_action" sequence="3"/>
+
+        <record id="dgii_report_sale_line_action" model="ir.actions.act_window">
+            <field name="name">Consultas lineas del 607</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">dgii.report.sale.line</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    <!-- Add Text Here -->
+                </p>
+                <p>
+                    <!-- More details about what a user can do with this object will be OK -->
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="dgii_report_sale_line_menu" name="Consultas lineas del 607" parent="marcos_account_dgii_menu"
+                  action="dgii_report_sale_line_action" sequence="4"/>
+
 
     </data>
 </odoo>
