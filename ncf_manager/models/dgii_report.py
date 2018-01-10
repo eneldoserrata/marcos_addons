@@ -288,17 +288,17 @@ class DgiiReport(models.Model):
     state = fields.Selection([('draft', 'Nuevo'), ('error', 'Con errores'), ('done', 'Validado')], default="draft")
 
     def get_invoice_in_draft_error(self, invoice_ids):
-        res = {}
+        error_list = {}
         error_msg = "Factura sin validar"
         for invoice_id in invoice_ids:
             if not error_list.get(invoice_id.id, False):
-                res.update(
+                error_list.update(
                     {invoice_id.id: [
                         (invoice_id.type, invoice_id.number, error_msg)]})
             else:
-                res[invoice_id.id].append(
+                error_list[invoice_id.id].append(
                     (invoice_id.type, invoice_id.number, error_msg))
-        return res
+        return error_list
 
     def get_late_informal_payed_invoice(self, start_date, end_date):
 
@@ -331,7 +331,6 @@ class DgiiReport(models.Model):
 
         error_list = []
         if vat and not api_marcos.is_identification(vat):
-            print vat, vat_type, ncf
             error_list.append(u"RNC/Cédula no es valido")
 
         if not api_marcos.is_ncf(ncf, invoice_type):
@@ -578,7 +577,7 @@ class DgiiReport(models.Model):
                 if invoice_id.type in ("out_invoice", "out_refund"):
                     no_tax_line.write({"invoice_line_tax_ids": [(4, sale_except_tax_id.id, False)]})
                 else:
-                    no_tax_line.write({"invoice_line_tax_ids": [(4, purchase_except_tax_id, False)]})
+                    no_tax_line.write({"invoice_line_tax_ids": [(4, purchase_except_tax_id.id, False)]})
 
             untaxed_lines = invoice_id.invoice_line_ids.filtered(lambda x: x.invoice_line_tax_ids[0].id in untax_ids)
 
