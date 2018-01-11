@@ -50,6 +50,8 @@ class AccountJournal(models.Model):
                                      string=u"Tipo de compra", default="normal")
     ncf_control = fields.Boolean("Control de NCF")
     ncf_remote_validation = fields.Boolean(u"Validar NCF con DGII", default=True)
+    caja_chica = fields.Boolean("Diario para caja chica")
+    partner_id = fields.Many2one("res.partner", string="Beneficiario para el pasivo de reposición")
 
 
 class AccountMove(models.Model):

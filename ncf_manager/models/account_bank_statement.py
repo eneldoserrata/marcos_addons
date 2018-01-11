@@ -34,14 +34,15 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from . import shop
-from . import account
-from . import account_invoice
-from . import account_payment
-from . import res
-from . import res_currency
-from . import dgii_report
-from . import sale
-from . import account_bank_statement
+from odoo import models, api
 
 
+class AccountBankStatementLine(models.Model):
+    _inherit = "account.bank.statement.line"
+
+    @api.multi
+    def process_reconciliations(self, data):
+        super(AccountBankStatementLine, self).process_reconciliations(data)
+        if self.journal_id.caja_chica:
+            caja_chica_move_line_id = self.journal_entry_ids.line_ids.filtered(lambda x: x.reconciled is False)
+            caja_chica_move_line_id.partner_id = self.journal_id.partner_id
