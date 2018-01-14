@@ -45,14 +45,14 @@ class StockMove(models.Model):
     @api.multi
     def action_done(self):
         res = super(StockMove, self).action_done()
-
-        product_datas = []
-        pos_configs = self.env["pos.config"].search([('multi_session_id', '!=', False)])
-        if pos_configs:
-            for rec in self:
-                product_datas.append(("pos.sync.backend", {"id": rec.product_id.id,
-                                                           "qty": rec.product_id.qty_available,
-                                                           "model": "stock.inventory.line"}))
-            if product_datas:
-                pos_configs._send_to_channel("pos.sync.backend", product_datas)
+        if self._context.get("job_uuid", False):
+            product_datas = []
+            pos_configs = self.env["pos.config"].search([('multi_session_id', '!=', False)])
+            if pos_configs:
+                for rec in self:
+                    product_datas.append(("pos.sync.backend", {"id": rec.product_id.id,
+                                                               "qty": rec.product_id.qty_available,
+                                                               "model": "stock.inventory.line"}))
+                if product_datas:
+                    pos_configs._send_to_channel("pos.sync.backend", product_datas)
         return res
