@@ -50,7 +50,7 @@ _logger = logging.getLogger(__name__)
 
 class DgiiReport(models.Model):
     _name = "dgii.report"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "name"
 
     @api.multi

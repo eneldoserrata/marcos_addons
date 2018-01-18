@@ -324,6 +324,24 @@ class AccountInvoice(models.Model):
 
         return move_lines
 
+    @api.multi
+    def action_invoice_cancel(self):
+        self.ensure_one()
+        if self.type in ("out_invoice", "out_refund") and self.move_name:
+            view_id = self.env.ref("ncf_manager.ncf_account_invoice_cancel_form")
+            return {
+                'name': "Cancelar factura",
+                'view_mode': 'form',
+                'view_id': view_id.id,
+                'view_type': 'form',
+                'res_model': 'account.invoice.cancel',  # With . Example sale.order
+                'type': 'ir.actions.act_window',
+                'target': 'new'
+            }
+
+        return super(AccountInvoice, self).action_invoice_cancel()
+
+
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'

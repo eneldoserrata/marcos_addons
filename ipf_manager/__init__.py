@@ -33,5 +33,5 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-import controllers
-import models
+from . import controllers
+from . import models

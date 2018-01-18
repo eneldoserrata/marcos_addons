@@ -38,7 +38,7 @@
 import requests
 
 from odoo import models, api, exceptions, fields
-from tools import is_ncf, _internet_on, is_identification
+from .tools import is_ncf, _internet_on, is_identification
 
 import logging
 

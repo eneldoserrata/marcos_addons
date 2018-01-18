@@ -34,6 +34,6 @@
 ########################################################################################################################
 
 
-from . import controllers
 from . import wizard
+from . import controllers
 from . import models

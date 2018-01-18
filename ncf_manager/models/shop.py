@@ -118,6 +118,8 @@ class ShopJournalConfig(models.Model):
 
     @api.model
     def get_user_shop_config(self):
+        if self._context.get("module", False):
+            return self.browse(1)
         user_shops = self.search([('user_ids', '=', self._uid)])
         if not user_shops:
             raise exceptions.UserError("Su usuario no tiene una sucursal asignada.")

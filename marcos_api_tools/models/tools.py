@@ -38,7 +38,8 @@ import csv
 
 csv.field_size_limit(sys.maxsize)
 
-import urllib2
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 
 __author__ = 'eneldoserrata'
 
@@ -210,7 +211,7 @@ def _internet_on(api_marcos):
     """TODO: fix this check"""
     return True
     try:
-        response = urllib2.urlopen(api_marcos, timeout=1)
+        response = urlopen(api_marcos, timeout=1)
         return True
     except urllib2.URLError as err:
         pass

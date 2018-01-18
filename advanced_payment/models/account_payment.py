@@ -44,7 +44,7 @@ _logger = logging.getLogger(__name__)
 
 class AccountPayment(models.Model):
     _name = 'account.payment'
-    _inherit = ['account.payment', 'mail.thread', 'ir.needaction_mixin', 'utm.mixin']
+    _inherit = ['account.payment', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
 
     @api.one
     @api.depends("currency_id")
@@ -732,13 +732,13 @@ class PaymentInvoiceLine(models.Model):
             amount_tax = 0
             for line in self.move_line_id.move_id.line_ids:
                 if line.product_id:
-                    if line.amount_currency <> 0:
+                    if line.amount_currency != 0:
                         amount_untaxed += abs(line.amount_currency)
                     else:
                         amount_untaxed += abs(line.debit + line.credit)
 
                 if line.tax_line_id:
-                    if line.amount_currency <> 0:
+                    if line.amount_currency != 0:
                         amount_tax += abs(line.amount_currency)
                     else:
                         amount_tax += abs(line.credit + line.debit)
@@ -751,7 +751,7 @@ class PaymentInvoiceLine(models.Model):
                     amount_dicount = amount_untaxed * desc
                     amount_untaxed -= amount_dicount
 
-            if line.amount_currency <> 0:
+            if line.amount_currency != 0:
                 return (amount_untaxed + amount_tax) * self.invoice_rate
             else:
                 return amount_untaxed + amount_tax

@@ -2,19 +2,21 @@
 <odoo>
     <data>
 
-        <!-- Inherit Form View to Modify it -->
-        <record id="ncf_manager_account_invoice_cancel_view" model="ir.ui.view">
-            <field name="name">ncf manager account invoice view</field>
+        <record id="ncf_account_invoice_cancel_form" model="ir.ui.view">
+            <field name="name">ncf_account_invoice_cancel_form</field>
             <field name="model">account.invoice.cancel</field>
-            <field name="inherit_id" ref="account.account_invoice_cancel_view"/>
             <field name="arch" type="xml">
-
-                <xpath expr="//footer" position="before">
+                <form string="Actualizacion de costo standard de la categoria">
                     <group>
-                    <field name="anulation_type"/>
+                        <field name="anulation_type"/>
                     </group>
-                </xpath>
-
+                    <footer>
+                        <button name="invoice_cancel" type="object"
+                                string="Cancelar factura" class="oe_highlight"/>
+                        o
+                        <button special="cancel" string="No Cancelar"/>
+                    </footer>
+                </form>
             </field>
         </record>
 

@@ -37,12 +37,7 @@ from odoo.exceptions import UserError
 
 
 class AccountInvoiceCancel(models.TransientModel):
-    """
-    This wizard will cancel the all the selected invoices.
-    If in the journal, the option allow cancelling entry is not selected then it will give warning message.
-    """
-
-    _inherit = "account.invoice.cancel"
+    _name = "account.invoice.cancel"
     _description = "Cancel the Selected Invoices"
 
     anulation_type = fields.Selection([
@@ -63,4 +58,4 @@ class AccountInvoiceCancel(models.TransientModel):
         if active_id:
             invoice_id = self.env['account.invoice'].browse(active_id)
             invoice_id.anulation_type = self.anulation_type
-            return invoice_id.action_invoice_cancel()
+            return invoice_id.action_cancel()

@@ -34,4 +34,4 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-import manual_invoice_payment
+from . import manual_invoice_payment

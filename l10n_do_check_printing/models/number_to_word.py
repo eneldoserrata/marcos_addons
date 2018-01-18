@@ -33,7 +33,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
-from itertools import ifilter
+
 
 UNIDADES = (
     '',
@@ -98,18 +98,7 @@ MONEDAS = (
 
 
 def to_word(number, mi_moneda=None):
-    # if mi_moneda != None:
-    #     try:
-    #         moneda = ifilter(lambda x: x['currency'] == mi_moneda, MONEDAS).next()
-    #         if number < 2:
-    #             moneda = moneda['singular']
-    #         else:
-    #             moneda = moneda['plural']
-    #     except:
-    #         return u"Tipo de moneda inválida"
-    # else:
-    #     moneda = ""
-    # """Converts a number into string representation"""
+
     converted = ''
 
     if not (0 < number < 999999999):

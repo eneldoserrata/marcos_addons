@@ -17,17 +17,13 @@
                     <field name="is_company_currency" invisible="1"/>
                 </form>
 
-                <xpath expr="//button[9]" position="attributes">
-                    <attribute name="string">Aplicar NC o ND</attribute>
-                </xpath>
-
                 <field name="date_due" position="replace">
                     <field name="move_name" invisible="0" groups="account.group_account_manager"/>
                 </field>
 
                 <xpath expr="//sheet//label" position="before">
                     <div class="oe_button_box" name="button_box">
-                        <button name="%(update_rate_wizard_action)d"
+                        <button name="%(ncf_manager.update_rate_wizard_action)d"
                                 type="action"
                                 class="oe_stat_button"
                                 icon="fa-money"
@@ -47,10 +43,6 @@
                     <field name="move_name" readonly="1" attrs="{'invisible': [('state','!=','cancel')]}"/>
                 </field>
 
-                <xpath expr="//button[@name='action_invoice_cancel']" position="replace">
-                    <button name="%(account.action_account_invoice_cancel)d" type='action' states="draft,proforma2,open"
-                            string="Cancel Invoice" groups="account.group_account_user"/>
-                </xpath>
                 <field name="date_invoice" position="after">
                     <field name="date_due" string="Vence"/>
                     <field name="shop_id" options="{'no_quick_create':True,'no_create_edit':True}"
@@ -120,10 +112,6 @@
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
 
-                <xpath expr="//button[3]" position="attributes">
-                    <attribute name="string">Aplicar NC o ND</attribute>
-                </xpath>
-
                 <field name="number" position="after">
                     <field name="is_company_currency" invisible="1"/>
                 </field>
@@ -137,7 +125,7 @@
 
                 <xpath expr="//sheet//label" position="before">
                     <div class="oe_button_box" name="button_box">
-                        <button name="%(update_rate_wizard_action)d"
+                        <button name="%(ncf_manager.update_rate_wizard_action)d"
                                 type="action"
                                 class="oe_stat_button"
                                 icon="fa-money"

@@ -34,7 +34,7 @@
 ########################################################################################################################
 
 from odoo import models, api, exceptions, fields
-import number_to_word
+from . import number_to_word
 
 
 class account_register_payments(models.TransientModel):
