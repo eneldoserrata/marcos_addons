@@ -57,7 +57,7 @@
     'version': '10.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'report','utm'],
+    'depends': ['base', 'account','utm'],
 
     # always loaded
     'data': [
