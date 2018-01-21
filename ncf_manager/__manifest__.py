@@ -51,7 +51,7 @@
     'version': '10.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'marcos_api_tools', 'l10n_do', 'sale', 'account_cancel'],
+    'depends': ['base','web','account', 'marcos_api_tools', 'l10n_do', 'sale', 'account_cancel'],
 
     # always loaded
     'data': [
@@ -67,7 +67,7 @@
         'views/views.xml',
         'views/res_currency_view.xml',
         'views/templates.xml',
-        'views/res_view.xml',
+        'views/res_partner_view.xml',
         'views/dgii_report_view.xml',
         'data/setup_ncf.xml'
     ],

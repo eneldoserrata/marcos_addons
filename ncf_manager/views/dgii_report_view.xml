@@ -18,7 +18,7 @@
                         <group col="4">
                             <group>
                                 <field name="company_id" readonly="1"/>
-                                <field name="name" widget="mask" data-inputmask="'mask': '99/9999'"/>
+                                <field name="name" data-inputmask="'mask': '99/9999'"/>
                                 <field name="positive_balance"/>
                             </group>
                             <group>
@@ -438,7 +438,7 @@
                                 </field>
                             </page>
                         </notebook>
-                        <widget type="opl"/>
+                        <!--<widget type="opl"/>-->
                     </sheet>
                     <div class="oe_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>

@@ -34,15 +34,37 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-from . import shop
-from . import account
-from . import account_invoice
-from . import account_payment
-from . import res_partner
-from . import res_currency
-from . import dgii_report
-from . import sale
-from . import account_bank_statement
-from . import dgii_ws
+from odoo import models, api
+from zeep import Client
+import json
 
+class DgiiWs(models.Model):
+    _name = "dgii.ws"
 
+    dgii_ws = u"http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?WSDL"
+
+    @api.model
+    def GetContribuyentes(self, value, patronBusqueda=0, inicioFilas=0, filaFilas=100, IMEI="public"):
+        client = Client(self.dgii_ws)
+        res = client.service.GetContribuyentes(value[0], patronBusqueda=patronBusqueda, inicioFilas=inicioFilas, filaFilas=filaFilas, IMEI=IMEI)
+        return json.loads(res)
+
+    def GetContribuyentesCount(self, value, IMEI="public"):
+        res = self.client.GetContribuyentesCount(value, IMEI=IMEI)
+        return json.loads(res)
+
+    def GetDocumento(self, codigoBusqueda, patronBusqueda=0, IMEI="public"):
+        res = self.service.client(codigoBusqueda, patronBusqueda=patronBusqueda, IMEI=IMEI)
+        return json.loads(res)
+
+    def GetNCF(self, RNC, NCF, IMEI="public"):
+        res = self.service.client.GetNCF(RNC, NCF, IMEI=IMEI)
+        return json.loads(res)
+
+    def GetPlaca(self, RNC, Placa, IMEI="public"):
+        res = self.service.client.GetPlaca(RNC, Placa, IMEI=IMEI)
+        return json.loads(res)
+
+    def GetVehiculoPorDATAMATRIX(self, value, IMEI="public"):
+        res =  self.service.client.GetVehiculoPorDATAMATRIX(value, IMEI=IMEI)
+        return json.loads(res)

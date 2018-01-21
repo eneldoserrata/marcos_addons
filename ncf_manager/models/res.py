@@ -55,8 +55,6 @@ class ResCompany(models.Model):
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-
-
     @api.multi
     @api.depends('sale_fiscal_type')
     def _fiscal_info_required(self):
@@ -161,6 +159,7 @@ class ResPartner(models.Model):
 
     @api.model
     def create(self, vals):
+        import pdb;pdb.set_trace()
         if self._context.get("install_mode", False):
             return super(ResPartner, self).create(vals)
 
@@ -183,6 +182,7 @@ class ResPartner(models.Model):
         if vals.get("vat", False):
             vals.update({"sale_fiscal_type": "fiscal", "is_company": True})
         return super(ResPartner, self).create(vals)
+
 
     @api.model
     def name_create(self, name):
@@ -223,12 +223,13 @@ class ResPartner(models.Model):
     @api.multi
     def rewrite_due_date(self):
         for rec in self:
-            invoice_ids = self.env["account.invoice"].search([('state','=','open'),('partner_id','=',self.id)])
+            invoice_ids = self.env["account.invoice"].search([('state', '=', 'open'), ('partner_id', '=', self.id)])
             for inv in invoice_ids:
                 pterm = rec.property_payment_term_id or rec.property_supplier_payment_term_id
                 if pterm:
                     currency_id = inv.currency_id.id or inv.company_id.currency_id.id
-                    pterm_list = pterm.with_context(currency_id=currency_id).compute(value=1, date_ref=inv.date_invoice)[0]
+                    pterm_list = \
+                    pterm.with_context(currency_id=currency_id).compute(value=1, date_ref=inv.date_invoice)[0]
                     date_due = max(line[0] for line in pterm_list)
                     inv.date_due = date_due
                     for line in inv.move_id.line_ids:

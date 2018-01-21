@@ -34,43 +34,44 @@
 # DEALINGS IN THE SOFTWARE.
 ########################################################################################################################
 
-# from odoo import models, api
-# from zeep import Client
-#
-#
-# class WSMovilDGII(models.TransientModel):
-#     _name = "wsmovildgii"
-#
-#     def getClient(self, ws):
-#         return Client(ws)
-#
-#     def GetContribuyentes(self, value, patronBusqueda=0, inicioFilas=0, filaFilas=100, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetContribuyentes"
-#         client = Client(ws)
-#         res = client.service.GetContribuyentes(value, patronBusqueda=patronBusqueda, inicioFilas=inicioFilas,
-#                                                filaFilas=filaFilas, IMEI=IMEI)
-#
-#     def GetContribuyentesCount(self, value, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetContribuyentesCount"
-#         client = Client(ws)
-#         res = client.service.GetContribuyentesCount(value,  IMEI=IMEI)
-#
-#     def GetDocumento(self, codigoBusqueda, patronBusqueda=0, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetDocumento"
-#         client = Client(ws)
-#         res = client.service.GetDocumento(codigoBusqueda, patronBusqueda=patronBusqueda, IMEI=IMEI)
-#
-#     def GetNCF(self, RNC, NCF, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetNCF"
-#         client = Client(ws)
-#         res = client.service.GetNCF(RNC, NCF, IMEI=IMEI)
-#
-#     def GetPlaca(self, RNC, Placa, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetPlaca"
-#         client = Client(ws)
-#         res = client.service.GetPlaca(RNC, Placa, IMEI=IMEI)
-#
-#     def GetVehiculoPorDATAMATRIX(self, value, IMEI="public"):
-#         ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetVehiculoPorDATAMATRIX"
-#         client = Client(ws)
-#         res = client.service.GetVehiculoPorDATAMATRIX(value, IMEI=IMEI)
+from odoo import models, api
+from zeep import Client
+
+
+class WSMovilDGII(models.TransientModel):
+    _name = "wsmovildgii"
+
+    def getClient(self, ws):
+        return Client(ws)
+
+    def GetContribuyentes(self, value, patronBusqueda=0, inicioFilas=0, filaFilas=100, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetContribuyentes"
+        client = Client(ws)
+        res = client.service.GetContribuyentes("101733934", patronBusqueda=0, inicioFilas=0, filaFilas=100, IMEI="public")
+        res = client.service.GetContribuyentes(value, patronBusqueda=patronBusqueda, inicioFilas=inicioFilas,
+                                               filaFilas=filaFilas, IMEI=IMEI)
+
+    def GetContribuyentesCount(self, value, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetContribuyentesCount"
+        client = Client(ws)
+        res = client.service.GetContribuyentesCount(value,  IMEI=IMEI)
+
+    def GetDocumento(self, codigoBusqueda, patronBusqueda=0, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetDocumento"
+        client = Client(ws)
+        res = client.service.GetDocumento(codigoBusqueda, patronBusqueda=patronBusqueda, IMEI=IMEI)
+
+    def GetNCF(self, RNC, NCF, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetNCF"
+        client = Client(ws)
+        res = client.service.GetNCF(RNC, NCF, IMEI=IMEI)
+
+    def GetPlaca(self, RNC, Placa, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetPlaca"
+        client = Client(ws)
+        res = client.service.GetPlaca(RNC, Placa, IMEI=IMEI)
+
+    def GetVehiculoPorDATAMATRIX(self, value, IMEI="public"):
+        ws = "http://www.dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx?op=GetVehiculoPorDATAMATRIX"
+        client = Client(ws)
+        res = client.service.GetVehiculoPorDATAMATRIX(value, IMEI=IMEI)
