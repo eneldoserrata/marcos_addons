@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<templates id="template">
-    <t t-name="CreateSalesOrderWidget">
-        <div class='control-button'>
-            <i class='fa fa-star'/>Cotizar / Facturar
-        </div>
-    </t>
-</templates>

@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_pos_config,access_pos_config,model_pos_config,point_of_sale.group_pos_user,1,1,1,1
-access_qty_pos_fraction,access_qty_pos_fraction,model_qty_pos_fraction,,1,1,1,1
-access_shop_ncf_config,access_shop_ncf_config,ncf_manager.model_shop_ncf_config,point_of_sale.group_pos_user,1,0,0,0
