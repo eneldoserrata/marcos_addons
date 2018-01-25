@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="ncf_pos_lite.list">
+      <field name="name">ncf_pos_lite list</field>
+      <field name="model">ncf_pos_lite.ncf_pos_lite</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="ncf_pos_lite.action_window">
+      <field name="name">ncf_pos_lite window</field>
+      <field name="res_model">ncf_pos_lite.ncf_pos_lite</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="ncf_pos_lite.action_server">
+      <field name="name">ncf_pos_lite server</field>
+      <field name="model_id" ref="model_ncf_pos_lite_ncf_pos_lite"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="ncf_pos_lite" id="ncf_pos_lite.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="ncf_pos_lite.menu_1" parent="ncf_pos_lite.menu_root"/>
+    <menuitem name="Menu 2" id="ncf_pos_lite.menu_2" parent="ncf_pos_lite.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="ncf_pos_lite.menu_1_list" parent="ncf_pos_lite.menu_1"
+              action="ncf_pos_lite.action_window"/>
+    <menuitem name="Server to list" id="ncf_pos_lite" parent="ncf_pos_lite.menu_2"
+              action="ncf_pos_lite.action_server"/>
+    -->
+  </data>
+</odoo>
