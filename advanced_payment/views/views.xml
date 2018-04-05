@@ -147,9 +147,9 @@
         <record id="customer_form_inherit_payment_order" model="ir.ui.view">
             <field name='name'>customer.form.inherit.payment.order</field>
             <field name='model'>res.partner</field>
-            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name='arch' type='xml'>
-                <xpath expr="//field[@name='credit']" position="after">
+                <xpath expr="//field[@name='trust']" position="after">
                     <field name="send_payment_order"/>
                 </xpath>
             </field>
