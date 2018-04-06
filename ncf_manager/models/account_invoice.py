@@ -59,10 +59,10 @@ class AccountInvoice(models.Model):
 
         if self.amount_untaxed and self.amount_untaxed:
             if self.currency_id:
-                self.tax_company_amount_total_signed = round((self.amount_untaxed_signed/self.amount_untaxed)*self.amount_tax, 2)
+                self.tax_company_amount_total_signed = round(
+                    (self.amount_untaxed_signed / self.amount_untaxed) * self.amount_tax, 2)
             else:
                 self.tax_company_amount_total_signed = self.amount_tax
-
 
     @api.model_cr_context
     def _auto_init(self):
@@ -155,7 +155,7 @@ class AccountInvoice(models.Model):
         comodel_name='account.invoice', column1='refund_invoice_id',
         column2='original_invoice_id', relation='account_invoice_refunds_rel',
         string=u"Factura original", readonly=True, states={'draft': [('readonly', False)]},
-        help=u"Factura original a la que se remite esta factura de reembolso",copy=False)
+        help=u"Factura original a la que se remite esta factura de reembolso", copy=False)
     refund_invoice_ids = fields.Many2many(
         comodel_name='account.invoice', column1='original_invoice_id',
         column2='refund_invoice_id', relation='account_invoice_refunds_rel',
@@ -173,9 +173,9 @@ class AccountInvoice(models.Model):
                                       ("others", u"OTROS NO REQUIRE NCF")],
                                      string=u"Tipo de compra", default="normal", related="journal_id.purchase_type")
 
-
     is_nd = fields.Boolean()
     tax_company_amount_total_signed = fields.Monetary(u"Impuesto Moneda Compañia", compute=_compute_amount)
+    internal_sequence = fields.Char(string=u"Número de factura")
 
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
@@ -188,7 +188,6 @@ class AccountInvoice(models.Model):
     def _onchange_partner_id(self):
         if self.partner_id.parent_id:
             self.partner_id = self.partner_id.parent_id
-
 
         super(AccountInvoice, self)._onchange_partner_id()
 
@@ -253,6 +252,15 @@ class AccountInvoice(models.Model):
 
             if msg:
                 raise exceptions.ValidationError(msg)
+
+            sequence_obj = self.env['ir.sequence']
+
+            if rec.type == "out_invoice":
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'client.invoice.number')
+            else:
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'supplier.invoice.number')
 
         return super(AccountInvoice, self).action_invoice_open()
 

@@ -51,6 +51,9 @@
                     <button name="%(account.action_account_invoice_cancel)d" type='action' states="draft,proforma2,open"
                             string="Cancel Invoice" groups="account.group_account_user"/>
                 </xpath>
+                <field name="date_invoice" position="before">
+                    <field name="internal_sequence" readonly="1"/>
+                </field>
                 <field name="date_invoice" position="after">
                     <field name="date_due" string="Vence"/>
                     <field name="shop_id" options="{'no_quick_create':True,'no_create_edit':True}"
@@ -211,8 +214,10 @@
             <field name="inherit_id" ref="account.invoice_supplier_tree"/>
             <field name="arch" type="xml">
                 <field name="residual_signed" position="after">
-                    <field name="amount_untaxed_signed" string="Subtotal Moneda Compañia" invisible="1" sum="Subtotal en la moneda de la empresa"/>
-                    <field name="tax_company_amount_total_signed" invisible="1" sum="Inpuesto en la moneda de la empresa"/>
+                    <field name="amount_untaxed_signed" string="Subtotal Moneda Compañia" invisible="1"
+                           sum="Subtotal en la moneda de la empresa"/>
+                    <field name="tax_company_amount_total_signed" invisible="1"
+                           sum="Inpuesto en la moneda de la empresa"/>
                 </field>
             </field>
         </record>
