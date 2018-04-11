@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <report
+                id="account.account_invoices"
+                model="account.invoice"
+                string="Invoices"
+                report_type="qweb-pdf"
+                name="account.report_invoice"
+                file="account.report_invoice"
+                attachment_use="False"
+                attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+        />
+
+        <template id="report.external_layout_header">
+            <div class="header">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <img t-if="company.logo" t-att-src="'data:image/png;base64,%s' % company.logo"
+                             style="max-height: 130;"/>
+                    </div>
+                    <div class="col-xs-9 text-right" style="margin-top:20px;" t-field="company.rml_header1"/>
+                </div>
+                <div class="col-xs-6" name="company_address">
+                    <span t-field="company.partner_id"
+                          t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
+                          style="border-bottom: 1px solid black; display:inline-block;"/>
+                    <br></br>
+                    <span>RNC.:
+                        <span t-field="company.vat"/>
+                    </span>
+                </div>
+                <div class="row zero_min_height">
+                    <div class="col-xs-12">
+                        <div style="border-bottom: 1px solid black;"></div>
+                    </div>
+                </div>
+                <!--<div class="row">-->
+                <!---->
+                <!--</div>-->
+            </div>
+        </template>
+
+        <!--<template id="marcos_report_invoice_document" inherit_id="account.report_invoice_document">-->
+            <!--<xpath expr="//field[@class='page']" position="replace">-->
+                <!-- Add your fields or attributes here -->
+            <!--</xpath>-->
+        <!--</template>-->
+
+
+        <!--<template id="account.account_invoice_report_duplicate" inherit_id="account.report_invoice_document"-->
+                  <!--primary="True">-->
+            <!--<xpath expr="//div[@name='invoice_info']" position="replace">-->
+                <!--<h2>-->
+                    <!--<span>Duplicate</span>-->
+                    <!--<span t-if="o.type == 'out_refund'">refund</span>-->
+                    <!--<span t-if="o.type == 'out_invoice'">invoice</span>-->
+                    <!--<span t-field="o.number"/>-->
+                <!--</h2>-->
+            <!--</xpath>-->
+        <!--</template>-->
+
+        <!--<template id="sale.report_invoice_document_inherit_sale" inherit_id="account.report_invoice_document">-->
+            <!--<xpath expr="//div[@name='invoice_address']" position="attributes">-->
+                <!--&lt;!&ndash;<xpath expr="//div[@name='invoice_address']" position="attributes">&ndash;&gt;-->
+                <!--<attribute name="groups">!sale.group_delivery_invoice_address</attribute>-->
+            <!--</xpath>-->
+            <!--<xpath expr="//div[@name='invoice_address']" position="before">-->
+                <!--&lt;!&ndash;<xpath expr="//div[@name='invoice_address']" position="before">&ndash;&gt;-->
+                <!--<div class="col-xs-5 col-xs-offset-7" groups="sale.group_delivery_invoice_address">-->
+                    <!--<strong t-if="o.partner_shipping_id == o.partner_id">Invoicing and shipping address:</strong>-->
+                    <!--<strong t-if="o.partner_shipping_id != o.partner_id">Invoicing address:</strong>-->
+                    <!--<div t-field="o.partner_id"-->
+                         <!--t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>-->
+                    <!--<span t-if="o.partner_id.vat">TIN:-->
+                        <!--<span t-field="o.partner_id.vat"/>-->
+                    <!--</span>-->
+                    <!--<div t-if="o.partner_shipping_id != o.partner_id" class="mt8">-->
+                        <!--<strong>Shipping address:</strong>-->
+                        <!--<div t-field="o.partner_shipping_id"-->
+                             <!--t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>-->
+                        <!--<span t-if="o.partner_shipping_id.vat">TIN:-->
+                            <!--<span t-field="o.partner_shipping_id.vat"/>-->
+                        <!--</span>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</xpath>-->
+        <!--</template>-->
+
+        <!--<template id="sale_stock.report_invoice_document_inherit_sale_stock"-->
+                  <!--inherit_id="account.report_invoice_document">-->
+            <!--<xpath expr="//div[@name='reference']" position="after">-->
+                <!--<div class="col-xs-2" t-if="o.incoterms_id" groups="sale.group_display_incoterm">-->
+                    <!--<strong>Incoterms:</strong>-->
+                    <!--<p t-field="o.incoterms_id.code"/>-->
+                <!--</div>-->
+            <!--</xpath>-->
+        <!--</template>-->
+
+        <!--<record id="web_site_sale.transaction_form_website_sale" model="ir.ui.view">-->
+        <!--<field name="name">payment.transaction.form.website_sale</field>-->
+        <!--<field name="model">payment.transaction</field>-->
+        <!--<field name="inherit_id" ref="payment.transaction_form"/>-->
+        <!--<field name="arch" type="xml">-->
+        <!--<xpath expr="//field[@name='reference']" position="after">-->
+        <!--<field name="sale_order_id"/>-->
+        <!--</xpath>-->
+        <!--</field>-->
+        <!--</record>-->
+
+
+    </data>
+</odoo>
