@@ -559,7 +559,13 @@ class AccountInvoice(models.Model):
                                 ncf_next, self.journal_id.name))
                         next_ncf = False
 
-                inv.move_name = ncf_next
+            inv.move_name = ncf_next
+
+    def norma_07_18_date_limit(self):
+        date_invoice = datetime.strptime(self.date_invoice or fields.Date.today(), "%Y-%m-%d").date()
+        limit_day_to_dgii_07_18 = datetime.strptime('01052018', "%d%m%Y").date()
+
+        return date_invoice >= limit_day_to_dgii_07_18
 
 
 class AccountInvoiceLine(models.Model):

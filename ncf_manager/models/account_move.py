@@ -42,8 +42,24 @@ class AccountMove(models.Model):
 
     @api.multi
     def post(self):
+
         invoice = self._context.get('invoice', False)
         if invoice:
+            if invoice.norma_07_18_date_limit():
+                if invoice.journal_id.ncf_control:
+                    if not len(invoice.journal_id.sequence_id.date_range_ids) > 1:
+                        raise UserError(_("Debe configurar los NCF para este diario."))
+                    if invoice.type == "out_invoice":
+                        # if invoice.is_nd:
+                        #     return super(AccountMove, self.with_context(sale_fiscal_type="debit_note")).post()
+                        # else:
+                        return super(AccountMove, self.with_context(
+                            sale_fiscal_type=invoice.fiscal_position_id.client_fiscal_type)).post()
+                    elif invoice.type == "out_refund":
+                        return super(AccountMove, self.with_context(sale_fiscal_type="credit_note")).post()
+                else:
+                    return super(AccountMove, self).post()
+
 
             if invoice.amount_total == 0:
                 raise ValidationError("No puede grabar una factura con valor 0!")
