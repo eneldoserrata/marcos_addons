@@ -61,14 +61,17 @@ class AccountJournal(models.Model):
 class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
 
-    supplier = fields.Boolean("Para proveedores")
-    client_fiscal_type = fields.Selection([
+    def get_fiscal_type(self):
+        return [
         ("final", u"Consumidor final"),
         ("fiscal", u"Para credito fiscal"),
         ("gov", u"Gubernamental"),
         ("special", u"Regimenes especiales"),
         ("unico", u"Unico ingreso")
-    ], string="Tipo de comprobante")
+    ]
+
+    supplier = fields.Boolean("Para proveedores")
+    client_fiscal_type = fields.Selection(get_fiscal_type, string="Tipo de comprobante")
     journal_id = fields.Many2one("account.journal", string="Diario de compra", domain="[('type','=','purchase')]")
     supplier_fiscal_type = fields.Selection([
         ('01', u'01 - Gastos de personal'),

@@ -45,7 +45,7 @@
 
                 <xpath expr="//page[@name='journal_entries']" position="inside">
 
-                    <group attrs="{'invisible':[('type','!=','sale')]}">
+                    <group attrs="{'invisible':[('type','!=','sale')]}" name="ncf_sequence">
                         <field name="final_sequence_id" attrs="{'invisible': [('ncf_control','!=',True)]}"/>
                         <field name="fiscal_sequence_id" attrs="{'invisible': [('ncf_control','!=',True)]}"/>
                         <field name="gov_sequence_id" attrs="{'invisible': [('ncf_control','!=',True)]}"/>
