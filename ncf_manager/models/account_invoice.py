@@ -57,6 +57,13 @@ MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    @api.multi
+    @api.depends('state')
+    def get_ncf_expiration_date(self):
+        for inv in self:
+            if inv.state in ['open','paid'] and inv.journal_id.ncf_control:
+                inv.ncf_expiration_date = [dr.date_to for dr in inv.sudo().journal_id.sequence_id.date_range_ids if dr.sale_fiscal_type == inv.client_fiscal_type][0]
+
     def _default_user_shop(self):
         shop_user_config = self.env["shop.ncf.config"].get_user_shop_config()
         return shop_user_config["shop_ids"][0]
@@ -160,6 +167,7 @@ class AccountInvoice(models.Model):
             'context': {"default_name": self.date_invoice or fields.Date.today()}
         }
 
+    ncf_expiration_date = fields.Date(u'NCF Válido hasta', compute="get_ncf_expiration_date", store=False)
     overdue_type = fields.Selection(
         [('overlimit_overdue', u'Este cliente tiene el limite de crédito agotado y facturas vencidas'),
          ('overlimit', u'Este cliente no tiene crédito disponible'),
@@ -207,6 +215,15 @@ class AccountInvoice(models.Model):
                              copy=False)
     charge_to = fields.Many2one("res.partner", string="Facturar a", readonly=True,
                                 states={'draft': [('readonly', False)]}, copy=False)
+    income_type = fields.Selection(
+        [('01', '01 - Ingresos por operaciones (No financieros)'),
+         ('02', '02 - Ingresos Financieros'),
+         ('03', '03 - Ingresos Extraordinarios'),
+         ('04', '04 - Ingresos por Arrendamientos'),
+         ('05', '05 - Ingresos por Venta de Activo Depreciable'),
+         ('06', '06 - Otros Ingresos')],
+        string='Tipo de Ingreso',
+        default="01", required=1)
 
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type, partner_id)',
