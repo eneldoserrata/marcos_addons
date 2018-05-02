@@ -82,7 +82,8 @@ class AccountPayment(models.Model):
 
                 else:
                     self.amount_currency = sum([rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
-                    self.rate = 0
+                    if not self.rate:
+                        self.rate = 1
                     self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (self.invoice_payment_amount_currency * self.rate)) / self.rate
 
 
