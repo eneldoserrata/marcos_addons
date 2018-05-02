@@ -256,11 +256,13 @@ class AccountInvoice(models.Model):
             sequence_obj = self.env['ir.sequence']
 
             if rec.type == "out_invoice":
-                rec.internal_sequence = sequence_obj.next_by_code(
-                    'client.invoice.number')
+                if not rec.internal_sequence:
+                    rec.internal_sequence = sequence_obj.next_by_code(
+                        'client.invoice.number')
             else:
-                rec.internal_sequence = sequence_obj.next_by_code(
-                    'supplier.invoice.number')
+                if not rec.internal_sequence:
+                    rec.internal_sequence = sequence_obj.next_by_code(
+                        'supplier.invoice.number')
 
         return super(AccountInvoice, self).action_invoice_open()
 
