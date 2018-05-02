@@ -48,7 +48,16 @@ class InheritedAccountInvoiceRefund(models.TransientModel):
 
     @api.onchange("refund_ncf")
     def onchange_ncf(self):
-        if self.refund_ncf:
+        if len(self.refund_ncf) == 11:
+            if not self.refund_ncf[:-8] == 'B04':
+                raise exceptions.ValidationError(_(
+                    "NCF *{}* NO corresponde con el tipo de documento\n\n"
+                    "Verifique lo ha digitado correctamente y que no sea un "
+                    "Comprobante Consumidor Final (02)".format(self.refund_ncf)))
+            else:
+                return
+
+        if self.refund_ncf and len(self.refund_ncf) == 19:
             if not is_ncf(self.refund_ncf, "in_refund"):
                 self.refund_ncf = False
                 return {
