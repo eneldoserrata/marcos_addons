@@ -340,7 +340,6 @@ class AccountInvoice(models.Model):
                     raise Warning(u"Este número de comprobante ya fue registrado para este proveedor!")
 
                 if not ncf.is_valid(invoice.move_name):
-                    import pdb;pdb.set_trace()
                     raise UserError("El numero de comprobante fiscal no es valido! "
                                                "no paso la validacion en DGII, Verifique que el NCF y el RNC del "
                                                "proveedor esten correctamente digitados, si es de proveedor informal o de "
