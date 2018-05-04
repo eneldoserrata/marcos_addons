@@ -253,17 +253,6 @@ class AccountInvoice(models.Model):
             if msg:
                 raise exceptions.ValidationError(msg)
 
-            sequence_obj = self.env['ir.sequence']
-
-            if rec.type == "out_invoice":
-                if not rec.internal_sequence:
-                    rec.internal_sequence = sequence_obj.next_by_code(
-                        'client.invoice.number')
-            else:
-                if not rec.internal_sequence:
-                    rec.internal_sequence = sequence_obj.next_by_code(
-                        'supplier.invoice.number')
-
         return super(AccountInvoice, self).action_invoice_open()
 
     @api.model
@@ -332,7 +321,21 @@ class AccountInvoice(models.Model):
                     else:
                         line[2]["credit"] = amount_total
 
-        return move_lines
+        return
+
+    @api.model
+    def create(self, vals):
+        rec = super(AccountInvoice, self).create(vals)
+        sequence_obj = self.env['ir.sequence']
+        if rec.type == "out_invoice":
+            if not rec.internal_sequence:
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'client.invoice.number')
+        else:
+            if not rec.internal_sequence:
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'supplier.invoice.number')
+        return rec
 
 
 class AccountInvoiceLine(models.Model):
