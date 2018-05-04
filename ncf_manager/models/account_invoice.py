@@ -339,13 +339,12 @@ class AccountInvoice(models.Model):
                 if inv_exist:
                     raise Warning(u"Este número de comprobante ya fue registrado para este proveedor!")
 
-                if _internet_on() and self.journal_id.ncf_remote_validation:
-                    result = self._check_ncf(invoice.partner_id.vat, invoice.move_name)
-                    if not result.get("valid", False):
-                        raise UserError("El numero de comprobante fiscal no es valido! "
-                                                   "no paso la validacion en DGII, Verifique que el NCF y el RNC del "
-                                                   "proveedor esten correctamente digitados, si es de proveedor informal o de "
-                                                   "gasto menor vefifique si debe solicitar nuevos numero.")
+                if not ncf.is_valid(invoice.move_name):
+                    import pdb;pdb.set_trace()
+                    raise UserError("El numero de comprobante fiscal no es valido! "
+                                               "no paso la validacion en DGII, Verifique que el NCF y el RNC del "
+                                               "proveedor esten correctamente digitados, si es de proveedor informal o de "
+                                               "gasto menor vefifique si debe solicitar nuevos numero.")
 
             self.signal_workflow("invoice_open")
 
