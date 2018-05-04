@@ -38,7 +38,12 @@ from openerp.tools.safe_eval import safe_eval as eval
 from openerp.exceptions import UserError
 import openerp.addons.decimal_precision as dp
 from ..models.tools import is_ncf
-
+import logging
+_logger = logging.getLogger(__name__)
+try:
+    from stdnum.do import ncf
+except(ImportError, IOError) as err:
+    _logger.debug(err)
 
 class InheritedAccountInvoiceRefund(models.TransientModel):
     _inherit = 'account.invoice.refund'
@@ -48,7 +53,7 @@ class InheritedAccountInvoiceRefund(models.TransientModel):
 
     @api.onchange("refund_ncf")
     def onchange_ncf(self):
-        if len(self.refund_ncf) == 11:
+        if not ncf.is_valid(self.refund_ncf):
             if not self.refund_ncf[:-8] == 'B04':
                 raise exceptions.ValidationError(_(
                     "NCF *{}* NO corresponde con el tipo de documento\n\n"
