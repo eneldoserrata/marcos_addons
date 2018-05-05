@@ -45,6 +45,12 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+try:
+    from stdnum.do import ncf
+except(ImportError, IOError) as err:
+    _logger.debug(err)
+
+
 class MarcosApiTools(models.Model):
     _name = 'marcos.api.tools'
 
@@ -117,11 +123,11 @@ class MarcosApiTools(models.Model):
         if not invoice.journal_id.ncf_remote_validation:
             return True
 
-        if not is_ncf(invoice.move_name, invoice.type):
-            return (100, u"Ncf inválido", u"El número de comprobante fiscal no es válido "
-                                          u"verificar de que no está digitando un comprobante"
-                                          u"de consumidor final código 02 o revise si lo ha"
-                                          u"digitado incorrectamente")
+        # if not is_ncf(invoice.move_name, invoice.type):
+        #     return (100, u"Ncf inválido", u"El número de comprobante fiscal no es válido "
+        #                                   u"verificar de que no está digitando un comprobante"
+        #                                   u"de consumidor final código 02 o revise si lo ha"
+        #                                   u"digitado incorrectamente")
 
         elif not invoice.journal_id.purchase_type in ['exterior', 'import',
                                                       'others'] and invoice.journal_id.type == "purchase":
@@ -146,18 +152,18 @@ class MarcosApiTools(models.Model):
             if inv_exist:
                 return (300, u"Ncf duplicado", u"Este número de comprobante ya fue registrado para este proveedor!")
 
-            if invoice.journal_id.ncf_remote_validation:
-                request_params = self.get_marcos_api_request_params()
-                if request_params[0] == 1:
-                    res = requests.get(
-                        '{}/ncf/{}/{}'.format(request_params[1], invoice.partner_id.vat, invoice.move_name),
-                        proxies=request_params[2])
-                    if res.status_code == 200 and not res.json().get("valid", False) == True:
-                        return (500, u"Ncf invalido", u"El numero de comprobante fiscal no es valido! "
-                                                      u"no paso la validacion en DGII, Verifique que el NCF y el RNC del "
-                                                      u"proveedor esten correctamente digitados, si es de proveedor informal o de "
-                                                      u"gasto menor vefifique si debe solicitar nuevos numero.")
-
+            # if invoice.journal_id.ncf_remote_validation:
+            #     request_params = self.get_marcos_api_request_params()
+            #     if request_params[0] == 1:
+            #         res = requests.get(
+            #             '{}/ncf/{}/{}'.format(request_params[1], invoice.partner_id.vat, invoice.move_name),
+            #             proxies=request_params[2])
+            #         if res.status_code == 200 and not res.json().get("valid", False) == True:
+            if not ncf.is_valid(invoice.move_name):
+                return (500, u"Ncf invalido", u"El numero de comprobante fiscal no es valido! "
+                                              u"no paso la validacion en DGII, Verifique que el NCF y el RNC del "
+                                              u"proveedor esten correctamente digitados, si es de proveedor informal o de "
+                                              u"gasto menor vefifique si debe solicitar nuevos numero.")
         return True
 
     def rates(self):

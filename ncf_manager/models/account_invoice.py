@@ -40,7 +40,10 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-import requests
+try:
+    from stdnum.do import ncf
+except(ImportError, IOError) as err:
+    _logger.debug(err)
 
 
 class AccountInvoice(models.Model):
@@ -255,15 +258,6 @@ class AccountInvoice(models.Model):
 
             sequence_obj = self.env['ir.sequence']
 
-            if rec.type == "out_invoice":
-                if not rec.internal_sequence:
-                    rec.internal_sequence = sequence_obj.next_by_code(
-                        'client.invoice.number')
-            else:
-                if not rec.internal_sequence:
-                    rec.internal_sequence = sequence_obj.next_by_code(
-                        'supplier.invoice.number')
-
         return super(AccountInvoice, self).action_invoice_open()
 
     @api.model
@@ -334,6 +328,21 @@ class AccountInvoice(models.Model):
 
         return move_lines
 
+    @api.model
+    def create(self, vals):
+        rec = super(AccountInvoice, self).create(vals)
+        sequence_obj = self.env['ir.sequence']
+
+        if rec.type == "out_invoice":
+            if not rec.internal_sequence:
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'client.invoice.number')
+        else:
+            if not rec.internal_sequence:
+                rec.internal_sequence = sequence_obj.next_by_code(
+                    'supplier.invoice.number')
+
+        return rec
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'

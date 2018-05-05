@@ -101,7 +101,7 @@ class AccountMove(models.Model):
 
                 invoice.shop_id.check_max(invoice.sale_fiscal_type, invoice)
                 invoice.move_name = sequence.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
-                invoice.reference = invoice.journal_id.sequence_id.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
+                # invoice.reference = invoice.journal_id.sequence_id.with_context(ir_sequence_date=invoice.date_invoice).next_by_id()
 
         return super(AccountMove, self).post()
 
