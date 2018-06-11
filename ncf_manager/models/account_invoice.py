@@ -175,17 +175,18 @@ class AccountInvoice(models.Model):
          ('none', 'None'), ], "Estado del credito", compute=_get_overdue_type, copy=False)
 
     internal_number = fields.Char(u"Número de factura")
-    anulation_type = fields.Selection([
-        ("01", u"DETERIORO DE FACTURA PRE-IMPRESA"),
-        ("02", u"ERRORES DE IMPRESIÓN (FACTURA PRE-IMPRESA)"),
-        ("03", u"IMPRESIÓN DEFECTUOSA"),
-        ("04", u"DUPLICIDAD DE FACTURA"),
-        ("05", u"CORRECCIÓN DE LA INFORMACIÓN"),
-        ("06", u"CAMBIO DE PRODUCTOS"),
-        ("07", u"DEVOLUCIÓN DE PRODUCTOS"),
-        ("08", u"OMISIÓN DE PRODUCTOS"),
-        ("09", u"ERRORES EN SECUENCIA DE NCF")
-    ], string=u"Tipo de anulación", copy=False)
+    anulation_type = fields.Selection(
+        [("01", "01 - Deterioro de Factura Pre-impresa"),
+         ("02", u"02 - Errores de Impresión (Factura Pre-impresa)"),
+         ("03", u"03 - Impresión Defectuosa"),
+         ("04", u"04 - Corrección de la Información"),
+         ("05", "05 - Cambio de Productos"),
+         ("06", u"06 - Devolución de Productos"),
+         ("07", u"07 - Omisión de Productos"),
+         ("08", "08 - Errores en Secuencia de NCF"),
+         ("09", "09 - Por Cese de Operaciones"),
+         ("10", u"10 - Pérdida o Hurto de Talonarios")],
+        string=u"Tipo de anulación", copy=False)
     shop_id = fields.Many2one("shop.ncf.config", string="Sucursal", required=False,
                               default=_default_user_shop)
     ncf_required = fields.Boolean(copy=True)
