@@ -57,6 +57,42 @@ MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    @api.model
+    def tax_line_move_line_get(self):
+        res = super(AccountInvoice, self).tax_line_move_line_get()
+
+        if self.journal_id.type == "purchase" and self.journal_id.purchase_type in (
+                "informal") and not self._context.get("from_payment"):
+            res_without_retention = []
+            tax_ids = [tax["tax_line_id"] for tax in res if tax["tax_line_id"]]
+            tax_ids = self.env["account.tax"].browse(tax_ids)
+            retention_tax = tax_ids.filtered(lambda r: r.purchase_tax_type in ("ritbis", "isr",)).ids
+            for value in res:
+                if not value.get("tax_line_id") in retention_tax:
+                    res_without_retention.append(value)
+            return res_without_retention
+
+
+        return res
+
+    @api.one
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id','date_invoice','type')
+    def _compute_amount(self):
+        super(AccountInvoice, self)._compute_amount()
+
+        if self.journal_id.purchase_type == 'informal':
+            self.amount_tax = sum(line.amount for line in self.tax_line_ids if not line.tax_id.purchase_tax_type in ("isr", "ritbis"))
+            self.amount_total = self.amount_untaxed + self.amount_tax
+            print(self.amount_tax)
+            print(self.amount_total)
+
+        if self.amount_untaxed and self.amount_untaxed:
+            if self.currency_id:
+                self.tax_company_amount_total_signed = round(
+                    (self.amount_untaxed_signed / self.amount_untaxed) * self.amount_tax, 2)
+            else:
+                self.tax_company_amount_total_signed = self.amount_tax
+
     @api.multi
     @api.depends('state')
     def get_ncf_expiration_date(self):
