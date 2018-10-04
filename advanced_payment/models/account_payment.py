@@ -77,15 +77,15 @@ class AccountPayment(models.Model):
             if self.rate_currency_id:
                 if self.is_base_currency:
                     self.amount_currency = self.invoice_payment_amount_currency
-                    self.payment_amount = self.invoice_payment_amount_currency*self.rate
-                    self.floatcurrency_diff = self.currency_diff = invoice_payment_amount_currency_local-self.payment_amount
+                    self.payment_amount = self.invoice_payment_amount_currency * self.rate
+                    self.floatcurrency_diff = self.currency_diff = invoice_payment_amount_currency_local - self.payment_amount
 
                 else:
                     self.amount_currency = sum([rec.amount for rec in self.payment_invoice_ids if rec.currency_id])
                     if not self.rate:
                         self.rate = 1
-                    self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (self.invoice_payment_amount_currency * self.rate)) / self.rate
-
+                    self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (
+                                self.invoice_payment_amount_currency * self.rate)) / self.rate
 
             if self.currency_diff > 0:
                 self.currency_diff_type = "out" if self.payment_type == "inbound" else "in"
@@ -112,11 +112,14 @@ class AccountPayment(models.Model):
             else:
                 self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
         else:
-            self.amount = self.invoice_payment_amount_currency + (sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+            self.amount = self.invoice_payment_amount_currency + (
+                        sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             if self.currency_diff > 0:
-                self.amount = self.payment_amount + (sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                self.amount = self.payment_amount + (
+                            sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             elif self.currency_diff < 0:
-                self.amount = self.payment_amount + (sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                self.amount = self.payment_amount + (
+                            sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
 
         if update_communication:
             full_payment = []
@@ -157,15 +160,16 @@ class AccountPayment(models.Model):
         [('in', 'INGRESO POR DIFERENCIA CAMBIARIA'), ('out', 'GASTO POR DIFERENCIA CAMBIARIA'),
          ("none", "SIN DIFERENCIA CAMBIARIA")], compute="_calc_payment_amount", string="Tipo de diferencia")
 
-    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id',compute="_calc_payment_amount")
+    amount_currency = fields.Monetary("Importe divisa", currency_field='rate_currency_id',
+                                      compute="_calc_payment_amount")
     rate_currency_id = fields.Many2one("res.currency", string="Divisa de cambio", compute="_calc_payment_amount")
     payment_amount = fields.Monetary("Pago calculado", compute="_calc_payment_amount")
     currency_diff = fields.Monetary("Diferencia cambiaria", compute="_calc_payment_amount")
 
     invoice_payment_amount = fields.Float(compute="_calc_payment_amount", digit=(16.16))
-    invoice_payment_amount_currency = fields.Float(compute="_calc_payment_amount", digit=(16,16))
+    invoice_payment_amount_currency = fields.Float(compute="_calc_payment_amount", digit=(16, 16))
 
-    floatcurrency_diff = fields.Float(compute="_calc_payment_amount", digits=(16,8))
+    floatcurrency_diff = fields.Float(compute="_calc_payment_amount", digits=(16, 8))
 
     is_base_currency = fields.Boolean(compute="_check_is_base_currency")
 
@@ -207,7 +211,7 @@ class AccountPayment(models.Model):
             if rate:
                 line_amount_currency = line.debit if line.debit else line.credit
                 if self.payment_type == "inbound":
-                    line_amount_currency = line_amount_currency*-1
+                    line_amount_currency = line_amount_currency * -1
                 line_debit = line_debit * rate
                 line_credit = line_credit * rate
 
@@ -241,34 +245,36 @@ class AccountPayment(models.Model):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
         """
-        #Remove uneed invoice lines
+        # Remove uneed invoice lines
         [inv.unlink() for inv in self.payment_invoice_ids if inv.amount == 0]
 
         # add inovices to payment
-        self.invoice_ids = self.env["account.invoice"].browse([m_line.move_line_id.invoice_id.id for m_line in self.payment_invoice_ids])
-
+        self.invoice_ids = self.env["account.invoice"].browse(
+            [m_line.move_line_id.invoice_id.id for m_line in self.payment_invoice_ids])
 
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
-
 
         invoice_currency = False
         if self.invoice_ids and all([x.currency_id == self.invoice_ids[0].currency_id for x in self.invoice_ids]):
             # if all the invoices selected share the same currency, record the paiement in that currency too
             invoice_currency = self.invoice_ids[0].currency_id
 
-        debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date).compute_amount_fields(amount, self.currency_id, self.company_id.currency_id,invoice_currency)
+        debit, credit, amount_currency, currency_id = aml_obj.with_context(
+            date=self.payment_date).compute_amount_fields(amount, self.currency_id, self.company_id.currency_id,
+                                                          invoice_currency)
 
         move = self.env['account.move'].create(self._get_move_vals())
         debit_invoice_total = 0
         credit_invoice_total = 0
 
         for inv in self.payment_invoice_ids:
-
+            invoice_id = inv.move_line_id.invoice_id
             # Write line corresponding to invoice payment
             inv_credit = inv.amount if debit > 0 else 0
             inv_debit = inv.amount if credit > 0 else 0
 
-            counterpart_aml_dict = self._get_shared_move_line_vals(inv_debit, inv_credit, amount_currency, move.id,False)
+            counterpart_aml_dict = self._get_shared_move_line_vals(inv_debit, inv_credit, amount_currency, move.id,
+                                                                   False)
             counterpart_aml_dict.update(self._get_counterpart_move_line_vals(inv.move_line_id.invoice_id))
             counterpart_aml_dict.update({'currency_id': currency_id})
 
@@ -283,15 +289,41 @@ class AccountPayment(models.Model):
                 counterpart_aml_dict.update({"amount_currency": False,
                                              "currency_id": False})
 
-
             counterpart_aml = aml_obj.create(counterpart_aml_dict)
             inv.move_line_id.invoice_id.register_payment(counterpart_aml)
 
             debit_invoice_total += counterpart_aml.debit
             credit_invoice_total += counterpart_aml.credit
 
+            retention_amount = 0
+            for tax in inv.move_line_id.invoice_id.tax_line_ids:
+                if tax.amount < 0:
+                    retention_amount += tax.amount
+                    aml_obj.create({'account_id': tax.account_id.id,
+                                    'amount_currency': False,
+                                    'credit': abs(tax.amount),
+                                    'currency_id': False,
+                                    'debit': 0,
+                                    'invoice_id': invoice_id.id,
+                                    'journal_id': counterpart_aml_dict.get("journal_id"),
+                                    'move_id': counterpart_aml_dict.get("move_id"),
+                                    'name': counterpart_aml_dict.get("name", "")+" retencion",
+                                    'partner_id': counterpart_aml_dict.get("partner_id"),
+                                    'payment_id': counterpart_aml_dict.get("payment_id")})
+            if retention_amount:
+                aml_obj.create({'account_id': counterpart_aml_dict.get("account_id"),
+                                'amount_currency': False,
+                                'credit': 0,
+                                'currency_id': False,
+                                'debit': abs(retention_amount),
+                                'invoice_id': invoice_id.id,
+                                'journal_id': counterpart_aml_dict.get("journal_id"),
+                                'move_id': counterpart_aml_dict.get("move_id"),
+                                'name': counterpart_aml_dict.get("name", "") + " retencion",
+                                'partner_id': counterpart_aml_dict.get("partner_id"),
+                                'payment_id': counterpart_aml_dict.get("payment_id")})
 
-        # Write counterpart lines
+                    # Write counterpart lines
         liquidity_aml_dict = self._get_shared_move_line_vals(debit, credit, amount_currency, move.id, False)
         liquidity_aml_dict.update(self._get_liquidity_move_line_vals(amount))
 
@@ -302,14 +334,18 @@ class AccountPayment(models.Model):
                 if self.currency_diff > 0:
                     liquidity_aml_dict.update({"amount_currency": False,
                                                "currency_id": False,
-                                               "debit": credit_invoice_total-abs(self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total-abs(self.floatcurrency_diff) if self.payment_type == "outbound" else 0
+                                               "debit": credit_invoice_total - abs(
+                                                   self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
+                                               "credit": debit_invoice_total - abs(
+                                                   self.floatcurrency_diff) if self.payment_type == "outbound" else 0
                                                })
                 else:
                     liquidity_aml_dict.update({"amount_currency": False,
                                                "currency_id": False,
-                                               "debit": credit_invoice_total+abs(self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total+abs(self.floatcurrency_diff) if self.payment_type == "outbound" else 0
+                                               "debit": credit_invoice_total + abs(
+                                                   self.floatcurrency_diff) if self.payment_type == "inbound" else 0,
+                                               "credit": debit_invoice_total + abs(
+                                                   self.floatcurrency_diff) if self.payment_type == "outbound" else 0
                                                })
             else:
                 liquidity_aml_dict.update({"amount_currency": False,
@@ -323,25 +359,29 @@ class AccountPayment(models.Model):
                     if self.payment_type == "inbound":
                         amount_currency = self.amount
                     else:
-                        amount_currency = self.amount*-1
+                        amount_currency = self.amount * -1
 
                     liquidity_aml_dict.update({"amount_currency": amount_currency,
                                                "currency_id": self.currency_id.id,
-                                               "debit": credit_invoice_total-abs(self.floatcurrency_diff*self.rate) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total-abs(self.currency_diff*self.rate) if self.payment_type == "outbound" else 0})
+                                               "debit": credit_invoice_total - abs(
+                                                   self.floatcurrency_diff * self.rate) if self.payment_type == "inbound" else 0,
+                                               "credit": debit_invoice_total - abs(
+                                                   self.currency_diff * self.rate) if self.payment_type == "outbound" else 0})
                 else:
                     if self.payment_type == "inbound":
                         amount_currency = self.amount
                     else:
-                        amount_currency = self.amount*-1
+                        amount_currency = self.amount * -1
 
                     liquidity_aml_dict.update({"amount_currency": amount_currency,
-                                               "debit": credit_invoice_total+abs(self.floatcurrency_diff*self.rate) if self.payment_type == "inbound" else 0,
-                                               "credit": debit_invoice_total+abs(self.currency_diff*self.rate) if self.payment_type == "outbound" else 0})
+                                               "debit": credit_invoice_total + abs(
+                                                   self.floatcurrency_diff * self.rate) if self.payment_type == "inbound" else 0,
+                                               "credit": debit_invoice_total + abs(
+                                                   self.currency_diff * self.rate) if self.payment_type == "outbound" else 0})
             else:
-                liquidity_aml_dict.update({"amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
-                                           "currency_id": self.currency_id.id})
-
+                liquidity_aml_dict.update({
+                                              "amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
+                                              "currency_id": self.currency_id.id})
 
         if not liquidity_aml_dict.get("account_id", False):
             raise exceptions.ValidationError("De diario de pago no tiene cuenta asignada.")
@@ -370,14 +410,14 @@ class AccountPayment(models.Model):
                     writeoff_account_id = writeoff_debit_account_id if self.currency_diff < 0 else writeoff_credit_account_id
             else:
                 if self.payment_type == "inbound":
-                    debit_wo = abs(self.floatcurrency_diff)*self.rate if self.currency_diff > 0 else 0
-                    credit_wo = abs(self.floatcurrency_diff)*self.rate if self.currency_diff < 0 else 0
+                    debit_wo = abs(self.floatcurrency_diff) * self.rate if self.currency_diff > 0 else 0
+                    credit_wo = abs(self.floatcurrency_diff) * self.rate if self.currency_diff < 0 else 0
                     amount_currency = self.currency_diff
                     writeoff_account_id = writeoff_debit_account_id if self.currency_diff > 0 else writeoff_credit_account_id
                 else:
-                    debit_wo = abs(self.currency_diff)*self.rate if self.currency_diff < 0 else 0
-                    credit_wo = abs(self.currency_diff)*self.rate if self.currency_diff > 0 else 0
-                    amount_currency = self.currency_diff*-1
+                    debit_wo = abs(self.currency_diff) * self.rate if self.currency_diff < 0 else 0
+                    credit_wo = abs(self.currency_diff) * self.rate if self.currency_diff > 0 else 0
+                    amount_currency = self.currency_diff * -1
                     writeoff_account_id = writeoff_credit_account_id if self.currency_diff > 0 else writeoff_debit_account_id
 
             writeoff_line['name'] = _('Diferencia cambiaria')
@@ -388,8 +428,6 @@ class AccountPayment(models.Model):
             writeoff_line['currency_id'] = self.currency_id.id if not self.is_base_currency else False
             writeoff_line['payment_id'] = self.id
             aml_obj.create(writeoff_line)
-
-        print [(l.account_id.code, l.account_id.name, l.debit, l.credit, l.amount_currency) for l in move.line_ids]
 
         move.post()
         return move
@@ -456,17 +494,19 @@ class AccountPayment(models.Model):
                 payment_account = rec.journal_id.default_debit_account_id.id
 
                 if self.payment_type == "inbound":
-                    payment_account_amount = sum([deb.debit for deb in rec.payment_move_ids if deb.account_id.id == payment_account])
+                    payment_account_amount = sum(
+                        [deb.debit for deb in rec.payment_move_ids if deb.account_id.id == payment_account])
                 else:
-                    payment_account_amount = sum([cre.credit for cre in rec.payment_move_ids if cre.account_id.id == payment_account])
+                    payment_account_amount = sum(
+                        [cre.credit for cre in rec.payment_move_ids if cre.account_id.id == payment_account])
 
-                if round(payment_account_amount,2) != round(rec.amount,2):
+                if round(payment_account_amount, 2) != round(rec.amount, 2):
                     raise exceptions.ValidationError("El monto del pago no coincide con la suma de los apuntes.")
 
                 debits = sum([deb.debit for deb in rec.payment_move_ids])
                 credits = sum([cre.credit for cre in rec.payment_move_ids])
 
-                if round(debits,2)-round(credits,2) !=0:
+                if round(debits, 2) - round(credits, 2) != 0:
                     raise exceptions.ValidationError("El asiento manual no esta cuadrado.")
 
                 rec.state = 'request'
@@ -551,7 +591,6 @@ class AccountPayment(models.Model):
     def _check_amount(self):
         if not self.amount > 0.0 and self.state != "draft":
             raise exceptions.ValidationError(_('The payment amount must be strictly positive.'))
-
 
     @api.onchange("move_type")
     def onchange_move_type(self):
@@ -679,8 +718,9 @@ class PaymentInvoiceLine(models.Model):
     @api.depends("move_line_id")
     def _render_amount_sing(self):
         self.net = abs(self.move_line_id.balance)
-        self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis)
-        self.balance = abs(self.move_line_id.amount_residual)
+        retention = sum([tax.amount for tax in self.move_line_id.invoice_id.tax_line_ids if tax.amount < 0])
+        self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis - retention)
+        self.balance = abs(self.move_line_id.amount_residual - retention)
         self.amount_currency = abs(self.move_line_id.amount_currency)
 
     @api.one
@@ -734,7 +774,7 @@ class PaymentMoveLine(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner', index=True, ondelete='restrict')
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     currency_id = fields.Many2one('res.currency', related='payment_id.currency_id', readonly=True,
-                                          help='Utility field to express amount currency', store=True)
+                                  help='Utility field to express amount currency', store=True)
     company_id = fields.Many2one('res.company', related='account_id.company_id', string='Company', store=True)
 
     debit = fields.Monetary(string="Debit", default=0.0, currency_field="currency_id")
