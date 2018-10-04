@@ -61,8 +61,7 @@ class AccountInvoice(models.Model):
     def tax_line_move_line_get(self):
         res = super(AccountInvoice, self).tax_line_move_line_get()
 
-        if self.journal_id.type == "purchase" and self.journal_id.purchase_type in (
-                "informal") and not self._context.get("from_payment"):
+        if not self._context.get("from_payment"):
             res_without_retention = []
             tax_ids = [tax["tax_line_id"] for tax in res if tax["tax_line_id"]]
             tax_ids = self.env["account.tax"].browse(tax_ids)
@@ -72,7 +71,6 @@ class AccountInvoice(models.Model):
                     res_without_retention.append(value)
             return res_without_retention
 
-
         return res
 
     @api.one
@@ -80,11 +78,9 @@ class AccountInvoice(models.Model):
     def _compute_amount(self):
         super(AccountInvoice, self)._compute_amount()
 
-        if self.journal_id.purchase_type == 'informal':
-            self.amount_tax = sum(line.amount for line in self.tax_line_ids if not line.tax_id.purchase_tax_type in ("isr", "ritbis"))
-            self.amount_total = self.amount_untaxed + self.amount_tax
-            print(self.amount_tax)
-            print(self.amount_total)
+        # if self.journal_id.purchase_type == 'informal':
+        self.amount_tax = sum(line.amount for line in self.tax_line_ids if not line.tax_id.purchase_tax_type in ("isr", "ritbis"))
+        self.amount_total = self.amount_untaxed + self.amount_tax
 
         if self.amount_untaxed and self.amount_untaxed:
             if self.currency_id:
