@@ -85,7 +85,7 @@ class AccountPayment(models.Model):
                     if not self.rate:
                         self.rate = 1
                     self.floatcurrency_diff = self.currency_diff = (self.amount_currency - (
-                                self.invoice_payment_amount_currency * self.rate)) / self.rate
+                            self.invoice_payment_amount_currency * self.rate)) / self.rate
 
             if self.currency_diff > 0:
                 self.currency_diff_type = "out" if self.payment_type == "inbound" else "in"
@@ -113,13 +113,13 @@ class AccountPayment(models.Model):
                 self.amount = sum([rec.amount for rec in self.payment_invoice_ids])
         else:
             self.amount = self.invoice_payment_amount_currency + (
-                        sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                    sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             if self.currency_diff > 0:
                 self.amount = self.payment_amount + (
-                            sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                        sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
             elif self.currency_diff < 0:
                 self.amount = self.payment_amount + (
-                            sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
+                        sum([rec.amount for rec in self.payment_invoice_ids if not rec.currency_id]) / self.rate)
 
         if update_communication:
             full_payment = []
@@ -297,24 +297,38 @@ class AccountPayment(models.Model):
 
             retention_amount = 0
             for tax in inv.move_line_id.invoice_id.tax_line_ids:
+
+                amount_currency = 0
+                tax_amount = tax.amount
+                currency_id = False
+
+
+                invoice_id = inv.move_line_id.invoice_id
+                if invoice_id.currency_id != invoice_id.company_id.currency_id:
+                    currency_id = invoice_id.currency_id.with_context(date=invoice_id.date_invoice)
+                    round_curr = currency_id.round
+                    tax_amount = round_curr(currency_id.compute(tax_amount, invoice_id.company_id.currency_id))
+                    amount_currency = tax.amount
+
+
                 if tax.amount < 0:
-                    retention_amount += tax.amount
+                    retention_amount += tax_amount
                     aml_obj.create({'account_id': tax.account_id.id,
-                                    'amount_currency': False,
-                                    'credit': abs(tax.amount),
-                                    'currency_id': False,
+                                    'amount_currency': abs(amount_currency)*-1,
+                                    'credit': abs(tax_amount),
+                                    'currency_id': currency_id and currency_id.id or False,
                                     'debit': 0,
                                     'invoice_id': invoice_id.id,
                                     'journal_id': counterpart_aml_dict.get("journal_id"),
                                     'move_id': counterpart_aml_dict.get("move_id"),
-                                    'name': counterpart_aml_dict.get("name", "")+" retencion",
+                                    'name': counterpart_aml_dict.get("name", "") + " retencion",
                                     'partner_id': counterpart_aml_dict.get("partner_id"),
                                     'payment_id': counterpart_aml_dict.get("payment_id")})
             if retention_amount:
                 aml_obj.create({'account_id': counterpart_aml_dict.get("account_id"),
-                                'amount_currency': False,
+                                'amount_currency': abs(amount_currency),
                                 'credit': 0,
-                                'currency_id': False,
+                                'currency_id': currency_id and currency_id.id or False,
                                 'debit': abs(retention_amount),
                                 'invoice_id': invoice_id.id,
                                 'journal_id': counterpart_aml_dict.get("journal_id"),
@@ -323,7 +337,7 @@ class AccountPayment(models.Model):
                                 'partner_id': counterpart_aml_dict.get("partner_id"),
                                 'payment_id': counterpart_aml_dict.get("payment_id")})
 
-                    # Write counterpart lines
+                # Write counterpart lines
         liquidity_aml_dict = self._get_shared_move_line_vals(debit, credit, amount_currency, move.id, False)
         liquidity_aml_dict.update(self._get_liquidity_move_line_vals(amount))
 
@@ -380,8 +394,8 @@ class AccountPayment(models.Model):
                                                    self.currency_diff * self.rate) if self.payment_type == "outbound" else 0})
             else:
                 liquidity_aml_dict.update({
-                                              "amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
-                                              "currency_id": self.currency_id.id})
+                    "amount_currency": self.payment_amount * -1 if self.payment_type == "outbound" else self.payment_amount,
+                    "currency_id": self.currency_id.id})
 
         if not liquidity_aml_dict.get("account_id", False):
             raise exceptions.ValidationError("De diario de pago no tiene cuenta asignada.")
@@ -718,7 +732,15 @@ class PaymentInvoiceLine(models.Model):
     @api.depends("move_line_id")
     def _render_amount_sing(self):
         self.net = abs(self.move_line_id.balance)
+
+        inv = self.move_line_id.invoice_id
         retention = sum([tax.amount for tax in self.move_line_id.invoice_id.tax_line_ids if tax.amount < 0])
+
+        if self.move_line_id.invoice_id.currency_id != inv.company_id.currency_id and retention:
+            currency_id = inv.currency_id.with_context(date=inv.date_invoice)
+            round_curr = currency_id.round
+            retention = round_curr(currency_id.compute(retention, inv.company_id.currency_id))
+
         self.balance_cash_basis = abs(self.move_line_id.balance_cash_basis - retention)
         self.balance = abs(self.move_line_id.amount_residual - retention)
         self.amount_currency = abs(self.move_line_id.amount_currency)
